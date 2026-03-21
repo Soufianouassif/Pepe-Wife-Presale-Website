@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Home",
+    "tokenomics": "Tokenomics",
+    "roadmap": "Roadmap",
+    "faq": "FAQ",
+    "about": "About"
+  },
+  "hero": {
+    "badge": "The Queen of Memes",
+    "title_meet": "MEET",
+    "title_pepe": "PEPE",
+    "title_wife": "WIFE",
+    "desc": "The most elegant, playful, and modern memecoin presale in the galaxy. Join the family and ride the wave of the ultimate queen.",
+    "whitepaper": "Whitepaper",
+    "join_presale": "Join Presale"
+  },
+  "buybox": {
+    "title": "Presale is LIVE!",
+    "desc": "Secure your $PWIFE tokens at the lowest price",
+    "current_price": "Current Price",
+    "input_placeholder": "Enter USDT Amount",
+    "buy_now": "Buy $PWIFE Now",
+    "how_to_buy": "How to Buy",
+    "audit": "Audit"
+  },
+  "tokenomics": {
+    "title": "Tokenomics",
+    "desc": "This is a full-width image container. Your custom tokenomics graphic will fill this area perfectly without margins."
+  },
+  "roadmap": {
+    "badge": "Our Journey",
+    "title_project": "Project",
+    "title_roadmap": "Roadmap",
+    "phase1_title": "The Queen Arrives",
+    "phase1_item1": "Smart Contract Audit",
+    "phase1_item2": "Presale Launch",
+    "phase1_item3": "Website V1 Live",
+    "phase1_item4": "Community Building",
+    "phase2_title": "Expanding the Palace",
+    "phase2_item1": "DEX Listings",
+    "phase2_item2": "CMC & CG Application",
+    "phase2_item3": "Marketing Push",
+    "phase2_item4": "First CEX Listing",
+    "phase3_title": "Global Dominion",
+    "phase3_item1": "Staking Launch",
+    "phase3_item2": "Partnerships",
+    "phase3_item3": "Celebrity Marketing",
+    "phase3_item4": "Tier 1 CEX Listing",
+    "phase4_title": "Legacy of the Queen",
+    "phase4_item1": "NFT Collection",
+    "phase4_item2": "Pepe Wife DAO",
+    "phase4_item3": "Merchandise Store",
+    "phase4_item4": "Future Ecosystem"
+  },
+  "whybuy": {
+    "badge": "Persuasive Power",
+    "title_why": "Why Buy",
+    "title_pepewife": "Pepe Wife?",
+    "desc": "Pepe Wife isn't just another memecoin. It's a statement of elegance, power, and the evolution of the Pepe ecosystem. We've built a foundation designed for success and community wealth.",
+    "cta": "Learn More About the Queen",
+    "reason1_title": "Premium Branding",
+    "reason1_desc": "Elegant and professional design that stands out from typical memecoins.",
+    "reason2_title": "Strong Community",
+    "reason2_desc": "Focused on long-term growth and a supportive environment for holders.",
+    "reason3_title": "Proven Security",
+    "reason3_desc": "Fully audited smart contract with locked liquidity for total peace of mind."
+  },
+  "risk": {
+    "title": "Risk Warning",
+    "p1": "Cryptocurrency investments carry high risk. Pepe Wife ($PWIFE) is a memecoin project created for entertainment and community purposes. There is no guarantee of profit, and you should never invest money you cannot afford to lose.",
+    "p2": "Please conduct your own thorough research before participating in the presale. The market for memecoins is highly volatile. By participating, you acknowledge the risks involved and agree that the project team is not liable for any financial losses."
+  },
+  "footer": {
+    "desc": "The most elegant queen in the crypto space. Join the evolution and be part of the royal family.",
+    "links_title": "Quick Links",
+    "community_title": "Community",
+    "legal_title": "Legal",
+    "rights": "© 2026 PEPE WIFE PROJECT. ALL RIGHTS RESERVED.",
+    "built_with": "BUILT WITH LOVE FOR THE CRYPTO QUEEN."
+  }
+}

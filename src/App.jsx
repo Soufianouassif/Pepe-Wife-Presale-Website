@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Rocket, Info, Shield, Map, HelpCircle, ArrowRight, Download } from 'lucide-react';
+import { Menu, X, Rocket, Info, Shield, Map, HelpCircle, ArrowRight, Download, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -8,8 +9,7 @@ const ASSETS = {
   HERO_CHARACTER_IMAGE: '/assets/hero-character.png',
   TOKENOMICS_FULL_IMAGE: '/assets/tokenomics.png',
   RISK_WARNING_BACKGROUND: '/assets/risk-bg.png',
-  OPTIONAL_SECTION_BACKGROUND_1: '/assets/section-bg-1.png',
-  OPTIONAL_SECTION_BACKGROUND_2: '/assets/section-bg-2.png',
+  NAVBAR_BACKGROUND_IMAGE: '/assets/navbar-bg.png', // New customizable background
   CUSTOM_BUTTON_IMAGE_PRIMARY: '/assets/btn-primary.png',
   CUSTOM_BUTTON_IMAGE_SECONDARY: '/assets/btn-secondary.png',
   COIN_ICON: '/assets/coin-icon.png',
@@ -17,8 +17,8 @@ const ASSETS = {
 
 const Button = ({ variant = 'primary', children, className = '', ...props }) => {
   const isCustom = variant === 'primary' 
-    ? ASSETS.CUSTOM_BUTTON_IMAGE_PRIMARY !== '[PUT_IMAGE_NAME_HERE]'
-    : ASSETS.CUSTOM_BUTTON_IMAGE_SECONDARY !== '[PUT_IMAGE_NAME_HERE]';
+    ? ASSETS.CUSTOM_BUTTON_IMAGE_PRIMARY !== '/assets/btn-primary.png'
+    : ASSETS.CUSTOM_BUTTON_IMAGE_SECONDARY !== '/assets/btn-secondary.png';
     
   const asset = variant === 'primary' 
     ? ASSETS.CUSTOM_BUTTON_IMAGE_PRIMARY 
@@ -40,147 +40,173 @@ const Button = ({ variant = 'primary', children, className = '', ...props }) => 
 };
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isRTL = i18n.language === 'ar';
+
+  useEffect(() => {
+    document.body.dir = isRTL ? 'rtl' : 'ltr';
+    localStorage.setItem('i18nextLng', i18n.language);
+  }, [i18n.language, isRTL]);
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <div className="min-h-screen bg-pepe-black text-white font-sans selection:bg-pepe-pink selection:text-white" dir="rtl" lang="ar">
+    <div className={`min-h-screen bg-pepe-black text-white selection:bg-pepe-pink selection:text-white`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* 1. NAVBAR */}
-      <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
+      <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} changeLanguage={changeLanguage} t={t} currentLng={i18n.language} />
 
       {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
+            initial={{ opacity: 0, x: isRTL ? '-100%' : '100%' }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
+            exit={{ opacity: 0, x: isRTL ? '-100%' : '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-40 bg-pepe-black flex flex-col items-center justify-center space-y-8 md:hidden"
+            className="fixed inset-0 z-[60] bg-pepe-yellow flex flex-col items-center justify-center space-y-8 md:hidden text-pepe-black"
           >
-            <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 text-pepe-green hover:text-pepe-pink transition-colors">
-              <X size={32} />
+            <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 hover:rotate-90 transition-transform">
+              <X size={40} strokeWidth={3} />
             </button>
-            <a href="#" className="text-2xl font-bold hover:text-pepe-green transition-colors" onClick={() => setIsMobileMenuOpen(false)}>الرئيسية</a>
-            <a href="#tokenomics" className="text-2xl font-bold hover:text-pepe-green transition-colors" onClick={() => setIsMobileMenuOpen(false)}>التوكنز</a>
-            <a href="#roadmap" className="text-2xl font-bold hover:text-pepe-green transition-colors" onClick={() => setIsMobileMenuOpen(false)}>خارطة الطريق</a>
-            <div className="flex flex-col space-y-4 w-full px-12">
-              <Button variant="secondary" className="w-full">الورقة البيضاء</Button>
-              <Button variant="primary" className="w-full">انضم للبيع المسبق</Button>
+            <nav className="flex flex-col items-center space-y-6">
+              {['home', 'tokenomics', 'roadmap', 'faq', 'about'].map((item) => (
+                <a key={item} href={`#${item === 'home' ? '' : item}`} className="text-3xl font-black uppercase hover:text-pepe-pink transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                  {t(`nav.${item}`)}
+                </a>
+              ))}
+            </nav>
+            <div className="flex space-x-4 space-x-reverse">
+              {['en', 'ar', 'fr'].map((lang) => (
+                <button 
+                  key={lang}
+                  onClick={() => changeLanguage(lang)}
+                  className={`px-4 py-2 rounded-xl font-black uppercase border-2 border-pepe-black ${i18n.language === lang ? 'bg-pepe-pink text-white' : 'bg-white'}`}
+                >
+                  {lang}
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <main>
-        {/* 2. HERO SECTION */}
-        <HeroSection />
-
-        {/* 3. TOKEN SALE / BUY BOX SECTION */}
-        <BuyBoxSection />
-
-        {/* 4. TOKENOMICS SECTION */}
-        <TokenomicsSection />
-
-        {/* 5. ROADMAP SECTION */}
-        <RoadmapSection />
-
-        {/* 6. WHY BUY PEPE WIFE SECTION */}
-        <WhyBuySection />
-
-        {/* 7. RISK WARNING SECTION */}
-        <RiskWarningSection />
+        <HeroSection t={t} />
+        <BuyBoxSection t={t} />
+        <TokenomicsSection t={t} />
+        <RoadmapSection t={t} />
+        <WhyBuySection t={t} />
+        <RiskWarningSection t={t} />
       </main>
 
-      {/* 8. FOOTER */}
-      <Footer />
+      <Footer t={t} />
     </div>
   );
 }
 
-const Navbar = ({ isOpen, setIsOpen }) => {
+const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng }) => {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-pepe-black/80 backdrop-blur-md border-b border-pepe-green/20">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center space-x-2 space-x-reverse">
-          <div className="w-10 h-10 bg-pepe-green rounded-full flex items-center justify-center text-pepe-black font-black italic">PW</div>
-          <span className="text-xl font-black tracking-tighter text-pepe-green uppercase">Pepe Wife</span>
+    <nav className="fixed top-4 left-4 right-4 z-50 rounded-[2rem] border-4 border-pepe-black shadow-[0_8px_0_0_rgba(10,10,10,1)] overflow-hidden h-20">
+      {/* Customizable Background */}
+      <div className="absolute inset-0 z-0">
+        {ASSETS.NAVBAR_BACKGROUND_IMAGE === '/assets/navbar-bg.png' ? (
+          <div className="w-full h-full bg-white" />
+        ) : (
+          <img src={ASSETS.NAVBAR_BACKGROUND_IMAGE} alt="Nav BG" className="w-full h-full object-cover" />
+        )}
+      </div>
+
+      <div className="relative z-10 h-full px-8 flex items-center justify-between">
+        <div className="flex items-center space-x-3 space-x-reverse">
+          <div className="w-12 h-12 bg-pepe-green rounded-2xl border-4 border-pepe-black flex items-center justify-center text-pepe-black font-black text-2xl transform -rotate-3">PW</div>
+          <span className="text-2xl font-black text-pepe-black uppercase hidden sm:block">Pepe Wife</span>
         </div>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-8 space-x-reverse">
-          <button className="text-sm font-bold uppercase tracking-widest hover:text-pepe-pink transition-colors">الورقة البيضاء</button>
-          <Button variant="primary" className="py-2 px-6 text-sm">انضم للبيع المسبق</Button>
+          {['home', 'tokenomics', 'roadmap', 'faq', 'about'].map((item) => (
+            <a key={item} href={`#${item === 'home' ? '' : item}`} className="text-pepe-black font-black uppercase tracking-tight hover:text-pepe-pink transition-all hover:-translate-y-1">
+              {t(`nav.${item}`)}
+            </a>
+          ))}
         </div>
 
-        {/* Mobile Toggle */}
-        <button className="md:hidden text-pepe-green hover:text-pepe-pink transition-colors" onClick={() => setIsOpen(!isOpen)}>
-          <Menu size={28} />
-        </button>
+        <div className="flex items-center space-x-4 space-x-reverse">
+          {/* Language Switcher */}
+          <div className="hidden sm:flex bg-pepe-black/10 p-1 rounded-xl border-2 border-pepe-black/20">
+            {['en', 'ar', 'fr'].map((lang) => (
+              <button 
+                key={lang}
+                onClick={() => changeLanguage(lang)}
+                className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all ${currentLng === lang ? 'bg-pepe-pink text-white shadow-md' : 'text-pepe-black/60 hover:text-pepe-black'}`}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+
+          <Button variant="primary" className="py-2 px-6 text-sm hidden lg:flex">
+            {t('hero.join_presale')}
+          </Button>
+
+          {/* Mobile Toggle */}
+          <button className="md:hidden text-pepe-black hover:scale-110 transition-transform" onClick={() => setIsOpen(!isOpen)}>
+            <Menu size={32} strokeWidth={3} />
+          </button>
+        </div>
       </div>
     </nav>
   );
 };
 
-const HeroSection = () => {
+const HeroSection = ({ t }) => {
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      {/* Background Placeholder */}
+    <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
       <div className="absolute inset-0 z-0 opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-l from-pepe-black via-pepe-black/60 to-transparent z-10" />
-        {ASSETS.HERO_BACKGROUND_IMAGE === '[PUT_IMAGE_NAME_HERE]' ? (
-          <div className="w-full h-full bg-pepe-dark-gray flex items-center justify-center">
-            <span className="text-pepe-green/20 text-4xl font-bold uppercase tracking-tighter">صورة_الخلفية_للبطل</span>
-          </div>
-        ) : (
-          <img src={ASSETS.HERO_BACKGROUND_IMAGE} alt="Hero BG" className="w-full h-full object-cover" />
-        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pepe-black/20 to-pepe-black z-10" />
+        <img src={ASSETS.HERO_BACKGROUND_IMAGE} alt="Hero BG" className="w-full h-full object-cover" />
       </div>
 
-      <div className="section-container relative z-10 w-full grid md:grid-cols-2 gap-12 items-center">
-        {/* Left Side: Character/Visual (Now Right in RTL) */}
+      <div className="section-container relative z-10 w-full grid md:grid-cols-2 gap-16 items-center">
         <div className="order-2 md:order-2 flex justify-center items-center">
           <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="relative w-full max-w-lg aspect-square"
           >
-            {ASSETS.HERO_CHARACTER_IMAGE === '[PUT_IMAGE_NAME_HERE]' ? (
-              <div className="w-full h-full bg-pepe-green/10 rounded-3xl border-4 border-dashed border-pepe-green/30 flex flex-col items-center justify-center text-pepe-green/40 p-12 text-center">
-                <Rocket size={80} className="mb-6 animate-bounce" />
-                <span className="text-xl font-bold">صورة_الشخصية</span>
-                <p className="text-sm mt-2">استبدلها بصورة شخصية Pepe Wife المتميزة</p>
+            {ASSETS.HERO_CHARACTER_IMAGE === '/assets/hero-character.png' ? (
+              <div className="cartoon-card w-full h-full flex flex-col items-center justify-center text-pepe-black/40 text-center">
+                <Rocket size={100} strokeWidth={3} className="mb-6" />
+                <span className="text-2xl font-black uppercase tracking-widest">HERO_CHARACTER</span>
               </div>
             ) : (
-              <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Pepe Wife Character" className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(74,222,128,0.3)]" />
+              <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Pepe Wife" className="w-full h-full object-contain drop-shadow-[20px_20px_0px_rgba(10,10,10,0.5)]" />
             )}
           </motion.div>
         </div>
 
-        {/* Right Side: Content (Now Left in RTL) */}
-        <div className="order-1 md:order-1 flex flex-col items-center md:items-start text-center md:text-right space-y-6">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="md:text-right"
-          >
-            <span className="px-4 py-1.5 bg-pepe-pink/20 text-pepe-pink text-xs font-black uppercase tracking-[0.2em] rounded-full border border-pepe-pink/30 mb-4 inline-block">ملكة الميمز</span>
-            <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter leading-none mb-6">
-              قابل <span className="text-pepe-green">PEPE</span><br />
-              <span className="text-pepe-pink">WIFE</span>
+        <div className="order-1 md:order-1 flex flex-col items-center md:items-start text-center md:text-left space-y-8">
+          <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }}>
+            <span className="btn-secondary py-2 px-6 text-sm mb-6 inline-block rotate-[-2deg]">{t('hero.badge')}</span>
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] mb-8 text-white drop-shadow-[8px_8px_0px_rgba(10,10,10,1)] uppercase">
+              {t('hero.title_meet')} <span className="text-pepe-green">{t('hero.title_pepe')}</span><br />
+              <span className="text-pepe-pink">{t('hero.title_wife')}</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-md mr-auto leading-relaxed">
-              أكثر بيع مسبق لعملة ميم أناقة وقوة وحداثة في المجرة. انضم للعائلة واركب موجة الملكة المطلقة.
+            <p className="text-xl md:text-2xl font-bold text-gray-200 max-w-xl leading-snug mb-10">
+              {t('hero.desc')}
             </p>
-            <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mt-8 space-x-reverse">
-              <Button variant="secondary" className="group">
-                <Download size={18} className="ml-2 group-hover:animate-bounce" />
-                الورقة البيضاء
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Button variant="outline" className="group">
+                <Download size={24} strokeWidth={3} className="mr-3 group-hover:bounce" />
+                {t('hero.whitepaper')}
               </Button>
               <Button variant="primary" className="group">
-                انضم للبيع المسبق
-                <ArrowRight size={18} className="mr-2 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                {t('hero.join_presale')}
+                <ArrowRight size={24} strokeWidth={3} className="ml-3 group-hover:translate-x-2 transition-transform rtl:rotate-180 rtl:group-hover:-translate-x-2" />
               </Button>
             </div>
           </motion.div>
@@ -190,72 +216,55 @@ const HeroSection = () => {
   );
 };
 
-const BuyBoxSection = () => {
+const BuyBoxSection = ({ t }) => {
   const [amount, setAmount] = useState('');
-  
   return (
-    <section className="bg-pepe-dark-gray/50 py-24 relative overflow-hidden">
+    <section className="py-24 relative overflow-hidden">
       <div className="section-container">
-        <div className="max-w-3xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="bg-pepe-black border-2 border-pepe-green/30 rounded-[2.5rem] p-8 md:p-12 shadow-[0_0_50px_rgba(74,222,128,0.1)] relative overflow-hidden"
-          >
-            {/* Decorative background element */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-pepe-pink/5 blur-[100px] -z-10" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-pepe-green/5 blur-[100px] -z-10" />
-
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-black italic text-pepe-green mb-2 uppercase tracking-tight">البيع المسبق متاح الآن!</h2>
-              <p className="text-gray-400">احصل على توكنات $PWIFE بأقل سعر</p>
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="cartoon-card relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-pepe-pink opacity-10 rounded-full -mr-20 -mt-20" />
+            
+            <div className="text-center mb-12">
+              <h2 className="text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight">{t('buybox.title')}</h2>
+              <p className="text-gray-600 text-xl font-bold">{t('buybox.desc')}</p>
             </div>
 
-            {/* Token Price Box */}
-            <div className="flex justify-center mb-10">
-              <div className="bg-pepe-dark-gray border border-pepe-yellow/30 px-8 py-4 rounded-2xl flex items-center space-x-4 space-x-reverse shadow-inner">
-                <div className="w-10 h-10 bg-pepe-yellow rounded-full flex items-center justify-center text-pepe-black font-black overflow-hidden">
-                  {ASSETS.COIN_ICON === '[PUT_IMAGE_NAME_HERE]' ? (
-                    '$'
-                  ) : (
-                    <img src={ASSETS.COIN_ICON} alt="Coin" className="w-full h-full object-cover" />
-                  )}
+            <div className="flex justify-center mb-12">
+              <div className="bg-pepe-yellow/20 border-4 border-pepe-black px-10 py-6 rounded-[2rem] flex items-center space-x-6 space-x-reverse transform rotate-1">
+                <div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center text-pepe-black font-black text-3xl shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
+                  {ASSETS.COIN_ICON === '/assets/coin-icon.png' ? '$' : <img src={ASSETS.COIN_ICON} className="w-full h-full object-cover rounded-xl" />}
                 </div>
                 <div>
-                  <div className="text-[10px] text-pepe-yellow font-black uppercase tracking-widest">السعر الحالي</div>
-                  <div className="text-xl font-bold">1 $PWIFE = 0.00012 USDT</div>
+                  <div className="text-xs text-pepe-black font-black uppercase tracking-[0.2em]">{t('buybox.current_price')}</div>
+                  <div className="text-3xl font-black text-pepe-black tracking-tight">1 $PWIFE = 0.00012 USDT</div>
                 </div>
               </div>
             </div>
 
-            {/* Purchase Input Area */}
-            <div className="space-y-6">
+            <div className="space-y-8 max-w-2xl mx-auto">
               <div className="relative group">
                 <input 
                   type="number" 
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="أدخل كمية USDT"
-                  className="w-full bg-pepe-dark-gray border-2 border-pepe-green/20 focus:border-pepe-green rounded-2xl px-6 py-5 text-xl font-bold outline-none transition-all placeholder:text-gray-600 text-center"
+                  placeholder={t('buybox.input_placeholder')}
+                  className="w-full bg-white border-4 border-pepe-black rounded-[1.5rem] px-8 py-6 text-2xl font-black outline-none transition-all placeholder:text-gray-400 text-center shadow-[6px_6px_0px_0px_rgba(10,10,10,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]"
                 />
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-pepe-green font-black">USDT</div>
               </div>
 
-              <div className="flex flex-col space-y-4">
-                <Button variant="primary" className="w-full py-5 text-xl uppercase italic tracking-tighter group">
-                  اشتري $PWIFE الآن
-                  <Rocket size={20} className="inline-block mr-3 group-hover:-translate-y-1 group-hover:-translate-x-1 transition-transform" />
+              <div className="flex flex-col space-y-6">
+                <Button variant="primary" className="w-full py-6 text-3xl shadow-[8px_8px_0px_0px_rgba(10,10,10,1)]">
+                  {t('buybox.buy_now')}
                 </Button>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <Button variant="secondary" className="py-4 border-pepe-pink/30 text-pepe-pink hover:bg-pepe-pink/10 flex items-center justify-center space-x-2 space-x-reverse">
-                    <HelpCircle size={18} />
-                    <span>كيفية الشراء</span>
+                <div className="grid grid-cols-2 gap-6">
+                  <Button variant="secondary" className="py-5 text-xl">
+                    {t('buybox.how_to_buy')}
                   </Button>
-                  <button className="py-4 bg-transparent border-2 border-pepe-yellow/30 text-pepe-yellow font-bold rounded-full hover:bg-pepe-yellow/10 transition-all flex items-center justify-center space-x-2 space-x-reverse">
-                    <Shield size={18} />
-                    <span>التدقيق</span>
-                  </button>
+                  <Button variant="outline" className="py-5 text-xl">
+                    {t('buybox.audit')}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -266,74 +275,48 @@ const BuyBoxSection = () => {
   );
 };
 
-const TokenomicsSection = () => {
-  return (
-    <section id="tokenomics" className="py-0 overflow-hidden">
-      <div className="w-full bg-pepe-black">
-        <div className="max-w-[1920px] mx-auto">
-          {ASSETS.TOKENOMICS_FULL_IMAGE === '[PUT_IMAGE_NAME_HERE]' ? (
-            <div className="w-full aspect-[21/9] bg-pepe-dark-gray flex flex-col items-center justify-center text-pepe-pink/20 border-y border-pepe-pink/10 p-20">
-              <h2 className="text-6xl md:text-8xl font-black italic uppercase mb-4 opacity-30">التوكنز</h2>
-              <p className="text-xl font-bold tracking-[0.5em] uppercase">TOKENOMICS_FULL_IMAGE</p>
-              <p className="mt-8 text-gray-500 max-w-lg text-center font-medium">هذا هو حاوية الصور كاملة العرض. ستملأ رسم التوكنز المخصص هذه المنطقة تمامًا بدون هوامش.</p>
-            </div>
-          ) : (
-            <img src={ASSETS.TOKENOMICS_FULL_IMAGE} alt="Tokenomics" className="w-full h-auto block" />
-          )}
-        </div>
+const TokenomicsSection = ({ t }) => (
+  <section id="tokenomics" className="py-24">
+    <div className="section-container text-center mb-12">
+      <h2 className="text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(10,10,10,1)]">{t('tokenomics.title')}</h2>
+    </div>
+    <div className="w-full bg-pepe-black border-y-8 border-pepe-black">
+      <div className="max-w-[1920px] mx-auto overflow-hidden">
+        {ASSETS.TOKENOMICS_FULL_IMAGE === '/assets/tokenomics.png' ? (
+          <div className="w-full aspect-[21/9] bg-pepe-pink flex flex-col items-center justify-center p-20 border-x-8 border-pepe-black">
+             <Rocket size={120} strokeWidth={3} className="text-white mb-8" />
+             <p className="text-2xl font-black text-white text-center max-w-2xl uppercase tracking-widest">{t('tokenomics.desc')}</p>
+          </div>
+        ) : (
+          <img src={ASSETS.TOKENOMICS_FULL_IMAGE} alt="Tokenomics" className="w-full h-auto block" />
+        )}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
-const RoadmapSection = () => {
-  const phases = [
-    { 
-      id: '٠١', 
-      title: 'وصول الملكة', 
-      items: ['تدقيق العقد الذكي', 'إطلاق البيع المسبق', 'الموقع الإلكتروني V1', 'بناء المجتمع'] 
-    },
-    { 
-      id: '٠٢', 
-      title: 'توسيع القصر', 
-      items: ['الإدراج في المنصات اللامركزية', 'تقديم طلب CMC & CG', 'حملة تسويقية', 'أول إدراج في منصة مركزية'] 
-    },
-    { 
-      id: '٠٣', 
-      title: 'السيادة العالمية', 
-      items: ['إطلاق التخزين (Staking)', 'الشراكات', 'تسويق المشاهير', 'إدراج في منصات الفئة الأولى'] 
-    },
-    { 
-      id: '٠٤', 
-      title: 'إرث الملكة', 
-      items: ['مجموعة NFT', 'Pepe Wife DAO', 'متجر البضائع', 'النظام البيئي المستقبلي'] 
-    }
-  ];
-
+const RoadmapSection = ({ t }) => {
+  const phases = ['phase1', 'phase2', 'phase3', 'phase4'];
   return (
-    <section id="roadmap" className="py-32 bg-pepe-black">
+    <section id="roadmap" className="py-32">
       <div className="section-container">
-        <div className="text-center mb-20">
-          <span className="text-pepe-yellow font-black tracking-widest uppercase text-xs">رحلتنا</span>
-          <h2 className="text-5xl md:text-6xl font-black italic mt-4 uppercase tracking-tighter">خارطة <span className="text-pepe-green">الطريق</span></h2>
+        <div className="text-center mb-24">
+          <span className="btn-secondary py-2 px-6 mb-4 inline-block transform -rotate-2">{t('roadmap.badge')}</span>
+          <h2 className="text-7xl font-black uppercase italic tracking-tighter mt-4 drop-shadow-[8px_8px_0px_rgba(10,10,10,1)]">
+            {t('roadmap.title_project')} <span className="text-pepe-green">{t('roadmap.title_roadmap')}</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {phases.map((phase, idx) => (
-            <motion.div 
-              key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-pepe-dark-gray/50 border border-pepe-green/20 rounded-[2rem] p-8 hover:border-pepe-pink/50 transition-all group text-right"
-            >
-              <div className="text-4xl font-black text-pepe-green/20 group-hover:text-pepe-pink/40 transition-colors mb-6 italic">{phase.id}</div>
-              <h3 className="text-2xl font-black mb-6 uppercase tracking-tight italic group-hover:text-pepe-green transition-colors">{phase.title}</h3>
+            <motion.div key={phase} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.1 }} className="cartoon-card group">
+              <div className="text-6xl font-black text-pepe-yellow mb-8 italic drop-shadow-[4px_4px_0px_rgba(10,10,10,1)] group-hover:scale-110 transition-transform">{(idx + 1).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</div>
+              <h3 className="text-2xl font-black mb-8 uppercase italic leading-tight text-pepe-black group-hover:text-pepe-pink transition-colors">{t(`roadmap.${phase}_title`)}</h3>
               <ul className="space-y-4">
-                {phase.items.map((item, i) => (
-                  <li key={i} className="flex items-start text-gray-400 text-sm font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-pepe-green mt-1.5 ml-3 shrink-0" />
-                    {item}
+                {[1, 2, 3, 4].map(i => (
+                  <li key={i} className="flex items-start text-gray-700 font-bold">
+                    <div className="w-4 h-4 rounded-full bg-pepe-green border-2 border-pepe-black mt-1.5 mr-3 shrink-0 rtl:mr-0 rtl:ml-3 shadow-[2px_2px_0px_0px_rgba(10,10,10,1)]" />
+                    {t(`roadmap.${phase}_item${i}`)}
                   </li>
                 ))}
               </ul>
@@ -345,152 +328,88 @@ const RoadmapSection = () => {
   );
 };
 
-const WhyBuySection = () => {
-  const reasons = [
-    {
-      title: 'علامة تجارية متميزة',
-      desc: 'تصميم أنيق واحترافي يبرز بين عملات الميم المعتادة.',
-      icon: <Rocket className="text-pepe-pink" size={32} />
-    },
-    {
-      title: 'مجتمع قوي',
-      desc: 'تركيز على النمو طويل الأمد وبيئة داعمة لحاملي العملة.',
-      icon: <Info className="text-pepe-green" size={32} />
-    },
-    {
-      title: 'أمان مثبت',
-      desc: 'عقد ذكي مدقق بالكامل مع سيولة مقفلة لراحة بال تامة.',
-      icon: <Shield className="text-pepe-yellow" size={32} />
-    }
-  ];
-
-  return (
-    <section className="py-32 bg-pepe-dark-gray/30">
-      <div className="section-container">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div className="text-right">
-            <span className="text-pepe-pink font-black tracking-widest uppercase text-xs">قوة الإقناع</span>
-            <h2 className="text-5xl md:text-6xl font-black italic mt-4 mb-8 uppercase tracking-tighter leading-none">لماذا تشتري <br /><span className="text-pepe-green">Pepe Wife؟</span></h2>
-            <p className="text-gray-400 text-lg mb-10 leading-relaxed max-w-lg mr-0 ml-auto">
-              Pepe Wife ليست مجرد عملة ميم أخرى. إنها تعبير عن الأناقة والقوة وتطور نظام Pepe البيئي. لقد بنينا أساسًا مصممًا للنجاح وثروة المجتمع.
-            </p>
-            <Button variant="primary">تعرف على المزيد عن الملكة</Button>
-          </div>
-
-          <div className="grid gap-6">
-            {reasons.map((reason, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-pepe-black/50 border border-white/5 p-6 rounded-3xl flex items-start space-x-6 space-x-reverse hover:bg-pepe-black transition-all text-right"
-              >
-                <div className="bg-pepe-dark-gray p-4 rounded-2xl shadow-lg shrink-0">
-                  {reason.icon}
-                </div>
-                <div>
-                  <h3 className="text-xl font-black italic uppercase tracking-tight mb-2">{reason.title}</h3>
-                  <p className="text-gray-500 text-sm font-medium">{reason.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const RiskWarningSection = () => {
-  return (
-    <section className="relative py-32 overflow-hidden">
-      {/* Background Placeholder */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-pepe-black/80 z-10" />
-        {ASSETS.RISK_WARNING_BACKGROUND === '[PUT_IMAGE_NAME_HERE]' ? (
-          <div className="w-full h-full bg-pepe-dark-gray flex items-center justify-center">
-            <span className="text-pepe-pink/10 text-4xl font-bold uppercase tracking-widest">خلفية_تحذير_المخاطر</span>
-          </div>
-        ) : (
-          <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk Warning BG" className="w-full h-full object-cover" />
-        )}
-      </div>
-
-      <div className="section-container relative z-20">
-        <div className="max-w-4xl mx-auto bg-pepe-black/40 backdrop-blur-xl border border-white/10 p-10 md:p-16 rounded-[3rem] text-center shadow-2xl">
-          <Shield size={64} className="text-pepe-yellow mx-auto mb-8 animate-pulse" />
-          <h2 className="text-4xl font-black italic text-white mb-8 uppercase tracking-tighter">تحذير المخاطر</h2>
-          <div className="space-y-6 text-gray-300 font-medium leading-relaxed text-sm md:text-base">
-            <p>
-              تنطوي الاستثمارات في العملات الرقمية على مخاطر عالية. مشروع Pepe Wife ($PWIFE) هو مشروع عملة ميم تم إنشاؤه لأغراض الترفيه والمجتمع. لا يوجد ضمان للربح، ويجب ألا تستثمر أبدًا أموالاً لا يمكنك تحمل خسارتها.
-            </p>
-            <p>
-              يرجى إجراء بحثك الشامل قبل المشاركة في البيع المسبق. سوق عملات الميم شديد التقلب. من خلال المشاركة، فإنك تقر بالمخاطر المعنية وتوافق على أن فريق المشروع غير مسؤول عن أي خسائر مالية.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const Footer = () => {
-  return (
-    <footer className="bg-pepe-black border-t border-pepe-green/10 pt-24 pb-12">
-      <div className="section-container">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 text-right">
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center space-x-2 space-x-reverse mb-8">
-              <div className="w-10 h-10 bg-pepe-green rounded-full flex items-center justify-center text-pepe-black font-black italic">PW</div>
-              <span className="text-2xl font-black tracking-tighter text-pepe-green uppercase">Pepe Wife</span>
-            </div>
-            <p className="text-gray-500 text-sm font-medium leading-relaxed mb-8">
-              الملكة الأكثر أناقة في عالم الكريبتو. انضم إلى التطور وكن جزءًا من العائلة الملكية.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-pepe-pink font-black uppercase tracking-widest text-xs mb-8">روابط سريعة</h4>
-            <ul className="space-y-4 text-sm font-bold uppercase tracking-tight text-gray-400">
-              <li><a href="#" className="hover:text-pepe-green transition-colors">البيع المسبق</a></li>
-              <li><a href="#tokenomics" className="hover:text-pepe-green transition-colors">التوكنز</a></li>
-              <li><a href="#roadmap" className="hover:text-pepe-green transition-colors">خارطة الطريق</a></li>
-              <li><a href="#" className="hover:text-pepe-green transition-colors">الورقة البيضاء</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-pepe-yellow font-black uppercase tracking-widest text-xs mb-8">المجتمع</h4>
-            <ul className="space-y-4 text-sm font-bold uppercase tracking-tight text-gray-400">
-              <li><a href="#" className="hover:text-pepe-green transition-colors">تويتر (X)</a></li>
-              <li><a href="#" className="hover:text-pepe-green transition-colors">تليجرام</a></li>
-              <li><a href="#" className="hover:text-pepe-green transition-colors">إنستغرام</a></li>
-              <li><a href="#" className="hover:text-pepe-green transition-colors">ديسكورد</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-pepe-green font-black uppercase tracking-widest text-xs mb-8">قانوني</h4>
-            <ul className="space-y-4 text-sm font-bold uppercase tracking-tight text-gray-400">
-              <li><a href="#" className="hover:text-pepe-pink transition-colors">شروط الخدمة</a></li>
-              <li><a href="#" className="hover:text-pepe-pink transition-colors">سياسة الخصوصية</a></li>
-              <li><a href="#" className="hover:text-pepe-pink transition-colors">إخلاء مسؤولية المخاطر</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-center md:text-right space-y-4 md:space-y-0">
-          <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">
-            © ٢٠٢٦ مشروع PEPE WIFE. جميع الحقوق محفوظة.
+const WhyBuySection = ({ t }) => (
+  <section id="about" className="py-32 bg-pepe-yellow/10">
+    <div className="section-container">
+      <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <div className="space-y-8 text-center lg:text-left rtl:lg:text-right">
+          <span className="btn-secondary py-2 px-6 rotate-[-3deg] inline-block">{t('whybuy.badge')}</span>
+          <h2 className="text-7xl font-black uppercase italic leading-[0.9] drop-shadow-[8px_8px_0px_rgba(10,10,10,1)]">
+            {t('whybuy.title_why')} <br /><span className="text-pepe-green">{t('whybuy.title_pepewife')}</span>
+          </h2>
+          <p className="text-2xl font-bold text-gray-200 leading-snug max-w-2xl mx-auto lg:mx-0">
+            {t('whybuy.desc')}
           </p>
-          <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest">
-            صنع بكل حب لملكة الكريبتو.
-          </p>
+          <Button variant="primary" className="text-2xl py-6">{t('whybuy.cta')}</Button>
+        </div>
+
+        <div className="grid gap-8">
+          {[1, 2, 3].map(i => (
+            <motion.div key={i} initial={{ x: 50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="cartoon-card flex items-center p-8 space-x-8 space-x-reverse">
+              <div className="w-20 h-20 bg-pepe-yellow rounded-[1.5rem] border-4 border-pepe-black flex items-center justify-center shrink-0 shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
+                {i === 1 ? <Rocket size={40} strokeWidth={3} /> : i === 2 ? <Globe size={40} strokeWidth={3} /> : <Shield size={40} strokeWidth={3} />}
+              </div>
+              <div className="text-right">
+                <h3 className="text-2xl font-black uppercase italic mb-2">{t(`whybuy.reason${i}_title`)}</h3>
+                <p className="text-gray-600 font-bold">{t(`whybuy.reason${i}_desc`)}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
-    </footer>
-  );
-};
+    </div>
+  </section>
+);
+
+const RiskWarningSection = ({ t }) => (
+  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black">
+    <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 bg-pepe-black/80 z-10" />
+      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-cover" />
+    </div>
+
+    <div className="section-container relative z-20">
+      <div className="cartoon-card max-w-5xl mx-auto text-center transform rotate-1">
+        <Shield size={100} strokeWidth={3} className="text-pepe-pink mx-auto mb-8 animate-pulse" />
+        <h2 className="text-6xl font-black uppercase italic mb-10 tracking-tight">{t('risk.title')}</h2>
+        <div className="space-y-8 text-xl font-bold text-gray-700 leading-relaxed">
+          <p>{t('risk.p1')}</p>
+          <p>{t('risk.p2')}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const Footer = ({ t }) => (
+  <footer className="bg-pepe-black py-24 border-t-8 border-pepe-black">
+    <div className="section-container">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24 text-center md:text-left rtl:md:text-right">
+        <div className="md:col-span-1 space-y-8">
+          <div className="flex items-center justify-center md:justify-start space-x-3 space-x-reverse">
+            <div className="w-16 h-16 bg-pepe-green rounded-2xl border-4 border-pepe-black flex items-center justify-center text-pepe-black font-black text-3xl rotate-[-5deg] shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">PW</div>
+            <span className="text-4xl font-black uppercase">Pepe Wife</span>
+          </div>
+          <p className="text-xl font-bold text-gray-400">{t('footer.desc')}</p>
+        </div>
+
+        {['links', 'community', 'legal'].map(cat => (
+          <div key={cat}>
+            <h4 className="text-2xl font-black uppercase italic text-pepe-pink mb-10 drop-shadow-[2px_2px_0px_rgba(10,10,10,1)]">{t(`footer.${cat}_title`)}</h4>
+            <ul className="space-y-6 text-lg font-black uppercase text-gray-300">
+              {cat === 'links' ? ['presale', 'tokenomics', 'roadmap', 'whitepaper'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{t(`nav.${l}` === 'nav.presale' ? 'nav.home' : `nav.${l}`)}</a></li>) :
+               cat === 'community' ? ['Twitter (X)', 'Telegram', 'Instagram', 'Discord'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{l}</a></li>) :
+               ['Terms', 'Privacy', 'Risk'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{l}</a></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="pt-16 border-t-4 border-pepe-black flex flex-col md:flex-row justify-between items-center gap-8 opacity-60">
+        <p className="text-sm font-black uppercase tracking-[0.3em]">{t('footer.rights')}</p>
+        <p className="text-sm font-black uppercase tracking-[0.3em]">{t('footer.built_with')}</p>
+      </div>
+    </div>
+  </footer>
+);
 
 export default App;

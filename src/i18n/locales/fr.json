@@ -1,0 +1,82 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "tokenomics": "Tokenomics",
+    "roadmap": "Feuille de Route",
+    "faq": "FAQ",
+    "about": "À Propos"
+  },
+  "hero": {
+    "badge": "La Reine des Memes",
+    "title_meet": "RENCONTREZ",
+    "title_pepe": "PEPE",
+    "title_wife": "WIFE",
+    "desc": "La prévente de memecoin la plus élégante, ludique et moderne de la galaxie. Rejoignez la famille et surfez sur la vague de la reine ultime.",
+    "whitepaper": "Livre Blanc",
+    "join_presale": "Rejoindre la Prévente"
+  },
+  "buybox": {
+    "title": "La Prévente est lancée !",
+    "desc": "Sécurisez vos jetons $PWIFE au prix le plus bas",
+    "current_price": "Prix Actuel",
+    "input_placeholder": "Entrez le montant USDT",
+    "buy_now": "Acheter $PWIFE Maintenant",
+    "how_to_buy": "Comment Acheter",
+    "audit": "Audit"
+  },
+  "tokenomics": {
+    "title": "Tokenomics",
+    "desc": "C'est un conteneur d'image plein écran. Votre graphique personnalisé remplira cette zone parfaitement sans marges."
+  },
+  "roadmap": {
+    "badge": "Notre Parcours",
+    "title_project": "Projet",
+    "title_roadmap": "Feuille de Route",
+    "phase1_title": "La Reine Arrive",
+    "phase1_item1": "Audit du Contrat Intelligent",
+    "phase1_item2": "Lancement de la Prévente",
+    "phase1_item3": "Site Web V1 en Ligne",
+    "phase1_item4": "Construction de la Communauté",
+    "phase2_title": "Expansion du Palais",
+    "phase2_item1": "Listings DEX",
+    "phase2_item2": "Candidature CMC & CG",
+    "phase2_item3": "Poussée Marketing",
+    "phase2_item4": "Premier Listing CEX",
+    "phase3_title": "Dominion Globale",
+    "phase3_item1": "Lancement du Staking",
+    "phase3_item2": "Partenariats",
+    "phase3_item3": "Marketing avec Célébrités",
+    "phase3_item4": "Listing CEX Tier 1",
+    "phase4_title": "Héritage de la Reine",
+    "phase4_item1": "Collection NFT",
+    "phase4_item2": "Pepe Wife DAO",
+    "phase4_item3": "Boutique de Marchandises",
+    "phase4_item4": "Écosystème Futur"
+  },
+  "whybuy": {
+    "badge": "Pouvoir de Persuasion",
+    "title_why": "Pourquoi Acheter",
+    "title_pepewife": "Pepe Wife ?",
+    "desc": "Pepe Wife n'est pas qu'un simple memecoin. C'est une déclaration d'élégance, de puissance et de l'évolution de l'écosystème Pepe. Nous avons bâti une base conçue pour le succès et la richesse de la communauté.",
+    "cta": "En Savoir Plus sur la Reine",
+    "reason1_title": "Branding Premium",
+    "reason1_desc": "Design élégant et professionnel qui se démarque des memecoins typiques.",
+    "reason2_title": "Communauté Forte",
+    "reason2_desc": "Axé sur la croissance à long terme et un environnement de soutien pour les détenteurs.",
+    "reason3_title": "Sécurité Prouvée",
+    "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée pour une tranquillité d'esprit totale."
+  },
+  "risk": {
+    "title": "Avertissement sur les Risques",
+    "p1": "Les investissements en cryptomonnaies comportent des risques élevés. Le projet Pepe Wife ($PWIFE) est un projet de memecoin créé à des fins de divertissement et de communauté. Il n'y a aucune garantie de profit, et vous ne devriez jamais investir de l'argent que vous ne pouvez pas vous permettre de perdre.",
+    "p2": "Veuillez mener vos propres recherches approfondies avant de participer à la prévente. Le marché des memecoins est très volatil. En participant, vous reconnaissez les risques encourus et acceptez que l'équipe du projet n'est pas responsable des pertes financières."
+  },
+  "footer": {
+    "desc": "La reine la plus élégante de l'espace crypto. Rejoignez l'évolution et faites partie de la famille royale.",
+    "links_title": "Liens Rapides",
+    "community_title": "Communauté",
+    "legal_title": "Juridique",
+    "rights": "© 2026 PROJET PEPE WIFE. TOUS DROITS RÉSERVÉS.",
+    "built_with": "CONSTRUIT AVEC AMOUR POUR LA REINE DU CRYPTO."
+  }
+}
