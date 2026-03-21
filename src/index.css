@@ -139,11 +139,13 @@ body {
   }
 
   .animate-gradient-text {
-    background: linear-gradient(-45deg, #facc15, #f472b6, #4ade80, #3b82f6);
-    background-size: 300% 300%;
-    animation: gradient-bg 5s ease infinite;
+    background: linear-gradient(to right, #22c55e, #9ca3af, #22c55e);
+    background-size: 200% auto;
+    animation: title-gradient-move 3s linear infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
   }
 
   .animate-gradient-bg {
@@ -167,4 +169,17 @@ body {
     0% { background-position: 0% center; }
     100% { background-position: -200% center; }
   }
+}
+
+/* French Font Scaling */
+.lang-fr h1 {
+  @apply text-4xl sm:text-6xl md:text-[8rem] !important;
+}
+
+.lang-fr h2 {
+  @apply text-3xl sm:text-4xl lg:text-6xl !important;
+}
+
+.lang-fr p, .lang-fr span, .lang-fr button, .lang-fr li {
+  font-size: 0.9em !important;
 }

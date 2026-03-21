@@ -71,11 +71,18 @@ const ConnectPage = () => {
           <span className="font-black uppercase tracking-tight">{t('nav.home')}</span>
         </button>
         
-        <div className="flex items-center space-x-3 space-x-reverse">
-          <div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000]">
-            <img src="/assets/hero-character.png" alt="Logo" className="w-8 h-8 object-contain" />
+        <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group" onClick={() => navigate('/')}>
+          <div className="flex items-center space-x-2 space-x-reverse group-hover:scale-105 transition-transform">
+            <img src="/assets/hero-character.png" alt="Logo" className="w-12 h-12 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-xl font-black uppercase leading-none bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
+                Pepe Wife
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
+                $PWIFE
+              </span>
+            </div>
           </div>
-          <span className="text-2xl font-black uppercase hidden sm:block">Pepe Wife</span>
         </div>
       </header>
 

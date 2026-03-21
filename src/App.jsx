@@ -10,11 +10,13 @@ import LoadingPage from './pages/LoadingPage';
 function App() {
   const { i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+  const isFrench = i18n.language === 'fr';
 
   useEffect(() => {
     document.body.dir = isRTL ? 'rtl' : 'ltr';
+    document.body.className = isFrench ? 'lang-fr' : '';
     localStorage.setItem('i18nextLng', i18n.language);
-  }, [i18n.language, isRTL]);
+  }, [i18n.language, isRTL, isFrench]);
 
   return (
     <WalletProvider>

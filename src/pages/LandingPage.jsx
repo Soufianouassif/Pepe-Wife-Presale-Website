@@ -127,16 +127,19 @@ const WalletButton = ({ t }) => {
 };
 
 const Ticker = ({ t }) => {
+  const { i18n } = useTranslation();
   const messages = [t('ticker.m1'), t('ticker.m2'), t('ticker.m3'), t('ticker.m4')];
+  const isArabic = i18n.language === 'ar';
+  
   return (
-    <div className="animate-gradient-bg border-y-4 border-pepe-black py-4 overflow-hidden relative z-20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]" dir="ltr">
+    <div className="bg-pepe-yellow border-y-4 border-pepe-black py-4 overflow-hidden relative z-20 shadow-[0_4px_20px_rgba(0,0,0,0.3)] -mt-1" dir="ltr">
       <div className="animate-marquee whitespace-nowrap">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="flex items-center">
             {messages.map((msg, idx) => (
               <span key={idx} className="text-xl md:text-2xl font-black text-pepe-black mx-6 md:mx-12 flex items-center drop-shadow-sm">
                 <Rocket size={20} className="mr-2 md:mr-4" />
-                {msg}
+                {isArabic ? t(`ticker.m${idx + 1}`, { lng: 'en' }) : msg}
               </span>
             ))}
           </div>
@@ -147,13 +150,18 @@ const Ticker = ({ t }) => {
 };
 
 const FeaturedIn = ({ t }) => {
+  const { i18n } = useTranslation();
   const platforms = ['Yahoo Finance', 'MarketWatch', 'Bloomberg', 'Cointelegraph', 'Decrypt'];
+  const isArabic = i18n.language === 'ar';
+  
   return (
-    <div className="bg-black border-y-4 border-pepe-black py-8 overflow-hidden relative z-20" dir="ltr">
+    <div className="bg-black border-y-4 border-pepe-black py-8 overflow-hidden relative z-20 -mt-1" dir="ltr">
       <div className="animate-marquee-slow whitespace-nowrap flex items-center">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="flex items-center">
-            <span className="text-xl font-black uppercase tracking-[0.3em] text-white/40 mx-10">{t('featured.title')}</span>
+            <span className="text-xl font-black uppercase tracking-[0.3em] text-white/40 mx-10">
+              {isArabic ? t('featured.title', { lng: 'en' }) : t('featured.title')}
+            </span>
             {platforms.map((p, idx) => (
               <span key={idx} className="text-2xl md:text-4xl font-black text-white mx-10 md:mx-20 uppercase italic tracking-tighter hover:text-pepe-yellow transition-colors cursor-default">
                 {p}
@@ -167,6 +175,7 @@ const FeaturedIn = ({ t }) => {
 };
 
 const PartnersTicker = ({ t }) => {
+  const { i18n } = useTranslation();
   const partners = [
     { name: 'Solana', color: 'text-[#14F195]' },
     { name: 'Raydium', color: 'text-[#FF00FF]' },
@@ -174,12 +183,16 @@ const PartnersTicker = ({ t }) => {
     { name: 'CoinMarketCap', color: 'text-[#1098AD]' },
     { name: 'Oracle', color: 'text-[#F80000]' }
   ];
+  const isArabic = i18n.language === 'ar';
+  
   return (
-    <div className="bg-white border-y-4 border-pepe-black py-12 overflow-hidden relative z-20" dir="ltr">
+    <div className="bg-white border-y-4 border-pepe-black py-12 overflow-hidden relative z-20 -mt-1" dir="ltr">
       <div className="animate-marquee whitespace-nowrap flex items-center">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="flex items-center">
-            <span className="text-2xl font-black uppercase tracking-widest text-pepe-black/30 mx-12">{t('partners.title')}</span>
+            <span className="text-2xl font-black uppercase tracking-widest text-pepe-black/30 mx-12">
+              {isArabic ? t('partners.title', { lng: 'en' }) : t('partners.title')}
+            </span>
             {partners.map((p, idx) => (
               <div key={idx} className="flex items-center mx-12 md:mx-20 group cursor-pointer transition-all duration-300">
                 <span className={`text-3xl md:text-5xl font-black uppercase italic tracking-tighter ${p.color} group-hover:scale-110 transition-transform`}>
@@ -203,17 +216,22 @@ const HeroSection = ({ t }) => {
           <img src={ASSETS.HERO_BACKGROUND_IMAGE} alt="Hero BG" className="w-full h-full object-cover lg:object-fill object-center" />
         </picture>
       </div>
-      <div className="section-container relative z-10 w-full flex flex-col items-center justify-center text-center space-y-10">
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+      <div className="section-container relative z-10 w-full flex flex-col items-center justify-center text-center space-y-10 py-0">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8 }}
+          className="max-w-[90%] md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto"
+        >
           <span className="bg-pepe-pink text-white px-8 py-3 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[6px_6px_0_0_#000] rotate-[-2deg] inline-block mb-8">
             {t('hero.badge')}
           </span>
-          <h1 className="text-5xl sm:text-7xl md:text-[10rem] font-black tracking-tighter leading-[1] sm:leading-[0.8] mb-10 text-pepe-black drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] sm:drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient">
+          <h1 className="text-5xl sm:text-7xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter leading-[1] sm:leading-[0.8] mb-10 text-pepe-black drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] sm:drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient break-words">
             {t('hero.title_meet')} {t('hero.title_pepe')}<br />
             {t('hero.title_wife')}
           </h1>
           <div className="relative inline-block mb-12 px-4 sm:px-0">
-            <p className="text-xl sm:text-2xl md:text-4xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[6px_6px_0_0_#FF69B4] sm:shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[6px_6px_0_0_#FF69B4] sm:shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
               {t('hero.desc')}
             </p>
           </div>
@@ -236,7 +254,7 @@ const HeroSection = ({ t }) => {
 const BuyBoxSection = ({ t, openModal }) => {
   const [amount, setAmount] = useState('');
   return (
-    <section className="py-16 sm:py-24 lg:min-h-[800px] relative overflow-hidden flex items-center">
+    <section className="py-16 sm:py-24 lg:min-h-[800px] relative overflow-hidden flex items-center -mt-1">
       <div className="absolute inset-0 z-0">
         <picture>
           <source media="(max-width: 1024px)" srcSet={ASSETS.BUY_BOX_MOBILE_BG} />
@@ -296,7 +314,7 @@ const TokenomicsSection = ({ t, openModal }) => {
     { label: t('tokenomics.category_marketing', 'Marketing'), percentage: 5, color: 'bg-white' },
   ];
   return (
-    <section id="tokenomics" className="relative py-24 overflow-hidden bg-white">
+    <section id="tokenomics" className="relative py-24 overflow-hidden bg-white -mt-1">
       <div className="section-container relative z-10 px-4 sm:px-6">
         <div className="text-center mb-16">
           <h2 className="text-5xl sm:text-7xl font-black uppercase italic drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient">{t('tokenomics.title')}</h2>
@@ -374,7 +392,7 @@ const TokenomicsSection = ({ t, openModal }) => {
 };
 
 const WhyBuySection = ({ t }) => (
-  <section id="about" className="relative py-20 sm:py-32 lg:min-h-[800px] overflow-hidden flex items-center">
+  <section id="about" className="relative py-20 sm:py-32 lg:min-h-[800px] overflow-hidden flex items-center -mt-1">
     <div className="absolute inset-0 z-0">
       <picture>
         <source media="(max-width: 1024px)" srcSet={ASSETS.WHY_BUY_MOBILE_BG} />
@@ -413,7 +431,7 @@ const WhyBuySection = ({ t }) => (
 );
 
 const RiskWarningSection = ({ t }) => (
-  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
+  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5 -mt-1">
     <div className="section-container relative z-20">
       <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white relative group">
         <div className="absolute top-6 right-6 text-pepe-pink opacity-20 group-hover:opacity-100 transition-opacity"><Info size={40} strokeWidth={3} /></div>
@@ -429,7 +447,7 @@ const RiskWarningSection = ({ t }) => (
 );
 
 const Footer = ({ t }) => (
-  <footer className="footer-black py-24">
+  <footer className="footer-black py-24 -mt-1">
     <div className="section-container">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24 text-center md:text-left rtl:md:text-right">
         <div className="md:col-span-1 space-y-8">
@@ -460,32 +478,41 @@ const Footer = ({ t }) => (
 
 const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal }) => {
   return (
-    <nav className="fixed top-4 left-4 right-4 z-50 rounded-[2rem] border-4 border-pepe-black shadow-[0_8px_0_0_rgba(10,10,10,1)] overflow-hidden h-20">
+    <nav className="fixed top-4 left-4 right-4 z-50 rounded-[2rem] border-4 border-pepe-black shadow-[0_8px_0_0_rgba(10,10,10,1)] overflow-hidden h-20 bg-white">
       <div className="absolute inset-0 z-0">
         {ASSETS.NAVBAR_BACKGROUND_IMAGE === '/assets/navbar-bg.png' ? <div className="w-full h-full bg-white" /> : <img src={ASSETS.NAVBAR_BACKGROUND_IMAGE} alt="Nav BG" className="w-full h-full object-cover" />}
       </div>
-      <div className="relative z-10 h-full px-8 flex items-center justify-between">
-        <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group" onClick={() => openModal('home')}>
-          <div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:scale-110 transition-transform">
-            <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-8 h-8 object-contain" />
+      <div className="relative z-10 h-full px-4 md:px-8 flex items-center justify-between">
+        <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group shrink-0" onClick={() => openModal('home')}>
+          <div className="flex items-center space-x-2 space-x-reverse group-hover:scale-105 transition-transform">
+            <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+            <div className="flex flex-col justify-center">
+              <span className="text-lg md:text-xl font-black uppercase leading-none bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
+                Pepe Wife
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
+                $PWIFE
+              </span>
+            </div>
           </div>
-          <span className="text-2xl font-black text-pepe-black uppercase hidden sm:block">Pepe Wife</span>
         </div>
-        <div className="hidden md:flex items-center space-x-6 space-x-reverse">
+
+        <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 space-x-reverse">
           {[{ id: 'home', label: t('nav.home') }, { id: 'about', label: t('nav.about') }, { id: 'tokenomics', label: t('nav.tokenomics') }, { id: 'roadmap', label: t('nav.roadmap') }, { id: 'faq', label: t('nav.faq') }].map((item) => (
-            <button key={item.id} onClick={() => openModal(item.id)} className="text-pepe-black font-black uppercase tracking-tight hover:text-pepe-pink transition-all hover:-translate-y-1">{item.label}</button>
+            <button key={item.id} onClick={() => openModal(item.id)} className="text-pepe-black font-black uppercase tracking-tight hover:text-pepe-pink transition-all hover:-translate-y-1 text-sm xl:text-base">{item.label}</button>
           ))}
-          <button onClick={() => openModal('contract')} className="text-pepe-black font-black uppercase tracking-tight hover:text-pepe-pink transition-all hover:-translate-y-1">{t('nav.contract')}</button>
+          <button onClick={() => openModal('contract')} className="text-pepe-black font-black uppercase tracking-tight hover:text-pepe-pink transition-all hover:-translate-y-1 text-sm xl:text-base">{t('nav.contract')}</button>
         </div>
-        <div className="flex items-center space-x-4 space-x-reverse">
+
+        <div className="flex items-center space-x-2 md:space-x-4 space-x-reverse shrink-0">
           <div className="hidden sm:flex bg-pepe-black/10 p-1 rounded-xl border-2 border-pepe-black/20">
-            {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-3 py-1 rounded-lg text-xs font-black uppercase transition-all ${currentLng === lang ? 'bg-pepe-pink text-white shadow-md' : 'text-pepe-black/60 hover:text-pepe-black'}`}>{lang}</button>)}
+            {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 md:px-3 py-1 rounded-lg text-[10px] md:text-xs font-black uppercase transition-all ${currentLng === lang ? 'bg-pepe-pink text-white shadow-md' : 'text-pepe-black/60 hover:text-pepe-black'}`}>{lang}</button>)}
           </div>
-          <div className="hidden sm:block">
-            <WalletButton t={t} openModal={openModal} />
+          <div className="hidden md:block">
+            <WalletButton t={t} />
           </div>
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2 hover:bg-pepe-black/5 rounded-xl transition-colors border-4 border-pepe-black">
-            {isOpen ? <X size={32} strokeWidth={3} /> : <Menu size={32} strokeWidth={3} />}
+          <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 hover:bg-pepe-black/5 rounded-xl transition-colors border-4 border-pepe-black">
+            {isOpen ? <X size={24} strokeWidth={3} /> : <Menu size={24} strokeWidth={3} />}
           </button>
         </div>
       </div>
