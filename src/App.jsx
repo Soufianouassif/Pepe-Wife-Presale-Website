@@ -13,8 +13,9 @@ const ASSETS = {
   CUSTOM_BUTTON_IMAGE_PRIMARY: '/assets/btn-primary.png',
   CUSTOM_BUTTON_IMAGE_SECONDARY: '/assets/btn-secondary.png',
   COIN_ICON: '/assets/coin-icon.png',
-  WHY_BUY_BG: '/assets/hero-section.svg',
-  TOKENOMICS_BG: '/assets/Untitled design.svg', // Updated with new background image
+  WHY_BUY_BG: '/assets/risk-bg.svg', // Moved from RiskWarning
+  TOKENOMICS_BG: '/assets/hero-section.svg', // Placeholder
+  BUY_BOX_BG: '/assets/Untitled design.svg', // Moved from Tokenomics
 };
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -134,12 +135,12 @@ const Ticker = ({ t }) => {
   const messages = [t('ticker.m1'), t('ticker.m2'), t('ticker.m3'), t('ticker.m4')];
   
   return (
-    <div className="bg-pepe-yellow border-y-4 border-pepe-black py-4 overflow-hidden relative z-20">
+    <div className="animate-gradient-bg border-y-4 border-pepe-black py-4 overflow-hidden relative z-20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
       <div className="animate-marquee whitespace-nowrap">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="flex items-center">
             {messages.map((msg, idx) => (
-              <span key={idx} className="text-xl md:text-2xl font-black text-pepe-black mx-6 md:mx-12 flex items-center">
+              <span key={idx} className="text-xl md:text-2xl font-black text-pepe-black mx-6 md:mx-12 flex items-center drop-shadow-sm">
                 <Rocket size={20} className="mr-2 md:mr-4 rtl:mr-0 rtl:ml-2 md:rtl:ml-4" />
                 {msg}
               </span>
@@ -156,15 +157,13 @@ const FeaturedIn = ({ t }) => {
   const platforms = ['Yahoo Finance', 'MarketWatch', 'Bloomberg', 'Cointelegraph', 'Decrypt'];
   
   return (
-    <div className="bg-white border-y-4 border-pepe-black py-10 overflow-hidden relative z-20">
-      <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
-        <h3 className="text-xl font-black uppercase tracking-[0.3em] text-pepe-black/40">{t('featured.title')}</h3>
-      </div>
-      <div className="animate-marquee whitespace-nowrap opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+    <div className="bg-black border-y-4 border-pepe-black py-8 overflow-hidden relative z-20">
+      <div className="animate-marquee-slow whitespace-nowrap flex items-center">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="flex items-center">
+            <span className="text-xl font-black uppercase tracking-[0.3em] text-white/40 mx-10">{t('featured.title')}</span>
             {platforms.map((p, idx) => (
-              <span key={idx} className="text-2xl md:text-4xl font-black text-pepe-black mx-10 md:mx-20 uppercase italic tracking-tighter">
+              <span key={idx} className="text-2xl md:text-4xl font-black text-white mx-10 md:mx-20 uppercase italic tracking-tighter hover:text-pepe-yellow transition-colors cursor-default">
                 {p}
               </span>
             ))}
@@ -480,9 +479,16 @@ const BuyBoxSection = ({ t, openModal }) => {
   const [amount, setAmount] = useState('');
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="section-container">
+      <div className="absolute inset-0 z-0">
+        <img 
+          src={ASSETS.BUY_BOX_BG} 
+          alt="Buy Box BG" 
+          className="w-full h-full object-cover" 
+        />
+      </div>
+      <div className="section-container relative z-10">
         <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="cartoon-card relative overflow-hidden">
+          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="cartoon-card relative overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="absolute top-0 right-0 w-40 h-40 bg-pepe-pink opacity-10 rounded-full -mr-20 -mt-20" />
             
             <div className="text-center mb-12">
@@ -545,16 +551,7 @@ const TokenomicsSection = ({ t, openModal }) => {
   ];
 
   return (
-    <section id="tokenomics" className="relative py-24 overflow-hidden bg-transparent">
-      {/* Full Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={ASSETS.TOKENOMICS_BG} 
-          alt="Tokenomics Background" 
-          className="w-full h-full object-cover md:object-fill" 
-        />
-      </div>
-
+    <section id="tokenomics" className="relative py-24 overflow-hidden bg-white">
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-7xl font-black uppercase italic drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] text-pepe-black">{t('tokenomics.title')}</h2>
@@ -562,8 +559,7 @@ const TokenomicsSection = ({ t, openModal }) => {
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            {/* Removed shadows and complex background effects for clarity */}
-            <div className="bg-white/80 backdrop-blur-md p-10 rounded-[2.5rem] border-4 border-pepe-black">
+            <div className="bg-white p-10 rounded-[2.5rem] border-4 border-pepe-black shadow-[12px_12px_0px_0px_rgba(10,10,10,1)]">
               <h3 className="text-3xl font-black uppercase mb-8 italic">{t('tokenomics.distribution_title' || 'Token Distribution')}</h3>
               <div className="space-y-6">
                 {distribution.map((item, idx) => (
@@ -594,7 +590,6 @@ const TokenomicsSection = ({ t, openModal }) => {
           </div>
 
           <div className="relative group">
-            {/* Removed blurring effects and shadows */}
             <div className="relative p-4 aspect-square flex items-center justify-center overflow-hidden">
               <img 
                 src={ASSETS.HERO_CHARACTER_IMAGE} 
@@ -611,10 +606,10 @@ const TokenomicsSection = ({ t, openModal }) => {
 
 const WhyBuySection = ({ t }) => (
   <section id="about" className="relative py-32 overflow-hidden">
-    <div className="absolute inset-0 z-0 opacity-100">
-      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-cover" />
+    <div className="absolute inset-0 z-0">
+      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-cover brightness-[0.8] contrast-[1.2]" />
     </div>
-    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[1]" />
+    <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] z-[1]" />
 
     <div className="section-container relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -623,7 +618,7 @@ const WhyBuySection = ({ t }) => (
           <h2 className="text-7xl font-black uppercase italic leading-[0.9] drop-shadow-[8px_8px_0px_rgba(10,10,10,1)]">
             {t('whybuy.title_why')} <br /><span className="text-pepe-green">{t('whybuy.title_pepewife')}</span>
           </h2>
-          <p className="text-2xl font-bold text-gray-700 leading-snug max-w-2xl mx-auto lg:mx-0">
+          <p className="text-2xl font-bold text-gray-800 leading-snug max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
             {t('whybuy.desc')}
           </p>
           <Button variant="primary" className="text-2xl py-6 shadow-[8px_8px_0_0_rgba(10,10,10,1)]">{t('whybuy.cta')}</Button>
@@ -631,13 +626,13 @@ const WhyBuySection = ({ t }) => (
 
         <div className="grid gap-8">
           {[1, 2, 3].map(i => (
-            <motion.div key={i} initial={{ x: 50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="cartoon-card shadow-green-custom flex items-center p-8 space-x-8 space-x-reverse">
+            <motion.div key={i} initial={{ x: 50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="cartoon-card bg-white/90 shadow-green-custom flex items-center p-8 space-x-8 space-x-reverse">
               <div className="w-20 h-20 bg-pepe-yellow rounded-[1.5rem] border-4 border-pepe-black flex items-center justify-center shrink-0 shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
                 {i === 1 ? <Rocket size={40} strokeWidth={3} /> : i === 2 ? <Globe size={40} strokeWidth={3} /> : <Shield size={40} strokeWidth={3} />}
               </div>
               <div className="text-right">
                 <h3 className="text-2xl font-black uppercase italic mb-2">{t(`whybuy.reason${i}_title`)}</h3>
-                <p className="text-gray-600 font-bold">{t(`whybuy.reason${i}_desc`)}</p>
+                <p className="text-gray-700 font-bold">{t(`whybuy.reason${i}_desc`)}</p>
               </div>
             </motion.div>
           ))}
@@ -648,11 +643,7 @@ const WhyBuySection = ({ t }) => (
 );
 
 const RiskWarningSection = ({ t }) => (
-  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
-    <div className="absolute inset-0 z-0 opacity-100">
-      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-cover" />
-    </div>
-
+  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-white">
     <div className="section-container relative z-20">
       <div className="cartoon-card max-w-5xl mx-auto text-center transform rotate-1 bg-white">
         <Shield size={100} strokeWidth={3} className="text-pepe-pink mx-auto mb-8 animate-pulse" />
