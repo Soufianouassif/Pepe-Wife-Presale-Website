@@ -78,6 +78,20 @@ body {
     box-shadow: 20px 20px 0px 0px #32CD32;
   }
 
+  .risk-card {
+    @apply bg-white p-12 rounded-[3rem] border-4 border-pepe-black transition-all duration-300;
+    box-shadow: 12px 12px 0px 0px #FF69B4;
+  }
+  
+  .risk-card:hover {
+    @apply -translate-y-2 -translate-x-1;
+    box-shadow: 18px 18px 0px 0px #FF69B4;
+  }
+
+  .footer-black {
+    @apply bg-black text-white border-t-8 border-pepe-black;
+  }
+
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
@@ -91,21 +105,21 @@ body {
   .animate-marquee {
     display: flex;
     width: max-content;
-    animation: marquee 30s linear infinite;
+    animation: marquee 60s linear infinite;
   }
 
   .rtl .animate-marquee {
-    animation: marquee-rtl 30s linear infinite;
+    animation: marquee-rtl 60s linear infinite;
   }
 
   .animate-marquee-slow {
     display: flex;
     width: max-content;
-    animation: marquee 60s linear infinite;
+    animation: marquee 100s linear infinite;
   }
 
   .rtl .animate-marquee-slow {
-    animation: marquee-rtl 60s linear infinite;
+    animation: marquee-rtl 100s linear infinite;
   }
 
   @keyframes gradient-bg {

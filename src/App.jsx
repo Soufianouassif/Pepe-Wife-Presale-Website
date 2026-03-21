@@ -174,6 +174,35 @@ const FeaturedIn = ({ t }) => {
   );
 };
 
+const PartnersTicker = ({ t }) => {
+  const partners = [
+    { name: 'Solana', color: 'text-[#14F195]' },
+    { name: 'Raydium', color: 'text-[#FF00FF]' },
+    { name: 'Binance', color: 'text-[#F3BA2F]' },
+    { name: 'CoinMarketCap', color: 'text-[#1098AD]' },
+    { name: 'Oracle', color: 'text-[#F80000]' }
+  ];
+
+  return (
+    <div className="bg-white border-y-4 border-pepe-black py-12 overflow-hidden relative z-20">
+      <div className="animate-marquee whitespace-nowrap flex items-center">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="flex items-center">
+            <span className="text-2xl font-black uppercase tracking-widest text-pepe-black/30 mx-12">{t('partners.title')}</span>
+            {partners.map((p, idx) => (
+              <div key={idx} className="flex items-center mx-12 md:mx-20 group cursor-pointer transition-all duration-300">
+                <span className={`text-3xl md:text-5xl font-black uppercase italic tracking-tighter ${p.color} group-hover:scale-110 transition-transform`}>
+                  {p.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -351,6 +380,7 @@ function App() {
         <FeaturedIn t={t} />
         <TokenomicsSection t={t} openModal={setActiveModal} />
         <WhyBuySection t={t} />
+        <PartnersTicker t={t} />
         <RiskWarningSection t={t} />
       </main>
 
@@ -643,46 +673,82 @@ const WhyBuySection = ({ t }) => (
 );
 
 const RiskWarningSection = ({ t }) => (
-  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-white">
+  <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
     <div className="section-container relative z-20">
-      <div className="cartoon-card max-w-5xl mx-auto text-center transform rotate-1 bg-white">
-        <Shield size={100} strokeWidth={3} className="text-pepe-pink mx-auto mb-8 animate-pulse" />
-        <h2 className="text-6xl font-black uppercase italic mb-10 tracking-tight">{t('risk.title')}</h2>
-        <div className="space-y-8 text-xl font-bold text-gray-700 leading-relaxed">
-          <p>{t('risk.p1')}</p>
-          <p>{t('risk.p2')}</p>
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white relative group"
+      >
+        {/* Decorative corner icon */}
+        <div className="absolute top-6 right-6 text-pepe-pink opacity-20 group-hover:opacity-100 transition-opacity">
+          <Info size={40} strokeWidth={3} />
         </div>
-      </div>
+        
+        <Shield size={100} strokeWidth={3} className="text-pepe-pink mx-auto mb-10 animate-pulse" />
+        <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-10 tracking-tight text-pepe-black drop-shadow-sm">
+          {t('risk.title')}
+        </h2>
+        <div className="space-y-8 text-xl md:text-2xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">
+          <p className="border-l-4 border-pepe-pink pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pr-6 py-2 bg-pepe-pink/5 rounded-r-2xl rtl:rounded-r-none rtl:rounded-l-2xl">
+            {t('risk.p1')}
+          </p>
+          <p className="border-l-4 border-pepe-black pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pr-6 py-2 bg-gray-50 rounded-r-2xl rtl:rounded-r-none rtl:rounded-l-2xl">
+            {t('risk.p2')}
+          </p>
+        </div>
+      </motion.div>
     </div>
   </section>
 );
 
 const Footer = ({ t }) => (
-  <footer className="bg-white py-24 border-t-8 border-pepe-black">
+  <footer className="footer-black py-24">
     <div className="section-container">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24 text-center md:text-left rtl:md:text-right">
         <div className="md:col-span-1 space-y-8">
           <div className="flex items-center justify-center md:justify-start space-x-3 space-x-reverse">
             <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-16 h-16 object-contain" />
-            <span className="text-4xl font-black uppercase">Pepe Wife</span>
+            <span className="text-4xl font-black uppercase text-white">Pepe Wife</span>
           </div>
-          <p className="text-xl font-bold text-gray-500">{t('footer.desc')}</p>
+          <p className="text-xl font-bold text-white/60">{t('footer.desc')}</p>
         </div>
 
         {['links', 'community', 'legal'].map(cat => (
           <div key={cat}>
-            <h4 className="text-2xl font-black uppercase italic text-pepe-pink mb-10 drop-shadow-[2px_2px_0px_rgba(10,10,10,1)]">{t(`footer.${cat}_title`)}</h4>
-            <ul className="space-y-6 text-lg font-black uppercase text-gray-700">
-              {cat === 'links' ? ['presale', 'tokenomics', 'roadmap', 'whitepaper'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{t(`nav.${l}` === 'nav.presale' ? 'nav.home' : `nav.${l}`)}</a></li>) :
-               cat === 'community' ? ['Twitter (X)', 'Telegram', 'Instagram', 'Discord'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{l}</a></li>) :
-               ['Terms', 'Privacy', 'Risk'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all">{l}</a></li>)}
+            <h4 className="text-2xl font-black uppercase italic text-pepe-pink mb-10 drop-shadow-[2px_2px_0px_rgba(255,255,255,0.1)]">
+              {t(`footer.${cat}_title`)}
+            </h4>
+            <ul className="space-y-6 text-lg font-black uppercase text-white/80">
+              {cat === 'links' ? ['presale', 'tokenomics', 'roadmap', 'whitepaper'].map(l => (
+                <li key={l}>
+                  <a href={`#${l === 'presale' ? '' : l}`} className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">
+                    {t(`nav.${l}` === 'nav.presale' ? 'nav.home' : `nav.${l}`)}
+                  </a>
+                </li>
+              )) :
+               cat === 'community' ? ['Twitter (X)', 'Telegram', 'Instagram', 'Discord'].map(l => (
+                <li key={l}>
+                  <a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">
+                    {l}
+                  </a>
+                </li>
+              )) :
+               ['Terms', 'Privacy', 'Risk'].map(l => (
+                <li key={l}>
+                  <a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">
+                    {l}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         ))}
       </div>
-      <div className="pt-16 border-t-4 border-pepe-black flex flex-col md:flex-row justify-between items-center gap-8 opacity-60">
-        <p className="text-sm font-black uppercase tracking-[0.3em] text-pepe-black">{t('footer.rights')}</p>
-        <p className="text-sm font-black uppercase tracking-[0.3em] text-pepe-black">{t('footer.built_with')}</p>
+      <div className="pt-16 border-t-4 border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 opacity-60">
+        <p className="text-sm font-black uppercase tracking-[0.3em] text-white">{t('footer.rights')}</p>
+        <p className="text-sm font-black uppercase tracking-[0.3em] text-white">{t('footer.built_with')}</p>
       </div>
     </div>
   </footer>
