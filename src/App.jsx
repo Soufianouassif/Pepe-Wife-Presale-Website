@@ -6,16 +6,19 @@ import { useTranslation } from 'react-i18next';
 // ASSET PLACEHOLDERS
 const ASSETS = {
   HERO_BACKGROUND_IMAGE: '/assets/hero-section.svg',
+  HERO_MOBILE_BG: '/assets/her-sectionmb-bg.svg',
   HERO_CHARACTER_IMAGE: '/assets/hero-character.png',
   TOKENOMICS_FULL_IMAGE: '/assets/tokenomics.png',
   RISK_WARNING_BACKGROUND: '/assets/risk-bg.svg',
-  NAVBAR_BACKGROUND_IMAGE: '/assets/navbar-bg.png', // New customizable background
+  NAVBAR_BACKGROUND_IMAGE: '/assets/navbar-bg.png', 
   CUSTOM_BUTTON_IMAGE_PRIMARY: '/assets/btn-primary.png',
   CUSTOM_BUTTON_IMAGE_SECONDARY: '/assets/btn-secondary.png',
   COIN_ICON: '/assets/coin-icon.png',
-  WHY_BUY_BG: '/assets/risk-bg.svg', // Moved from RiskWarning
-  TOKENOMICS_BG: '/assets/hero-section.svg', // Placeholder
-  BUY_BOX_BG: '/assets/Untitled design.svg', // Moved from Tokenomics
+  WHY_BUY_BG: '/assets/risk-bg.svg',
+  WHY_BUY_MOBILE_BG: '/assets/risk-bg-mobil.png',
+  TOKENOMICS_BG: '/assets/hero-section.svg', 
+  BUY_BOX_BG: '/assets/Untitled design.svg',
+  BUY_BOX_MOBILE_BG: '/assets/sell-mb-bg.png',
 };
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -461,12 +464,15 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
 const HeroSection = ({ t }) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 pb-10 overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-100">
-        <img 
-          src={ASSETS.HERO_BACKGROUND_IMAGE} 
-          alt="Hero BG" 
-          className="w-full h-full object-cover" 
-        />
+      <div className="absolute inset-0 z-0">
+        <picture>
+          <source media="(max-width: 1024px)" srcSet={ASSETS.HERO_MOBILE_BG} />
+          <img 
+            src={ASSETS.HERO_BACKGROUND_IMAGE} 
+            alt="Hero BG" 
+            className="w-full h-full object-cover object-center" 
+          />
+        </picture>
       </div>
 
       <div className="section-container relative z-10 w-full flex flex-col items-center justify-center text-center space-y-10">
@@ -478,13 +484,13 @@ const HeroSection = ({ t }) => {
         >
           <span className="btn-secondary py-2 px-8 text-sm mb-8 inline-block rotate-[-2deg] shadow-[4px_4px_0_0_#000]">{t('hero.badge')}</span>
           
-          <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.8] mb-10 text-pepe-black drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic">
-            {t('hero.title_meet')} <span className="text-pepe-green">{t('hero.title_pepe')}</span><br />
-            <span className="text-pepe-pink">{t('hero.title_wife')}</span>
+          <h1 className="text-5xl sm:text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.8] mb-10 text-pepe-black drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient">
+            {t('hero.title_meet')} {t('hero.title_pepe')}<br />
+            {t('hero.title_wife')}
           </h1>
 
           <div className="relative inline-block mb-12">
-            <p className="text-2xl md:text-4xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-6 rounded-3xl shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
+            <p className="text-xl sm:text-2xl md:text-4xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-5 sm:p-6 rounded-3xl shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
               {t('hero.desc')}
             </p>
           </div>
@@ -510,11 +516,14 @@ const BuyBoxSection = ({ t, openModal }) => {
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <img 
-          src={ASSETS.BUY_BOX_BG} 
-          alt="Buy Box BG" 
-          className="w-full h-full object-cover" 
-        />
+        <picture>
+          <source media="(max-width: 1024px)" srcSet={ASSETS.BUY_BOX_MOBILE_BG} />
+          <img 
+            src={ASSETS.BUY_BOX_BG} 
+            alt="Buy Box BG" 
+            className="w-full h-full object-cover object-center" 
+          />
+        </picture>
       </div>
       <div className="section-container relative z-10">
         <div className="max-w-4xl mx-auto">
@@ -522,8 +531,8 @@ const BuyBoxSection = ({ t, openModal }) => {
             <div className="absolute top-0 right-0 w-40 h-40 bg-pepe-pink opacity-10 rounded-full -mr-20 -mt-20" />
             
             <div className="text-center mb-12">
-              <h2 className="text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight">{t('buybox.title')}</h2>
-              <p className="text-gray-600 text-xl font-bold">{t('buybox.desc')}</p>
+              <h2 className="text-4xl sm:text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
+              <p className="text-gray-600 text-lg sm:text-xl font-bold">{t('buybox.desc')}</p>
             </div>
 
             <div className="flex justify-center mb-12">
@@ -584,7 +593,7 @@ const TokenomicsSection = ({ t, openModal }) => {
     <section id="tokenomics" className="relative py-24 overflow-hidden bg-white">
       <div className="section-container relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-7xl font-black uppercase italic drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] text-pepe-black">{t('tokenomics.title')}</h2>
+          <h2 className="text-5xl sm:text-7xl font-black uppercase italic drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient">{t('tokenomics.title')}</h2>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -637,7 +646,14 @@ const TokenomicsSection = ({ t, openModal }) => {
 const WhyBuySection = ({ t }) => (
   <section id="about" className="relative py-32 overflow-hidden">
     <div className="absolute inset-0 z-0">
-      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-cover brightness-[0.8] contrast-[1.2]" />
+      <picture>
+        <source media="(max-width: 1024px)" srcSet={ASSETS.WHY_BUY_MOBILE_BG} />
+        <img 
+          src={ASSETS.WHY_BUY_BG} 
+          alt="Why Buy BG" 
+          className="w-full h-full object-cover object-center bg-no-repeat brightness-[0.8] contrast-[1.2]" 
+        />
+      </picture>
     </div>
     <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] z-[1]" />
 
@@ -645,8 +661,8 @@ const WhyBuySection = ({ t }) => (
       <div className="grid lg:grid-cols-2 gap-20 items-center">
         <div className="space-y-8 text-center lg:text-left rtl:lg:text-right">
           <span className="btn-secondary py-2 px-6 rotate-[-3deg] inline-block">{t('whybuy.badge')}</span>
-          <h2 className="text-7xl font-black uppercase italic leading-[0.9] drop-shadow-[8px_8px_0px_rgba(10,10,10,1)]">
-            {t('whybuy.title_why')} <br /><span className="text-pepe-green">{t('whybuy.title_pepewife')}</span>
+          <h2 className="text-5xl sm:text-7xl font-black uppercase italic leading-[0.9] drop-shadow-[8px_8px_0px_rgba(10,10,10,1)] animate-title-gradient">
+            {t('whybuy.title_why')} <br />{t('whybuy.title_pepewife')}
           </h2>
           <p className="text-2xl font-bold text-gray-800 leading-snug max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
             {t('whybuy.desc')}
@@ -687,7 +703,7 @@ const RiskWarningSection = ({ t }) => (
         </div>
         
         <Shield size={100} strokeWidth={3} className="text-pepe-pink mx-auto mb-10 animate-pulse" />
-        <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-10 tracking-tight text-pepe-black drop-shadow-sm">
+        <h2 className="text-5xl md:text-7xl font-black uppercase italic mb-10 tracking-tight text-pepe-black drop-shadow-sm animate-title-gradient">
           {t('risk.title')}
         </h2>
         <div className="space-y-8 text-xl md:text-2xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">

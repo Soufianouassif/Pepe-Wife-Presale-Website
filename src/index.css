@@ -141,4 +141,20 @@ body {
     background-size: 300% 300%;
     animation: gradient-bg 8s ease infinite;
   }
+
+  /* Progressive Title Gradient: Yellow, Red, Green */
+  .animate-title-gradient {
+    background: linear-gradient(to right, #facc15, #ef4444, #22c55e, #facc15);
+    background-size: 200% auto;
+    animation: title-gradient-move 4s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
+
+  @keyframes title-gradient-move {
+    0% { background-position: 0% center; }
+    100% { background-position: -200% center; }
+  }
 }
