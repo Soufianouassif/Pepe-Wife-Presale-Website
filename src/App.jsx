@@ -14,6 +14,7 @@ const ASSETS = {
   CUSTOM_BUTTON_IMAGE_SECONDARY: '/assets/btn-secondary.png',
   COIN_ICON: '/assets/coin-icon.png',
   WHY_BUY_BG: '/assets/hero-section.svg',
+  TOKENOMICS_BG: '/assets/tokenomics-bg.png', // Placeholder for tokenomics background
 };
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -383,49 +384,46 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
 
 const HeroSection = ({ t }) => {
   return (
-    <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-95">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pepe-black/5 to-pepe-black z-10" />
+    <section className="relative min-h-screen flex items-center justify-center pt-20 pb-10 overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-100">
         <img 
           src={ASSETS.HERO_BACKGROUND_IMAGE} 
           alt="Hero BG" 
-          className="w-full h-full object-contain bg-no-repeat" 
+          className="w-full h-full object-cover" 
         />
       </div>
 
-      <div className="section-container relative z-10 w-full grid md:grid-cols-2 gap-16 items-center">
-        <div className="order-2 md:order-2 flex justify-center items-center">
-          <motion.div 
-            animate={{ y: [0, -20, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="relative w-full max-w-lg aspect-square"
-          >
-            <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Pepe Wife" className="w-full h-full object-contain drop-shadow-[20px_20px_0px_rgba(10,10,10,0.5)]" />
-          </motion.div>
-        </div>
+      <div className="section-container relative z-10 w-full flex flex-col items-center justify-center text-center space-y-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }} 
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl"
+        >
+          <span className="btn-secondary py-2 px-8 text-sm mb-8 inline-block rotate-[-2deg] shadow-[4px_4px_0_0_#000]">{t('hero.badge')}</span>
+          
+          <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.8] mb-10 text-pepe-black drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic">
+            {t('hero.title_meet')} <span className="text-pepe-green">{t('hero.title_pepe')}</span><br />
+            <span className="text-pepe-pink">{t('hero.title_wife')}</span>
+          </h1>
 
-        <div className="order-1 md:order-1 flex flex-col items-center md:items-start text-center md:text-left space-y-8">
-          <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }}>
-            <span className="btn-secondary py-2 px-6 text-sm mb-6 inline-block rotate-[-2deg]">{t('hero.badge')}</span>
-            <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] mb-8 text-pepe-black drop-shadow-[8px_8px_0px_rgba(255,255,255,0.5)] uppercase">
-              {t('hero.title_meet')} <span className="text-pepe-green">{t('hero.title_pepe')}</span><br />
-              <span className="text-pepe-pink">{t('hero.title_wife')}</span>
-            </h1>
-            <p className="text-xl md:text-2xl font-bold text-gray-600 max-w-xl leading-snug mb-10">
+          <div className="relative inline-block mb-12">
+            <p className="text-2xl md:text-4xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-6 rounded-3xl shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
               {t('hero.desc')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-6">
-              <Button variant="outline" className="group">
-                <Download size={24} strokeWidth={3} className="mr-3 group-hover:bounce" />
-                {t('hero.whitepaper')}
-              </Button>
-              <Button variant="primary" className="group">
-                {t('hero.join_presale')}
-                <ArrowRight size={24} strokeWidth={3} className="ml-3 group-hover:translate-x-2 transition-transform rtl:rotate-180 rtl:group-hover:-translate-x-2" />
-              </Button>
-            </div>
-          </motion.div>
-        </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mt-12">
+            <Button variant="outline" className="group text-2xl py-6 px-10 shadow-[8px_8px_0_0_#000]">
+              <Download size={32} strokeWidth={3} className="mr-3 group-hover:animate-bounce" />
+              {t('hero.whitepaper')}
+            </Button>
+            <Button variant="primary" className="group text-2xl py-6 px-10 shadow-[8px_8px_0_0_#000]">
+              {t('hero.join_presale')}
+              <ArrowRight size={32} strokeWidth={3} className="ml-3 group-hover:translate-x-2 transition-transform rtl:rotate-180 rtl:group-hover:-translate-x-2" />
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -500,15 +498,19 @@ const TokenomicsSection = ({ t, openModal }) => {
   ];
 
   return (
-    <section id="tokenomics" className="py-24 bg-pepe-yellow/5">
-      <div className="section-container">
+    <section id="tokenomics" className="relative py-24 overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-100">
+        <img src={ASSETS.TOKENOMICS_BG} alt="Tokenomics BG" className="w-full h-full object-cover" />
+      </div>
+
+      <div className="section-container relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(10,10,10,1)]">{t('tokenomics.title')}</h2>
+          <h2 className="text-7xl font-black uppercase italic drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] text-pepe-black">{t('tokenomics.title')}</h2>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <div className="cartoon-card p-10 shadow-pink-custom">
+            <div className="cartoon-card p-10 shadow-pink-custom bg-white/90">
               <h3 className="text-3xl font-black uppercase mb-8 italic">{t('tokenomics.distribution_title' || 'Token Distribution')}</h3>
               <div className="space-y-6">
                 {distribution.map((item, idx) => (
@@ -556,8 +558,8 @@ const TokenomicsSection = ({ t, openModal }) => {
 
 const WhyBuySection = ({ t }) => (
   <section id="about" className="relative py-32 overflow-hidden">
-    <div className="absolute inset-0 z-0 opacity-95">
-      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-contain" />
+    <div className="absolute inset-0 z-0 opacity-100">
+      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-cover" />
     </div>
     <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[1]" />
 
@@ -594,8 +596,8 @@ const WhyBuySection = ({ t }) => (
 
 const RiskWarningSection = ({ t }) => (
   <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
-    <div className="absolute inset-0 z-0 opacity-95">
-      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-contain" />
+    <div className="absolute inset-0 z-0 opacity-100">
+      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-cover" />
     </div>
 
     <div className="section-container relative z-20">
