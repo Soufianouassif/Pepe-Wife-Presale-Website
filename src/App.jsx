@@ -74,6 +74,61 @@ const Button = ({ variant = 'primary', children, className = '', ...props }) => 
   );
 };
 
+const WalletButton = ({ t }) => {
+  const [status, setStatus] = useState('idle'); // idle, connecting, connected, error
+  const [address, setAddress] = useState('');
+
+  const connectWallet = async () => {
+    setStatus('connecting');
+    try {
+      // Simulate wallet connection
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setAddress('0x71C...3921');
+      setStatus('connected');
+    } catch (error) {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  };
+
+  const disconnectWallet = () => {
+    setStatus('idle');
+    setAddress('');
+  };
+
+  return (
+    <button
+      onClick={status === 'connected' ? disconnectWallet : connectWallet}
+      disabled={status === 'connecting'}
+      className={`
+        relative group flex items-center justify-center px-6 py-3 rounded-2xl border-4 border-pepe-black 
+        font-black uppercase tracking-wider transition-all active:scale-95
+        ${status === 'connected' ? 'bg-pepe-green text-pepe-black shadow-[4px_4px_0_0_#000]' : 
+          status === 'error' ? 'bg-red-500 text-white shadow-[4px_4px_0_0_#000]' :
+          'bg-pepe-yellow text-pepe-black shadow-[6px_6px_0_0_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#000]'}
+      `}
+    >
+      <span className="flex items-center space-x-2 space-x-reverse">
+        {status === 'connecting' ? (
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+            <Rocket size={20} />
+          </motion.div>
+        ) : status === 'connected' ? (
+          <Check size={20} strokeWidth={3} />
+        ) : (
+          <Globe size={20} strokeWidth={3} />
+        )}
+        <span>
+          {status === 'connecting' ? t('nav.wallet.connecting') : 
+           status === 'connected' ? address : 
+           status === 'error' ? t('nav.wallet.error') : 
+           t('nav.wallet.connect')}
+        </span>
+      </span>
+    </button>
+  );
+};
+
 function App() {
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -226,6 +281,9 @@ function App() {
                 </a>
               ))}
             </nav>
+            <div className="flex flex-col space-y-4 w-full px-12">
+              <WalletButton t={t} />
+            </div>
             <div className="flex space-x-4 space-x-reverse">
               {['en', 'ar', 'fr'].map((lang) => (
                 <button 
@@ -309,6 +367,10 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
             {t('buybox.audit')}
           </Button>
 
+          <div className="hidden sm:block">
+            <WalletButton t={t} />
+          </div>
+
           {/* Mobile Toggle */}
           <button className="md:hidden text-pepe-black hover:scale-110 transition-transform" onClick={() => setIsOpen(!isOpen)}>
             <Menu size={32} strokeWidth={3} />
@@ -322,8 +384,13 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
 const HeroSection = ({ t }) => {
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-20">
-        <img src={ASSETS.HERO_BACKGROUND_IMAGE} alt="Hero BG" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 z-0 opacity-95">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pepe-black/5 to-pepe-black z-10" />
+        <img 
+          src={ASSETS.HERO_BACKGROUND_IMAGE} 
+          alt="Hero BG" 
+          className="w-full h-full object-contain bg-no-repeat" 
+        />
       </div>
 
       <div className="section-container relative z-10 w-full grid md:grid-cols-2 gap-16 items-center">
@@ -441,7 +508,7 @@ const TokenomicsSection = ({ t, openModal }) => {
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <div className="cartoon-card p-10">
+            <div className="cartoon-card p-10 shadow-pink-custom">
               <h3 className="text-3xl font-black uppercase mb-8 italic">{t('tokenomics.distribution_title' || 'Token Distribution')}</h3>
               <div className="space-y-6">
                 {distribution.map((item, idx) => (
@@ -489,10 +556,10 @@ const TokenomicsSection = ({ t, openModal }) => {
 
 const WhyBuySection = ({ t }) => (
   <section id="about" className="relative py-32 overflow-hidden">
-    <div className="absolute inset-0 z-0 opacity-10">
-      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-cover" />
+    <div className="absolute inset-0 z-0 opacity-95">
+      <img src={ASSETS.WHY_BUY_BG} alt="Why Buy BG" className="w-full h-full object-contain" />
     </div>
-    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-[1]" />
+    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[1]" />
 
     <div className="section-container relative z-10">
       <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -509,7 +576,7 @@ const WhyBuySection = ({ t }) => (
 
         <div className="grid gap-8">
           {[1, 2, 3].map(i => (
-            <motion.div key={i} initial={{ x: 50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="cartoon-card flex items-center p-8 space-x-8 space-x-reverse">
+            <motion.div key={i} initial={{ x: 50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="cartoon-card shadow-green-custom flex items-center p-8 space-x-8 space-x-reverse">
               <div className="w-20 h-20 bg-pepe-yellow rounded-[1.5rem] border-4 border-pepe-black flex items-center justify-center shrink-0 shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
                 {i === 1 ? <Rocket size={40} strokeWidth={3} /> : i === 2 ? <Globe size={40} strokeWidth={3} /> : <Shield size={40} strokeWidth={3} />}
               </div>
@@ -527,8 +594,8 @@ const WhyBuySection = ({ t }) => (
 
 const RiskWarningSection = ({ t }) => (
   <section className="relative py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
-    <div className="absolute inset-0 z-0 opacity-10">
-      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-cover" />
+    <div className="absolute inset-0 z-0 opacity-95">
+      <img src={ASSETS.RISK_WARNING_BACKGROUND} alt="Risk" className="w-full h-full object-contain" />
     </div>
 
     <div className="section-container relative z-20">

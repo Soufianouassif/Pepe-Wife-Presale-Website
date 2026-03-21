@@ -5,7 +5,14 @@
     "roadmap": "Roadmap",
     "faq": "FAQ",
     "about": "About",
-    "contract": "Contract"
+    "contract": "Contract",
+    "wallet": {
+      "connect": "Connect Wallet",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "error": "Connection Failed",
+      "disconnect": "Disconnect"
+    }
   },
   "contract": {
     "title": "Smart Contract Details",

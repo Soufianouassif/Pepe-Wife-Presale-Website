@@ -63,4 +63,18 @@ body {
   .cartoon-card {
     @apply bg-white text-pepe-black p-8 rounded-[2.5rem] border-4 border-pepe-black shadow-[12px_12px_0px_0px_rgba(10,10,10,1)] transition-all hover:-translate-y-2 hover:-translate-x-1 hover:shadow-[16px_16px_0px_0px_rgba(10,10,10,1)];
   }
+
+  .shadow-pink-custom {
+    box-shadow: 15px 15px 0px 0px #FF69B4;
+  }
+  .shadow-pink-custom:hover {
+    box-shadow: 20px 20px 0px 0px #FF69B4;
+  }
+
+  .shadow-green-custom {
+    box-shadow: 15px 15px 0px 0px #32CD32;
+  }
+  .shadow-green-custom:hover {
+    box-shadow: 20px 20px 0px 0px #32CD32;
+  }
 }

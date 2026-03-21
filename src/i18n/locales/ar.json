@@ -5,7 +5,14 @@
     "roadmap": "خارطة الطريق",
     "faq": "الأسئلة الشائعة",
     "about": "حول المشروع",
-    "contract": "عقد"
+    "contract": "عقد",
+    "wallet": {
+      "connect": "ربط المحفظة",
+      "connecting": "جاري الاتصال...",
+      "connected": "متصل",
+      "error": "فشل الاتصال",
+      "disconnect": "قطع الاتصال"
+    }
   },
   "contract": {
     "title": "تفاصيل العقد الذكي",
