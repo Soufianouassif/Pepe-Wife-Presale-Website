@@ -6,6 +6,7 @@
     "faq": "FAQ",
     "about": "About",
     "contract": "Contract",
+    "whitepaper": "Whitepaper",
     "wallet": {
       "connect": "Connect Wallet",
       "connecting": "Connecting...",
@@ -49,7 +50,21 @@
   },
   "tokenomics": {
     "title": "Tokenomics",
-    "desc": "This is a full-width image container. Your custom tokenomics graphic will fill this area perfectly without margins."
+    "desc": "This is a full-width image container. Your custom tokenomics graphic will fill this area perfectly without margins.",
+    "distribution_title": "Token Distribution",
+    "category_presale": "Presale",
+    "category_liquidity": "Liquidity",
+    "category_staking": "Staking",
+    "category_team": "Team",
+    "category_marketing": "Marketing",
+    "table_header_category": "Category",
+    "zero_tax": "Zero Tax",
+    "liquidity_lock": "Liquidity Locked",
+    "team_lock": "Team Share Locked",
+    "marketing_lock": "Marketing Share Locked",
+    "linear_vesting": "Linear Vesting (Marketing)",
+    "freeze": "Freeze (Disabled)",
+    "mint": "Mint (Disabled)"
   },
   "roadmap": {
     "badge": "Our Journey",
@@ -75,6 +90,16 @@
     "phase4_item2": "Pepe Wife DAO",
     "phase4_item3": "Merchandise Store",
     "phase4_item4": "Future Ecosystem"
+  },
+  "faq": {
+    "q1": "What is Pepe Wife ($PWIFE)?",
+    "a1": "Pepe Wife is an elegant and playful memecoin project built on the Solana blockchain, designed to bring a touch of sophistication to the meme ecosystem.",
+    "q2": "How can I join the presale?",
+    "a2": "You can join the presale by connecting your wallet to our official website and exchanging USDT for $PWIFE tokens during the active presale stages.",
+    "q3": "Is the smart contract safe?",
+    "a3": "Yes, our smart contract has been fully audited by leading security firms, and liquidity will be locked to ensure community safety.",
+    "q4": "When will the token be listed?",
+    "a4": "Token listing is planned for Phase 2 of our roadmap, starting with major decentralized exchanges (DEX) followed by centralized exchanges (CEX)."
   },
   "whybuy": {
     "badge": "Persuasive Power",

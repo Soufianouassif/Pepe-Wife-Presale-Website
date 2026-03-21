@@ -4,7 +4,31 @@
     "tokenomics": "Tokenomics",
     "roadmap": "Feuille de Route",
     "faq": "FAQ",
-    "about": "À Propos"
+    "about": "À Propos",
+    "contract": "Contrat",
+    "whitepaper": "Livre Blanc",
+    "wallet": {
+      "connect": "Connecter Wallet",
+      "connecting": "Connexion...",
+      "connected": "Connecté",
+      "error": "Échec Connexion",
+      "disconnect": "Déconnecter"
+    }
+  },
+  "contract": {
+    "title": "Détails du Contrat Intelligent",
+    "copy_address": "Copier l'Adresse",
+    "copied": "Copié avec Succès !",
+    "locked_liquidity": "Liquidité Verrouillée",
+    "locked_team": "Part Équipe Verrouillée",
+    "duration": "1 An",
+    "address": "0x1234...5678"
+  },
+  "audit": {
+    "title": "Rapport d'Audit",
+    "desc": "Le contrat intelligent Pepe Wife a été entièrement audité par des firmes de sécurité de premier plan pour garantir les plus hauts niveaux de sécurité.",
+    "button": "Voir le Rapport Complet",
+    "status": "Terminé & Sécurisé"
   },
   "hero": {
     "badge": "La Reine des Memes",
@@ -26,7 +50,21 @@
   },
   "tokenomics": {
     "title": "Tokenomics",
-    "desc": "C'est un conteneur d'image plein écran. Votre graphique personnalisé remplira cette zone parfaitement sans marges."
+    "desc": "C'est un conteneur d'image plein écran. Votre graphique personnalisé remplira cette zone parfaitement sans marges.",
+    "distribution_title": "Distribution des Jetons",
+    "category_presale": "Prévente",
+    "category_liquidity": "Liquidité",
+    "category_staking": "Staking",
+    "category_team": "Équipe",
+    "category_marketing": "Marketing",
+    "table_header_category": "Catégorie",
+    "zero_tax": "Zéro Taxe",
+    "liquidity_lock": "Liquidité Verrouillée",
+    "team_lock": "Part Équipe Verrouillée",
+    "marketing_lock": "Part Marketing Verrouillée",
+    "linear_vesting": "Vesting Linéaire (Marketing)",
+    "freeze": "Gel (Désactivé)",
+    "mint": "Mint (Désactivé)"
   },
   "roadmap": {
     "badge": "Notre Parcours",
@@ -53,23 +91,33 @@
     "phase4_item3": "Boutique de Marchandises",
     "phase4_item4": "Écosystème Futur"
   },
+  "faq": {
+    "q1": "Qu'est-ce que Pepe Wife ($PWIFE) ?",
+    "a1": "Pepe Wife est un projet de memecoin élégant et ludique construit sur la blockchain Solana, conçu pour apporter une touche de sophistication à l'écosystème meme.",
+    "q2": "Comment puis-je rejoindre la prévente ?",
+    "a2": "Vous pouvez rejoindre la prévente en connectant votre portefeuille à notre site officiel et en échangeant des USDT contre des jetons $PWIFE.",
+    "q3": "Le contrat intelligent est-il sûr ?",
+    "a3": "Oui, notre contrat intelligent a été entièrement audité par des firmes de sécurité de premier plan, et la liquidité sera verrouillée.",
+    "q4": "Quand le jeton sera-t-il listé ?",
+    "a4": "Le listing du jeton est prévu pour la phase 2 de notre feuille de route, en commençant par les DEX puis les CEX."
+  },
   "whybuy": {
     "badge": "Pouvoir de Persuasion",
     "title_why": "Pourquoi Acheter",
     "title_pepewife": "Pepe Wife ?",
-    "desc": "Pepe Wife n'est pas qu'un simple memecoin. C'est une déclaration d'élégance, de puissance et de l'évolution de l'écosystème Pepe. Nous avons bâti une base conçue pour le succès et la richesse de la communauté.",
+    "desc": "Pepe Wife n'est pas qu'un simple memecoin. C'est une déclaration d'élégance, de puissance et de l'évolution de l'écosystème Pepe.",
     "cta": "En Savoir Plus sur la Reine",
     "reason1_title": "Branding Premium",
     "reason1_desc": "Design élégant et professionnel qui se démarque des memecoins typiques.",
     "reason2_title": "Communauté Forte",
     "reason2_desc": "Axé sur la croissance à long terme et un environnement de soutien pour les détenteurs.",
     "reason3_title": "Sécurité Prouvée",
-    "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée pour une tranquillité d'esprit totale."
+    "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée.",
   },
   "risk": {
     "title": "Avertissement sur les Risques",
-    "p1": "Les investissements en cryptomonnaies comportent des risques élevés. Le projet Pepe Wife ($PWIFE) est un projet de memecoin créé à des fins de divertissement et de communauté. Il n'y a aucune garantie de profit, et vous ne devriez jamais investir de l'argent que vous ne pouvez pas vous permettre de perdre.",
-    "p2": "Veuillez mener vos propres recherches approfondies avant de participer à la prévente. Le marché des memecoins est très volatil. En participant, vous reconnaissez les risques encourus et acceptez que l'équipe du projet n'est pas responsable des pertes financières."
+    "p1": "Les investissements en cryptomonnaies comportent des risques élevés. Pepe Wife ($PWIFE) est un projet de memecoin créé à des fins de divertissement.",
+    "p2": "Veuillez mener vos propres recherches approfondies avant de participer à la prévente. Le marché des memecoins est très volatil.",
   },
   "footer": {
     "desc": "La reine la plus élégante de l'espace crypto. Rejoignez l'évolution et faites partie de la famille royale.",
@@ -89,6 +137,6 @@
     "title": "VU DANS"
   },
   "partners": {
-    "title": "EcoSys Partners"
+    "title": "Partenaires EcoSys"
   }
 }
