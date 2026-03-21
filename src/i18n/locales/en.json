@@ -4,7 +4,23 @@
     "tokenomics": "Tokenomics",
     "roadmap": "Roadmap",
     "faq": "FAQ",
-    "about": "About"
+    "about": "About",
+    "contract": "Contract"
+  },
+  "contract": {
+    "title": "Smart Contract Details",
+    "copy_address": "Copy Smart Address",
+    "copied": "Copied Successfully!",
+    "locked_liquidity": "Locked Liquidity",
+    "locked_team": "Locked Team Share",
+    "duration": "1 Year",
+    "address": "0x1234...5678"
+  },
+  "audit": {
+    "title": "Audit Report",
+    "desc": "The Pepe Wife smart contract has been fully audited by leading security firms to ensure the highest levels of safety and transparency for our community.",
+    "button": "View Full Report",
+    "status": "Completed & Secure"
   },
   "hero": {
     "badge": "The Queen of Memes",
