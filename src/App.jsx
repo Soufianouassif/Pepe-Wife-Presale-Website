@@ -98,7 +98,7 @@ function App() {
         <HeroSection t={t} />
         <BuyBoxSection t={t} />
         <TokenomicsSection t={t} />
-        <RoadmapSection t={t} />
+        <RoadmapSection />
         <WhyBuySection t={t} />
         <RiskWarningSection t={t} />
       </main>
@@ -295,7 +295,8 @@ const TokenomicsSection = ({ t }) => (
   </section>
 );
 
-const RoadmapSection = ({ t }) => {
+const RoadmapSection = () => {
+  const { t, i18n } = useTranslation();
   const phases = ['phase1', 'phase2', 'phase3', 'phase4'];
   return (
     <section id="roadmap" className="py-32">
