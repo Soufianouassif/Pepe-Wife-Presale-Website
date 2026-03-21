@@ -138,5 +138,34 @@
   },
   "partners": {
     "title": "EcoSys Partners"
+  },
+  "dashboard": {
+    "title": "User Dashboard",
+    "wallet_info": "Wallet Info",
+    "balance": "My $PWIFE Balance",
+    "referral": "Referral System",
+    "referral_desc": "Share your link and earn 5% on every purchase!",
+    "copy_link": "Copy Link",
+    "stats": "Statistics",
+    "purchased": "Total Purchased",
+    "claim_date": "Claim Date",
+    "disconnect": "Disconnect Wallet"
+  },
+  "calculator": {
+    "title": "Profit Calculator",
+    "input_amount": "Investment (USDT)",
+    "buy_price": "Buy Price ($)",
+    "sell_price": "Target Sell Price ($)",
+    "trading_fees": "Trading Fees (%)",
+    "calculate": "Calculate Results",
+    "reset": "Reset",
+    "results": {
+      "initial": "Initial Investment",
+      "tokens": "Tokens Received",
+      "revenue": "Net Revenue",
+      "profit": "Estimated Profit",
+      "roi": "ROI",
+      "error": "Invalid Input Data"
+    }
   }
 }

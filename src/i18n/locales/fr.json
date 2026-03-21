@@ -112,12 +112,12 @@
     "reason2_title": "Communauté Forte",
     "reason2_desc": "Axé sur la croissance à long terme et un environnement de soutien pour les détenteurs.",
     "reason3_title": "Sécurité Prouvée",
-    "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée.",
+    "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée."
   },
   "risk": {
     "title": "Avertissement sur les Risques",
     "p1": "Les investissements en cryptomonnaies comportent des risques élevés. Pepe Wife ($PWIFE) est un projet de memecoin créé à des fins de divertissement.",
-    "p2": "Veuillez mener vos propres recherches approfondies avant de participer à la prévente. Le marché des memecoins est très volatil.",
+    "p2": "Veuillez mener vos propres recherches approfondies avant de participer à la prévente. Le marché des memecoins est très volatil."
   },
   "footer": {
     "desc": "La reine la plus élégante de l'espace crypto. Rejoignez l'évolution et faites partie de la famille royale.",
@@ -138,5 +138,34 @@
   },
   "partners": {
     "title": "Partenaires EcoSys"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "wallet_info": "Infos Portefeuille",
+    "balance": "Mon Solde $PWIFE",
+    "referral": "Système de Parrainage",
+    "referral_desc": "Partagez votre lien et gagnez 5% sur chaque achat !",
+    "copy_link": "Copier le Lien",
+    "stats": "Statistiques",
+    "purchased": "Total Acheté",
+    "claim_date": "Date de Réclamation",
+    "disconnect": "Déconnecter"
+  },
+  "calculator": {
+    "title": "Calculateur de Profit",
+    "input_amount": "Investissement (USDT)",
+    "buy_price": "Prix d'Achat ($)",
+    "sell_price": "Prix de Vente Cible ($)",
+    "trading_fees": "Frais de Transaction (%)",
+    "calculate": "Calculer les Résultats",
+    "reset": "Réinitialiser",
+    "results": {
+      "initial": "Investissement Initial",
+      "tokens": "Jetons Reçus",
+      "revenue": "Revenu Net",
+      "profit": "Profit Estimé",
+      "roi": "ROI",
+      "error": "Données Invalides"
+    }
   }
 }
