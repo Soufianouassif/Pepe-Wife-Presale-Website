@@ -77,4 +77,24 @@ body {
   .shadow-green-custom:hover {
     box-shadow: 20px 20px 0px 0px #32CD32;
   }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes marquee-rtl {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+  }
+
+  .rtl .animate-marquee {
+    animation: marquee-rtl 30s linear infinite;
+  }
 }

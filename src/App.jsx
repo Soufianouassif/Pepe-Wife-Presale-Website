@@ -14,7 +14,7 @@ const ASSETS = {
   CUSTOM_BUTTON_IMAGE_SECONDARY: '/assets/btn-secondary.png',
   COIN_ICON: '/assets/coin-icon.png',
   WHY_BUY_BG: '/assets/hero-section.svg',
-  TOKENOMICS_BG: '/assets/tokenomics-bg.png', // Placeholder for tokenomics background
+  TOKENOMICS_BG: '/assets/Untitled design.svg', // Updated with new background image
 };
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -127,6 +127,51 @@ const WalletButton = ({ t }) => {
         </span>
       </span>
     </button>
+  );
+};
+
+const Ticker = ({ t }) => {
+  const messages = [t('ticker.m1'), t('ticker.m2'), t('ticker.m3'), t('ticker.m4')];
+  
+  return (
+    <div className="bg-pepe-yellow border-y-4 border-pepe-black py-4 overflow-hidden relative z-20">
+      <div className="animate-marquee whitespace-nowrap">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="flex items-center">
+            {messages.map((msg, idx) => (
+              <span key={idx} className="text-xl md:text-2xl font-black text-pepe-black mx-6 md:mx-12 flex items-center">
+                <Rocket size={20} className="mr-2 md:mr-4 rtl:mr-0 rtl:ml-2 md:rtl:ml-4" />
+                {msg}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FeaturedIn = ({ t }) => {
+  // Placeholders for media logos
+  const platforms = ['Yahoo Finance', 'MarketWatch', 'Bloomberg', 'Cointelegraph', 'Decrypt'];
+  
+  return (
+    <div className="bg-white border-y-4 border-pepe-black py-10 overflow-hidden relative z-20">
+      <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
+        <h3 className="text-xl font-black uppercase tracking-[0.3em] text-pepe-black/40">{t('featured.title')}</h3>
+      </div>
+      <div className="animate-marquee whitespace-nowrap opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="flex items-center">
+            {platforms.map((p, idx) => (
+              <span key={idx} className="text-2xl md:text-4xl font-black text-pepe-black mx-10 md:mx-20 uppercase italic tracking-tighter">
+                {p}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -302,7 +347,9 @@ function App() {
 
       <main>
         <HeroSection t={t} />
+        <Ticker t={t} />
         <BuyBoxSection t={t} openModal={setActiveModal} />
+        <FeaturedIn t={t} />
         <TokenomicsSection t={t} openModal={setActiveModal} />
         <WhyBuySection t={t} />
         <RiskWarningSection t={t} />
@@ -498,9 +545,14 @@ const TokenomicsSection = ({ t, openModal }) => {
   ];
 
   return (
-    <section id="tokenomics" className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 z-0 opacity-100">
-        <img src={ASSETS.TOKENOMICS_BG} alt="Tokenomics BG" className="w-full h-full object-cover" />
+    <section id="tokenomics" className="relative py-24 overflow-hidden bg-transparent">
+      {/* Full Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src={ASSETS.TOKENOMICS_BG} 
+          alt="Tokenomics Background" 
+          className="w-full h-full object-cover md:object-fill" 
+        />
       </div>
 
       <div className="section-container relative z-10">
@@ -510,7 +562,8 @@ const TokenomicsSection = ({ t, openModal }) => {
 
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <div className="cartoon-card p-10 shadow-pink-custom bg-white/90">
+            {/* Removed shadows and complex background effects for clarity */}
+            <div className="bg-white/80 backdrop-blur-md p-10 rounded-[2.5rem] border-4 border-pepe-black">
               <h3 className="text-3xl font-black uppercase mb-8 italic">{t('tokenomics.distribution_title' || 'Token Distribution')}</h3>
               <div className="space-y-6">
                 {distribution.map((item, idx) => (
@@ -541,8 +594,8 @@ const TokenomicsSection = ({ t, openModal }) => {
           </div>
 
           <div className="relative group">
-            <div className="absolute -inset-4 bg-pepe-pink opacity-10 blur-2xl group-hover:opacity-20 transition-opacity" />
-            <div className="relative cartoon-card p-4 aspect-square flex items-center justify-center overflow-hidden">
+            {/* Removed blurring effects and shadows */}
+            <div className="relative p-4 aspect-square flex items-center justify-center overflow-hidden">
               <img 
                 src={ASSETS.HERO_CHARACTER_IMAGE} 
                 alt="Tokenomics Illustration" 

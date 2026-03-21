@@ -78,5 +78,14 @@
     "legal_title": "Juridique",
     "rights": "© 2026 PROJET PEPE WIFE. TOUS DROITS RÉSERVÉS.",
     "built_with": "CONSTRUIT AVEC AMOUR POUR LA REINE DU CRYPTO."
+  },
+  "ticker": {
+    "m1": "REJOIGNEZ LA RÉVOLUTION $PWIFE MAINTENANT !",
+    "m2": "L'ÉTAPE 1 DE LA PRÉVENTE SE VEND RAPIDEMENT !",
+    "m3": "NE MANQUEZ PAS L'ENVOL VERS LA LUNE !",
+    "m4": "SÉCURISEZ VOS JETONS AVANT L'AUGMENTATION DU PRIX !"
+  },
+  "featured": {
+    "title": "VU DANS"
   }
 }
