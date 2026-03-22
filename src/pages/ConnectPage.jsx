@@ -3,31 +3,204 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
-import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X } from 'lucide-react';
+import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
+import { ethers } from 'ethers';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X, ExternalLink } from 'lucide-react';
+
+// --- CONFIGURATION ---
+const WALLETCONNECT_PROJECT_ID = 'YOUR_PROJECT_ID_HERE'; // Replace with real ID from cloud.walletconnect.com
+// ---------------------
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
   const { connect } = useWallet();
+  const { select, wallets: solanaWallets } = useSolanaWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); // idle, connecting
   const [error, setError] = useState(null);
 
-  const handleConnect = (walletName) => {
+  // WalletConnect Connection Logic
+  const handleWalletConnect = async () => {
+    if (WALLETCONNECT_PROJECT_ID === 'YOUR_PROJECT_ID_HERE') {
+      setError(i18n.language === 'ar' ? 'يرجى إدخال WalletConnect Project ID في الإعدادات.' : 'Please configure WalletConnect Project ID.');
+      return;
+    }
+
     setStatus('connecting');
     setError(null);
-    
-    // Simulate connection approval
-    setTimeout(() => {
-      if (Math.random() > 0.1) { // 90% success rate for simulation
-        const mockAddress = '0x71C...3921';
-        connect(mockAddress, walletName);
+
+    try {
+      const provider = await EthereumProvider.init({
+        projectId: WALLETCONNECT_PROJECT_ID,
+        showQrModal: true,
+        chains: [1], // Ethereum Mainnet
+        methods: ["eth_sendTransaction", "personal_sign"],
+        events: ["chainChanged", "accountsChanged"],
+      });
+
+      await provider.connect();
+      const accounts = provider.accounts;
+      const address = accounts[0];
+
+      if (address) {
+        connect(address, 'WalletConnect');
         navigate('/loading');
-      } else {
-        setStatus('idle');
-        setError('Connection rejected by user');
       }
-    }, 2000);
+    } catch (err) {
+      console.error('WalletConnect error:', err);
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'فشل الاتصال عبر WalletConnect.' : 'WalletConnect connection failed.');
+    }
+  };
+
+  // Trust Wallet Connection Logic
+  const handleTrustWalletConnect = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    // Trust Wallet can inject into window.ethereum or window.trustwallet
+    const provider = window.trustwallet || window.ethereum;
+    
+    if (!provider || (!provider.isTrust && !window.trustwallet)) {
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'محفظة Trust Wallet غير مثبتة.' : 'Trust Wallet is not installed.');
+      window.open('https://trustwallet.com/download', '_blank');
+      return;
+    }
+
+    try {
+      const ethProvider = new ethers.BrowserProvider(provider);
+      const accounts = await ethProvider.send("eth_requestAccounts", []);
+      const address = accounts[0];
+
+      connect(address, 'Trust Wallet');
+      navigate('/loading');
+    } catch (err) {
+      console.error('Trust Wallet error:', err);
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'تم رفض طلب الاتصال من قبل Trust Wallet.' : 'Trust Wallet connection rejected.');
+    }
+  };
+
+  // MetaMask Connection Logic
+  const handleMetaMaskConnect = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    if (typeof window.ethereum === 'undefined') {
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'محفظة MetaMask غير مثبتة.' : 'MetaMask is not installed.');
+      window.open('https://metamask.io/download/', '_blank');
+      return;
+    }
+
+    try {
+      // 1. Request accounts
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const address = accounts[0];
+
+      // 2. Check Network (Ethereum Mainnet is 1)
+      const network = await provider.getNetwork();
+      if (network.chainId !== 1n) {
+        try {
+          // Attempt to switch to Mainnet
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x1' }],
+          });
+        } catch (switchError) {
+          setStatus('idle');
+          setError(i18n.language === 'ar' ? 'يرجى التبديل إلى شبكة Ethereum Mainnet.' : 'Please switch to Ethereum Mainnet.');
+          return;
+        }
+      }
+
+      // 3. Check Balance (Gas availability)
+      const balance = await provider.getBalance(address);
+      if (balance === 0n) {
+        console.warn('Empty wallet balance detected');
+      }
+
+      // 4. Update global context
+      connect(address, 'MetaMask');
+      navigate('/loading');
+    } catch (err) {
+      console.error('MetaMask connection error:', err);
+      setStatus('idle');
+      if (err.code === 4001) {
+        setError(i18n.language === 'ar' ? 'تم رفض طلب الاتصال.' : 'Connection request rejected.');
+      } else {
+        setError(i18n.language === 'ar' ? 'فشل الاتصال بـ MetaMask.' : 'Failed to connect to MetaMask.');
+      }
+    }
+  };
+
+  const handlePhantomConnect = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    try {
+      // 1. Check if Phantom extension exists in the browser
+      const isPhantomInstalled = window?.solana?.isPhantom;
+
+      if (!isPhantomInstalled) {
+        setStatus('idle');
+        setError(i18n.language === 'ar' ? 'محفظة Phantom غير مثبتة. يرجى تثبيتها أولاً.' : 'Phantom wallet is not installed. Please install it first.');
+        window.open('https://phantom.app/', '_blank');
+        return;
+      }
+
+      // 2. Attempt to connect to Phantom
+      const response = await window.solana.connect();
+      const publicKey = response.publicKey.toString();
+
+      // 3. Update global context
+      connect(publicKey, 'Phantom');
+      
+      // 4. Redirect to loading then dashboard
+      navigate('/loading');
+    } catch (err) {
+      console.error('Phantom connection error:', err);
+      setStatus('idle');
+      if (err.code === 4001) {
+        setError(i18n.language === 'ar' ? 'تم رفض طلب الاتصال من قبل المستخدم.' : 'Connection request rejected by user.');
+      } else {
+        setError(i18n.language === 'ar' ? 'حدث خطأ أثناء الاتصال بالمحفظة.' : 'An error occurred while connecting to the wallet.');
+      }
+    }
+  };
+
+  const handleConnect = (walletName) => {
+    if (walletName === 'Phantom') {
+      handlePhantomConnect();
+      return;
+    }
+    
+    if (walletName === 'MetaMask') {
+      handleMetaMaskConnect();
+      return;
+    }
+
+    if (walletName === 'Trust Wallet') {
+      handleTrustWalletConnect();
+      return;
+    }
+
+    if (walletName === 'WalletConnect') {
+      handleWalletConnect();
+      return;
+    }
+
+    // Placeholder for other wallets
+    setStatus('connecting');
+    setError(null);
+    setTimeout(() => {
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'هذه المحفظة ستكون متاحة قريباً.' : 'This wallet will be available soon.');
+    }, 1000);
   };
 
   const wallets = [

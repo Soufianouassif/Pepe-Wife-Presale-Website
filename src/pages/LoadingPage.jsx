@@ -24,7 +24,6 @@ const LoadingPage = () => {
     }, 1000);
 
     const redirectTimer = setTimeout(() => {
-      localStorage.setItem('walletConnected', 'true');
       navigate('/dashboard');
     }, 4500);
 

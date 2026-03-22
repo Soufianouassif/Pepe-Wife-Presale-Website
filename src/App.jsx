@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import ConnectPage from './pages/ConnectPage';
 import LoadingPage from './pages/LoadingPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const { i18n } = useTranslation();
@@ -24,8 +25,8 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/connect" element={<ConnectPage />} />
-          <Route path="/loading" element={<LoadingPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/loading" element={<ProtectedRoute><LoadingPage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
