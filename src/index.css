@@ -171,15 +171,45 @@ body {
   }
 }
 
-/* French Font Scaling */
+/* Language-Specific Adjustments */
+html[lang="fr"] {
+  font-size: 15px; /* Slightly smaller base font for French */
+}
+
+html[lang="ar"] {
+  font-size: 17px; /* Slightly larger for Arabic readability */
+}
+
 .lang-fr h1 {
-  @apply text-4xl sm:text-6xl md:text-[8rem] !important;
+  @apply text-4xl sm:text-6xl md:text-[7rem] lg:text-[9rem];
 }
 
 .lang-fr h2 {
-  @apply text-3xl sm:text-4xl lg:text-6xl !important;
+  @apply text-3xl sm:text-4xl lg:text-5xl;
 }
 
-.lang-fr p, .lang-fr span, .lang-fr button, .lang-fr li {
-  font-size: 0.9em !important;
+/* RTL Adjustments for Arabic */
+[dir="rtl"] .animate-marquee {
+  animation: marquee-rtl 60s linear infinite;
+}
+
+[dir="rtl"] .animate-marquee-slow {
+  animation: marquee-rtl 100s linear infinite;
+}
+
+/* Ensure no gaps between sections */
+section {
+  margin-top: -1px;
+  position: relative;
+  z-index: 1;
+}
+
+.section-bg-full {
+  @apply absolute inset-0 w-full h-full object-cover z-0;
+}
+
+@media (max-width: 640px) {
+  .section-container {
+    @apply py-8 px-4;
+  }
 }

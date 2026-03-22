@@ -19,10 +19,30 @@ export const WalletProvider = ({ children }) => {
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
+  // Use named functions for event listeners to avoid memory leaks
+  const handleEthereumAccounts = (accounts) => {
+    if (accounts.length > 0) {
+      connect(accounts[0], 'MetaMask');
+    } else {
+      disconnect();
+    }
+  };
+
+  const handleEthereumChain = () => window.location.reload();
+
+  const handleSolanaAccount = (publicKey) => {
+    if (publicKey) {
+      connect(publicKey.toString(), 'Phantom');
+    } else {
+      disconnect();
+    }
+  };
+
   useEffect(() => {
-    const connected = localStorage.getItem('walletConnected') === 'true';
-    const savedAddress = localStorage.getItem('walletAddress') || '';
-    const savedType = localStorage.getItem('walletType') || '';
+    // Use sessionStorage for temporary session state (more secure than localStorage)
+    const connected = sessionStorage.getItem('walletConnected') === 'true';
+    const savedAddress = sessionStorage.getItem('walletAddress') || '';
+    const savedType = sessionStorage.getItem('walletType') || '';
     
     setIsConnected(connected);
     setAddress(savedAddress);
@@ -30,51 +50,39 @@ export const WalletProvider = ({ children }) => {
 
     // Listen for MetaMask account changes
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length > 0) {
-          connect(accounts[0], 'MetaMask');
-        } else {
-          disconnect();
-        }
-      });
-      window.ethereum.on('chainChanged', () => window.location.reload());
+      window.ethereum.on('accountsChanged', handleEthereumAccounts);
+      window.ethereum.on('chainChanged', handleEthereumChain);
     }
 
     // Listen for Phantom account changes
     if (window.solana) {
-      window.solana.on('accountChanged', (publicKey) => {
-        if (publicKey) {
-          connect(publicKey.toString(), 'Phantom');
-        } else {
-          disconnect();
-        }
-      });
+      window.solana.on('accountChanged', handleSolanaAccount);
     }
 
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', () => {});
-        window.ethereum.removeListener('chainChanged', () => {});
+        window.ethereum.removeListener('accountsChanged', handleEthereumAccounts);
+        window.ethereum.removeListener('chainChanged', handleEthereumChain);
       }
       if (window.solana) {
-        window.solana.removeListener('accountChanged', () => {});
+        window.solana.removeListener('accountChanged', handleSolanaAccount);
       }
     };
   }, []);
 
   const connect = (addr, type) => {
-    localStorage.setItem('walletConnected', 'true');
-    localStorage.setItem('walletAddress', addr);
-    localStorage.setItem('walletType', type);
+    sessionStorage.setItem('walletConnected', 'true');
+    sessionStorage.setItem('walletAddress', addr);
+    sessionStorage.setItem('walletType', type);
     setIsConnected(true);
     setAddress(addr);
     setWalletType(type);
   };
 
   const disconnect = () => {
-    localStorage.removeItem('walletConnected');
-    localStorage.removeItem('walletAddress');
-    localStorage.removeItem('walletType');
+    sessionStorage.removeItem('walletConnected');
+    sessionStorage.removeItem('walletAddress');
+    sessionStorage.removeItem('walletType');
     setIsConnected(false);
     setAddress('');
     setWalletType('');
@@ -87,6 +95,11 @@ export const WalletProvider = ({ children }) => {
       if (walletType === 'MetaMask' || walletType === 'Trust') {
         if (!window.ethereum) throw new Error('Ethereum provider not found');
         
+        // Basic Ethereum address validation
+        if (!/^0x[a-fA-F0-9]{40}$/.test(to)) {
+          throw new Error('Invalid Ethereum address');
+        }
+
         // Convert amount to hex wei
         const value = (parseFloat(amount) * 1e18).toString(16);
         const params = [{
@@ -102,9 +115,15 @@ export const WalletProvider = ({ children }) => {
       } else if (walletType === 'Phantom') {
         if (!window.solana) throw new Error('Solana provider not found');
         
-        // This is a simplified Solana transfer for demonstration
-        // In a real app, you'd use @solana/web3.js to build a transaction
         const { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } = await import('@solana/web3.js');
+        
+        // Basic Solana address validation
+        try {
+          new PublicKey(to);
+        } catch (e) {
+          throw new Error('Invalid Solana address');
+        }
+
         const transaction = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey: new PublicKey(address),
@@ -117,6 +136,10 @@ export const WalletProvider = ({ children }) => {
         return signature;
       }
     } catch (error) {
+      // Map common error codes to user-friendly messages
+      if (error.code === 4001) {
+        throw new Error('USER_REJECTED');
+      }
       console.error('Transaction failed:', error);
       throw error;
     }

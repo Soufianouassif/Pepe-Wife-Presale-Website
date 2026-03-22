@@ -14,10 +14,16 @@ function App() {
   const isFrench = i18n.language === 'fr';
 
   useEffect(() => {
-    document.body.dir = isRTL ? 'rtl' : 'ltr';
-    document.body.className = isFrench ? 'lang-fr' : '';
+    // Update HTML attributes for SEO and styling
+    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    
+    // Update body classes
+    document.body.className = `lang-${i18n.language} ${isRTL ? 'rtl' : 'ltr'}`;
+    
+    // Persist language choice
     localStorage.setItem('i18nextLng', i18n.language);
-  }, [i18n.language, isRTL, isFrench]);
+  }, [i18n.language, isRTL]);
 
   return (
     <WalletProvider>

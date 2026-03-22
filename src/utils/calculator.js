@@ -14,13 +14,12 @@ export const calculateProfit = (amount, buyPrice, sellPrice, feePercent = 0) => 
   if (isNaN(numSellPrice) || numSellPrice <= 0) return { error: 'invalid_sell_price' };
   if (isNaN(numFee) || numFee < 0) return { error: 'invalid_fee' };
 
-  const initialInvestment = numAmount * numBuyPrice;
-  const totalTokens = numAmount; // amount is in tokens or USDT? 
-  // Let's assume user inputs Amount in USDT to invest
-  
+  // Assume numAmount is the Investment in USDT
+  const initialInvestment = numAmount;
   const tokensBought = numAmount / numBuyPrice;
   const rawRevenue = tokensBought * numSellPrice;
   
+  // Fee is applied to the total transaction volume (buy + sell)
   const totalFees = (rawRevenue + initialInvestment) * (numFee / 100);
   const netRevenue = rawRevenue - totalFees;
   
@@ -29,7 +28,7 @@ export const calculateProfit = (amount, buyPrice, sellPrice, feePercent = 0) => 
 
   return {
     initialInvestment: initialInvestment.toFixed(2),
-    tokensBought: tokensBought.toFixed(2),
+    tokensBought: tokensBought.toFixed(0), // Tokens usually displayed as integers if high supply
     netRevenue: netRevenue.toFixed(2),
     profit: profit.toFixed(2),
     roi: roi.toFixed(2),
