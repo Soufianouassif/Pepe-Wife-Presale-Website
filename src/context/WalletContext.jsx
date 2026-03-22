@@ -78,15 +78,54 @@ export const WalletProvider = ({ children }) => {
     setIsConnected(false);
     setAddress('');
     setWalletType('');
-    
-    // If Phantom is connected via window object, we can't easily force disconnect 
-    // without the adapter, but for our app state we clear it.
+  };
+
+  const sendTransaction = async (to, amount, currency) => {
+    if (!isConnected) throw new Error('Wallet not connected');
+
+    try {
+      if (walletType === 'MetaMask' || walletType === 'Trust') {
+        if (!window.ethereum) throw new Error('Ethereum provider not found');
+        
+        // Convert amount to hex wei
+        const value = (parseFloat(amount) * 1e18).toString(16);
+        const params = [{
+          from: address,
+          to: to,
+          value: '0x' + value,
+        }];
+
+        return await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params,
+        });
+      } else if (walletType === 'Phantom') {
+        if (!window.solana) throw new Error('Solana provider not found');
+        
+        // This is a simplified Solana transfer for demonstration
+        // In a real app, you'd use @solana/web3.js to build a transaction
+        const { Transaction, SystemProgram, LAMPORTS_PER_SOL, PublicKey } = await import('@solana/web3.js');
+        const transaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: new PublicKey(address),
+            toPubkey: new PublicKey(to),
+            lamports: parseFloat(amount) * LAMPORTS_PER_SOL,
+          })
+        );
+
+        const { signature } = await window.solana.signAndSendTransaction(transaction);
+        return signature;
+      }
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      throw error;
+    }
   };
 
   return (
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect>
-        <WalletContext.Provider value={{ isConnected, address, walletType, connect, disconnect }}>
+        <WalletContext.Provider value={{ isConnected, address, walletType, connect, disconnect, sendTransaction }}>
           {children}
         </WalletContext.Provider>
       </SolanaWalletProvider>

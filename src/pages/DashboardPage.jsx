@@ -344,6 +344,110 @@ const DashboardPage = () => {
                 </div>
               </motion.div>
             )}
+
+            {activeTab === 'referrals' && (
+              <motion.div
+                key="referrals"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-10"
+              >
+                <div className="bg-pepe-yellow p-10 rounded-[4rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#000] space-y-8">
+                  <h3 className="text-4xl font-black uppercase italic">Referral Program</h3>
+                  <p className="text-xl font-bold text-pepe-black/70 leading-relaxed">
+                    Invite your friends and earn 5% of their total $PWIFE purchases instantly!
+                  </p>
+                  <div className="bg-white border-4 border-pepe-black rounded-2xl p-6 flex items-center justify-between shadow-[8px_8px_0_0_#000]">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Unique Link</span>
+                      <code className="text-sm font-black text-pepe-black">pepewife.com/?ref={address.slice(0, 6)}...{address.slice(-4)}</code>
+                    </div>
+                    <button onClick={copyAddress} className="p-4 bg-pepe-pink text-white rounded-xl border-4 border-pepe-black shadow-[4px_4px_0_0_#000] hover:translate-y-1 transition-all">
+                      <Copy size={24} />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
+                    <p className="text-xs font-black uppercase text-gray-400">Total Referrals</p>
+                    <p className="text-5xl font-black italic">24</p>
+                  </div>
+                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
+                    <p className="text-xs font-black uppercase text-gray-400">Total Earnings</p>
+                    <p className="text-5xl font-black italic text-pepe-green">5,200</p>
+                  </div>
+                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
+                    <p className="text-xs font-black uppercase text-gray-400">Tier Status</p>
+                    <p className="text-5xl font-black italic text-pepe-pink">GOLD</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'staking' && (
+              <motion.div
+                key="staking"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-10"
+              >
+                <div className="bg-pepe-black text-white p-10 rounded-[4rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] flex flex-col md:flex-row items-center gap-10">
+                  <div className="flex-1 space-y-6">
+                    <h3 className="text-4xl font-black uppercase italic text-pepe-yellow">PWIFE Staking</h3>
+                    <p className="text-xl font-bold text-white/70">Stake your $PWIFE tokens to earn passive rewards. High APR for early believers!</p>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-white/10 p-4 rounded-2xl border-2 border-white/20">
+                        <p className="text-xs font-black uppercase text-gray-400">Current APR</p>
+                        <p className="text-3xl font-black text-pepe-green">450%</p>
+                      </div>
+                      <div className="bg-white/10 p-4 rounded-2xl border-2 border-white/20">
+                        <p className="text-xs font-black uppercase text-gray-400">Total Staked</p>
+                        <p className="text-3xl font-black">15.4M</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full md:w-80 bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[10px_10px_0_0_#000] text-pepe-black space-y-6">
+                    <p className="text-center font-black uppercase italic">Stake Tokens</p>
+                    <input type="number" placeholder="0.00" className="w-full border-4 border-pepe-black p-4 rounded-xl font-black outline-none" />
+                    <button className="w-full bg-pepe-yellow border-4 border-pepe-black py-4 rounded-xl font-black uppercase italic shadow-[4px_4px_0_0_#000]">Stake Now</button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'settings' && (
+              <motion.div
+                key="settings"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white border-8 border-pepe-black rounded-[4rem] p-10 shadow-[20px_20px_0_0_#000] space-y-10"
+              >
+                <h3 className="text-4xl font-black uppercase italic">Account Settings</h3>
+                <div className="grid gap-10">
+                  <div className="space-y-4">
+                    <label className="font-black uppercase italic text-sm">Display Name</label>
+                    <input type="text" placeholder="Pepe Enjoyer" className="w-full md:w-1/2 border-4 border-pepe-black p-4 rounded-xl font-black outline-none" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="font-black uppercase italic text-sm">Email Notifications</label>
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-8 bg-pepe-green border-4 border-pepe-black rounded-full relative cursor-pointer">
+                        <div className="absolute right-1 top-1 w-4 h-4 bg-white border-2 border-pepe-black rounded-full" />
+                      </div>
+                      <span className="font-bold text-gray-500">Enabled</span>
+                    </div>
+                  </div>
+                  <div className="pt-6 border-t-4 border-pepe-black/5">
+                    <button className="bg-pepe-black text-white border-4 border-pepe-black px-8 py-3 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#FF69B4] hover:translate-y-1 transition-all">
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </main>
       </div>

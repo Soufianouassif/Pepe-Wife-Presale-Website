@@ -207,7 +207,7 @@ const PartnersTicker = ({ t }) => {
   );
 };
 
-const HeroSection = ({ t }) => {
+const HeroSection = ({ t, openBuyModal }) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 pb-10 overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -240,7 +240,11 @@ const HeroSection = ({ t }) => {
               <Download size={28} strokeWidth={3} className="mr-3 group-hover:animate-bounce" />
               {t('hero.whitepaper')}
             </Button>
-            <Button variant="primary" className="w-full sm:w-auto group text-xl sm:text-2xl py-4 sm:py-6 px-8 sm:px-10 shadow-[6px_6px_0_0_#000] sm:shadow-[8px_8px_0_0_#000]">
+            <Button 
+              variant="primary" 
+              onClick={openBuyModal}
+              className="w-full sm:w-auto group text-xl sm:text-2xl py-4 sm:py-6 px-8 sm:px-10 shadow-[6px_6px_0_0_#000] sm:shadow-[8px_8px_0_0_#000]"
+            >
               {t('hero.join_presale')}
               <ArrowRight size={28} strokeWidth={3} className="ml-3 group-hover:translate-x-2 transition-transform rtl:rotate-180 rtl:group-hover:-translate-x-2" />
             </Button>
@@ -251,7 +255,7 @@ const HeroSection = ({ t }) => {
   );
 };
 
-const BuyBoxSection = ({ t, openModal }) => {
+const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
   const [amount, setAmount] = useState('');
   return (
     <section className="py-16 sm:py-24 lg:min-h-[800px] relative overflow-hidden flex items-center -mt-1">
@@ -285,7 +289,11 @@ const BuyBoxSection = ({ t, openModal }) => {
                 <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={t('buybox.input_placeholder')} className="w-full bg-white border-4 border-pepe-black rounded-xl sm:rounded-[1.5rem] px-6 sm:px-8 py-4 sm:py-6 text-xl sm:text-2xl font-black outline-none transition-all placeholder:text-gray-400 text-center shadow-[4px_4px_0px_0px_rgba(10,10,10,1)] sm:shadow-[6px_6px_0px_0px_rgba(10,10,10,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_rgba(10,10,10,1)]" />
               </div>
               <div className="flex flex-col space-y-4 sm:space-y-6">
-                <Button variant="primary" className="w-full py-4 sm:py-6 text-2xl sm:text-3xl shadow-[6px_6px_0_0_rgba(10,10,10,1)] sm:shadow-[8px_8px_0_0_rgba(10,10,10,1)]">
+                <Button 
+                  variant="primary" 
+                  onClick={openBuyModal}
+                  className="w-full py-4 sm:py-6 text-2xl sm:text-3xl shadow-[6px_6px_0_0_rgba(10,10,10,1)] sm:shadow-[8px_8px_0_0_rgba(10,10,10,1)]"
+                >
                   {t('buybox.buy_now')}
                 </Button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -520,10 +528,103 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
   );
 };
 
+const BuyModal = ({ isOpen, onClose, t }) => {
+  const [amount, setAmount] = useState('');
+  const [currency, setSolCurrency] = useState('SOL');
+  const [isLoading, setIsLoading] = useState(false);
+  const { isConnected, sendTransaction, address } = useWallet();
+  const navigate = useNavigate();
+
+  const handleBuy = async () => {
+    if (!isConnected) {
+      navigate('/connect');
+      return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // For demonstration, we'll use a placeholder address
+      const treasuryAddress = '0x1234567890abcdef1234567890abcdef12345678';
+      const tx = await sendTransaction(treasuryAddress, amount, currency);
+      console.log('Transaction success:', tx);
+      alert('Transaction successful! Your $PWIFE tokens will be sent shortly.');
+      onClose();
+    } catch (error) {
+      console.error('Transaction error:', error);
+      alert('Transaction failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Join Presale" headerColor="bg-pepe-green">
+      <div className="space-y-8">
+        <div className="text-center space-y-4">
+          <h4 className="text-3xl font-black uppercase italic animate-title-gradient">Phase 1 is Live!</h4>
+          <p className="text-xl font-bold text-gray-600">1 $PWIFE = 0.00012 USDT</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={() => setSolCurrency('SOL')}
+              className={`p-4 rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all ${currency === 'SOL' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
+            >
+              Pay with SOL
+            </button>
+            <button 
+              onClick={() => setSolCurrency('USDT')}
+              className={`p-4 rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all ${currency === 'USDT' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
+            >
+              Pay with USDT
+            </button>
+          </div>
+
+          <div className="relative">
+            <input 
+              type="number" 
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              className="w-full bg-white border-4 border-pepe-black rounded-2xl p-6 text-2xl font-black outline-none shadow-[6px_6px_0_0_#000]"
+            />
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-pepe-pink">{currency}</span>
+          </div>
+
+          <div className="bg-pepe-black text-white p-6 rounded-2xl border-4 border-pepe-black flex justify-between items-center">
+            <span className="font-black uppercase">You will get:</span>
+            <span className="text-2xl font-black text-pepe-yellow">{amount ? (amount * 8333).toLocaleString() : '0'} $PWIFE</span>
+          </div>
+
+          <button 
+            onClick={handleBuy}
+            disabled={isLoading}
+            className={`w-full bg-pepe-green text-pepe-black border-4 border-pepe-black py-6 rounded-2xl text-2xl font-black uppercase italic shadow-[8px_8px_0_0_#000] hover:translate-y-1 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Processing...' : 'Buy Now'}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 opacity-60">
+          <Shield size={20} className="text-pepe-green" />
+          <span className="text-xs font-black uppercase">Secure Transaction by Smart Contract</span>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const LandingPage = () => {
   const { t, i18n } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const isRTL = i18n.language === 'ar';
 
   useEffect(() => {
@@ -563,15 +664,18 @@ const LandingPage = () => {
       </AnimatePresence>
 
       <main>
-        <HeroSection t={t} />
+        <HeroSection t={t} openBuyModal={() => setIsBuyModalOpen(true)} />
         <Ticker t={t} />
-        <BuyBoxSection t={t} openModal={setActiveModal} />
+        <BuyBoxSection t={t} openModal={setActiveModal} openBuyModal={() => setIsBuyModalOpen(true)} />
         <FeaturedIn t={t} />
         <TokenomicsSection t={t} openModal={setActiveModal} />
         <WhyBuySection t={t} />
         <PartnersTicker t={t} />
         <RiskWarningSection t={t} />
       </main>
+
+      {/* BUY MODAL */}
+      <BuyModal isOpen={isBuyModalOpen} onClose={() => setIsBuyModalOpen(false)} t={t} />
 
       {/* MODALS */}
       <Modal isOpen={activeModal === 'home'} onClose={() => setActiveModal(null)} title={t('nav.home')} headerColor="bg-pepe-yellow">
