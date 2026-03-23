@@ -14,7 +14,7 @@ export default {
         'pepe-dark-gray': '#1a1a1a',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Fredoka', 'system-ui', 'sans-serif'],
       },
     },
   },

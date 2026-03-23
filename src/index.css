@@ -2,22 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Cartoonish';
-  src: url('https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Grandstander:wght@400;900&display=swap');
-}
-
 :root {
   background-color: #ffffff;
   color: #0a0a0a;
-  font-family: 'Grandstander', 'Fredoka One', 'Bangers', cursive;
+  font-family: 'Fredoka', sans-serif;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  background-image: radial-gradient(circle at 50% 50%, #f9fafb 0%, #ffffff 100%);
+@layer base {
+  body {
+    @apply font-sans antialiased;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 50% 50%, #f9fafb 0%, #ffffff 100%);
+  }
+
+  /* Responsive Font Sizes for Mobile-First Approach */
+  h1 {
+    @apply text-[28px] sm:text-[40px] md:text-[60px] lg:text-[144px] font-black leading-tight;
+  }
+  
+  h2 {
+    @apply text-[24px] sm:text-[32px] md:text-[48px] lg:text-[72px] font-black leading-tight;
+  }
+
+  h3 {
+    @apply text-[20px] sm:text-[24px] md:text-[32px] lg:text-[48px] font-bold;
+  }
+
+  p, span, li, a {
+    @apply text-[14px] sm:text-[16px] md:text-[18px] lg:text-[20px];
+  }
+
+  button, input {
+    @apply text-[14px] sm:text-[16px];
+  }
 }
 
 /* Custom Scrollbar */
@@ -107,29 +126,16 @@ body {
     100% { transform: translateX(-50%); }
   }
 
-  @keyframes marquee-rtl {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(50%); }
-  }
-
   .animate-marquee {
     display: flex;
     width: max-content;
     animation: marquee 60s linear infinite;
   }
 
-  .rtl .animate-marquee {
-    animation: marquee-rtl 60s linear infinite;
-  }
-
   .animate-marquee-slow {
     display: flex;
     width: max-content;
     animation: marquee 100s linear infinite;
-  }
-
-  .rtl .animate-marquee-slow {
-    animation: marquee-rtl 100s linear infinite;
   }
 
   @keyframes gradient-bg {
@@ -212,4 +218,19 @@ section {
   .section-container {
     @apply py-8 px-4;
   }
+}
+
+/* Forced Desktop Mode on Mobile */
+html.forced-desktop body {
+  min-width: 1280px !important;
+  overflow-x: auto !important;
+  width: 1280px !important;
+}
+
+html.forced-desktop .fixed {
+  position: absolute !important;
+}
+
+html.forced-desktop #root {
+  width: 1280px;
 }

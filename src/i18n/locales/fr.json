@@ -114,6 +114,19 @@
     "reason3_title": "Sécurité Prouvée",
     "reason3_desc": "Contrat intelligent entièrement audité avec liquidité verrouillée."
   },
+  "whitepaper": {
+    "badge": "Plan Technique",
+    "title": "Livre Blanc de Pepe Wife",
+    "desc": "Plongez au cœur de l'architecture technique, de la tokenomie et de la grande vision de l'écosystème Pepe Wife. Notre livre blanc détaille chaque étape de notre parcours pour devenir la reine ultime des memecoins.",
+    "download_btn": "Télécharger le PDF",
+    "read_online": "Lire le Résumé",
+    "feat1_title": "Vision Globale",
+    "feat1_desc": "Connecter la communauté mondiale des memes grâce à un écosystème unifié et élégant construit sur le réseau ultra-rapide de Solana.",
+    "feat2_title": "Actifs Sécurisés",
+    "feat2_desc": "Protocoles de sécurité multicouches et contrats intelligents entièrement audités garantissant une sécurité totale pour tous les détenteurs de $PWIFE.",
+    "feat3_title": "Grande Feuille de Route",
+    "feat3_desc": "Un parcours clair et ambitieux de la prévente aux listings sur les CEX de Tier 1 et à un écosystème décentralisé prospère."
+  },
   "risk": {
     "title": "Avertissement sur les Risques",
     "p1": "Les investissements en cryptomonnaies comportent des risques élevés. Pepe Wife ($PWIFE) est un projet de memecoin créé à des fins de divertissement.",
@@ -167,5 +180,9 @@
       "roi": "ROI",
       "error": "Données Invalides"
     }
+  },
+  "view_mode": {
+    "switch_to_desktop": "Version Bureau",
+    "switch_to_mobile": "Version Mobile"
   }
 }

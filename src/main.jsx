@@ -1,8 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { Buffer } from 'buffer'
 import App from './App.jsx'
 import './index.css'
 import './i18n/config'
+
+window.Buffer = Buffer
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

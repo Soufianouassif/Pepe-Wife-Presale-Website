@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import ProfitCalculator from '../components/ProfitCalculator';
+import ViewModeToggle from '../components/ViewModeToggle';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -127,19 +128,17 @@ const WalletButton = ({ t }) => {
 };
 
 const Ticker = ({ t }) => {
-  const { i18n } = useTranslation();
   const messages = [t('ticker.m1'), t('ticker.m2'), t('ticker.m3'), t('ticker.m4')];
-  const isArabic = i18n.language === 'ar';
   
   return (
     <div className="bg-pepe-yellow border-y-4 border-pepe-black py-4 overflow-hidden relative z-20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]" dir="ltr">
-      <div className="animate-marquee whitespace-nowrap">
+      <div className="animate-marquee whitespace-nowrap flex flex-row">
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="flex items-center">
+          <div key={i} className="flex flex-row items-center">
             {messages.map((msg, idx) => (
               <span key={idx} className="text-xl md:text-2xl font-black text-pepe-black mx-6 md:mx-12 flex items-center drop-shadow-sm">
-                <Rocket size={20} className="mr-2 md:mr-4" />
-                {isArabic ? t(`ticker.m${idx + 1}`, { lng: 'en' }) : msg}
+                <Rocket size={20} className="mr-2 md:mr-4 rtl:ml-2 rtl:mr-0" />
+                {msg}
               </span>
             ))}
           </div>
@@ -150,17 +149,15 @@ const Ticker = ({ t }) => {
 };
 
 const FeaturedIn = ({ t }) => {
-  const { i18n } = useTranslation();
   const platforms = ['Yahoo Finance', 'MarketWatch', 'Bloomberg', 'Cointelegraph', 'Decrypt'];
-  const isArabic = i18n.language === 'ar';
   
   return (
     <div className="bg-black border-y-4 border-pepe-black py-8 overflow-hidden relative z-20" dir="ltr">
-      <div className="animate-marquee-slow whitespace-nowrap flex items-center">
+      <div className="animate-marquee-slow whitespace-nowrap flex flex-row items-center">
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="flex items-center">
+          <div key={i} className="flex flex-row items-center">
             <span className="text-xl font-black uppercase tracking-[0.3em] text-white/40 mx-10">
-              {isArabic ? t('featured.title', { lng: 'en' }) : t('featured.title')}
+              {t('featured.title')}
             </span>
             {platforms.map((p, idx) => (
               <span key={idx} className="text-2xl md:text-4xl font-black text-white mx-10 md:mx-20 uppercase italic tracking-tighter hover:text-pepe-yellow transition-colors cursor-default">
@@ -175,7 +172,6 @@ const FeaturedIn = ({ t }) => {
 };
 
 const PartnersTicker = ({ t }) => {
-  const { i18n } = useTranslation();
   const partners = [
     { name: 'Solana', color: 'text-[#14F195]' },
     { name: 'Raydium', color: 'text-[#FF00FF]' },
@@ -183,18 +179,17 @@ const PartnersTicker = ({ t }) => {
     { name: 'CoinMarketCap', color: 'text-[#1098AD]' },
     { name: 'Oracle', color: 'text-[#F80000]' }
   ];
-  const isArabic = i18n.language === 'ar';
   
   return (
     <div className="bg-white border-y-4 border-pepe-black py-12 overflow-hidden relative z-20" dir="ltr">
-      <div className="animate-marquee whitespace-nowrap flex items-center">
+      <div className="animate-marquee whitespace-nowrap flex flex-row items-center">
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="flex items-center">
+          <div key={i} className="flex flex-row items-center">
             <span className="text-2xl font-black uppercase tracking-widest text-pepe-black/30 mx-12">
-              {isArabic ? t('partners.title', { lng: 'en' }) : t('partners.title')}
+              {t('partners.title')}
             </span>
             {partners.map((p, idx) => (
-              <div key={idx} className="flex items-center mx-12 md:mx-20 group cursor-pointer transition-all duration-300">
+              <div key={idx} className="flex flex-row items-center mx-12 md:mx-20 group cursor-pointer transition-all duration-300">
                 <span className={`text-3xl md:text-5xl font-black uppercase italic tracking-tighter ${p.color} group-hover:scale-110 transition-transform`}>
                   {p.name}
                 </span>
@@ -231,12 +226,12 @@ const HeroSection = ({ t, openBuyModal }) => {
           <span className="bg-pepe-pink text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] rotate-[-2deg] inline-block mb-6 sm:mb-8 text-xs sm:text-base">
             {t('hero.badge')}
           </span>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter leading-[1] sm:leading-[0.85] mb-8 sm:mb-12 text-pepe-black drop-shadow-[4px_4px_0px_rgba(255,255,255,1)] sm:drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient break-words">
+          <h1 className="text-3xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter leading-[1] sm:leading-[0.85] mb-8 sm:mb-12 text-pepe-black drop-shadow-[4px_4px_0px_rgba(255,255,255,1)] sm:drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient break-words">
             {t('hero.title_meet')} {t('hero.title_pepe')}<br />
             {t('hero.title_wife')}
           </h1>
           <div className="relative inline-block mb-10 sm:mb-14 px-2 sm:px-0 max-w-2xl mx-auto">
-            <p className="text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[4px_4px_0_0_#FF69B4] sm:shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
+            <p className="text-base sm:text-2xl md:text-3xl font-black text-white leading-tight bg-pepe-black border-4 border-pepe-black p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[4px_4px_0_0_#FF69B4] sm:shadow-[8px_8px_0_0_#FF69B4] transform hover:rotate-1 transition-transform">
               {t('hero.desc')}
             </p>
           </div>
@@ -275,7 +270,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
           <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-sm p-6 sm:p-12 rounded-[2rem] sm:rounded-[2.5rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-pepe-pink opacity-10 rounded-full -mr-16 -mt-16 sm:-mr-20 sm:-mt-20" />
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
               <p className="text-gray-600 text-sm sm:text-lg lg:text-xl font-bold">{t('buybox.desc')}</p>
             </div>
             <div className="flex justify-center mb-8 sm:mb-12">
@@ -336,7 +331,7 @@ const TokenomicsSection = ({ t, openModal }) => {
     <section id="tokenomics" className="relative py-16 sm:py-24 overflow-hidden bg-white">
       <div className="section-container relative z-10 px-4 sm:px-6">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-4xl sm:text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient">{t('tokenomics.title')}</h2>
+          <h2 className="text-3xl sm:text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient">{t('tokenomics.title')}</h2>
         </div>
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="space-y-8">
@@ -423,10 +418,10 @@ const WhyBuySection = ({ t }) => (
       <div className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center">
         <div className="space-y-6 sm:space-y-8 text-center lg:text-left rtl:lg:text-right">
           <span className="btn-secondary py-2 px-6 rotate-[-3deg] inline-block text-xs sm:text-base">{t('whybuy.badge')}</span>
-          <h2 className="text-3xl sm:text-5xl lg:text-7xl font-black uppercase italic leading-[1.1] lg:leading-[0.9] drop-shadow-[4px_4px_0px_rgba(10,10,10,1)] lg:drop-shadow-[8px_8px_0px_rgba(10,10,10,1)] animate-title-gradient">
+          <h2 className="text-2xl sm:text-5xl lg:text-7xl font-black uppercase italic leading-[1.1] lg:leading-[0.9] drop-shadow-[4px_4px_0px_rgba(10,10,10,1)] lg:drop-shadow-[8px_8px_0px_rgba(10,10,10,1)] animate-title-gradient">
             {t('whybuy.title_why')} <br />{t('whybuy.title_pepewife')}
           </h2>
-          <p className="text-base sm:text-2xl font-bold text-gray-800 leading-snug max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
+          <p className="text-sm sm:text-2xl font-bold text-gray-800 leading-snug max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
             {t('whybuy.desc')}
           </p>
           <Button variant="primary" className="w-full sm:w-auto text-lg sm:text-2xl py-4 sm:py-6 shadow-[6px_6px_0_0_rgba(10,10,10,1)] lg:shadow-[8px_8px_0_0_rgba(10,10,10,1)]">{t('whybuy.cta')}</Button>
@@ -455,8 +450,8 @@ const RiskWarningSection = ({ t }) => (
       <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white relative group">
         <div className="absolute top-6 right-6 text-pepe-pink opacity-20 group-hover:opacity-100 transition-opacity"><Info size={40} strokeWidth={3} /></div>
         <Shield size={60} strokeWidth={3} className="sm:w-[100px] sm:h-[100px] text-pepe-pink mx-auto mb-6 sm:mb-10 animate-pulse" />
-        <h2 className="text-3xl sm:text-7xl font-black uppercase italic mb-6 sm:mb-10 tracking-tight text-pepe-black drop-shadow-sm animate-title-gradient">{t('risk.title')}</h2>
-        <div className="space-y-4 sm:space-y-8 text-base sm:text-2xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">
+        <h2 className="text-2xl sm:text-7xl font-black uppercase italic mb-6 sm:mb-10 tracking-tight text-pepe-black drop-shadow-sm animate-title-gradient">{t('risk.title')}</h2>
+        <div className="space-y-4 sm:space-y-8 text-sm sm:text-2xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">
           <p className="border-l-4 border-pepe-pink pl-4 sm:pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pr-4 sm:pr-6 py-2 bg-pepe-pink/5 rounded-r-2xl rtl:rounded-r-none rtl:rounded-l-2xl">{t('risk.p1')}</p>
           <p className="border-l-4 border-pepe-black pl-4 sm:pl-6 rtl:border-l-0 rtl:border-r-4 rtl:pr-4 sm:pr-6 py-2 bg-gray-50 rounded-r-2xl rtl:rounded-r-none rtl:rounded-l-2xl">{t('risk.p2')}</p>
         </div>
@@ -464,6 +459,95 @@ const RiskWarningSection = ({ t }) => (
     </div>
   </section>
 );
+
+const WhitepaperSection = ({ t, openModal }) => {
+  const features = [
+    { id: 1, icon: <Globe size={32} />, color: 'bg-pepe-green', title: t('whitepaper.feat1_title'), desc: t('whitepaper.feat1_desc') },
+    { id: 2, icon: <Lock size={32} />, color: 'bg-pepe-yellow', title: t('whitepaper.feat2_title'), desc: t('whitepaper.feat2_desc') },
+    { id: 3, icon: <Rocket size={32} />, color: 'bg-pepe-green', title: t('whitepaper.feat3_title'), desc: t('whitepaper.feat3_desc') },
+  ];
+
+  return (
+    <section id="whitepaper" className="relative py-20 sm:py-32 overflow-hidden bg-pepe-black text-white border-y-8 border-pepe-black">
+      {/* Technical Grid Background */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+           style={{ backgroundImage: 'linear-gradient(#39FF14 1px, transparent 1px), linear-gradient(90deg, #39FF14 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      
+      <div className="section-container relative z-10 px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <motion.div initial={{ x: -50, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} className="space-y-8 text-center lg:text-left rtl:lg:text-right">
+            <span className="bg-pepe-yellow text-pepe-black px-6 py-2 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[4px_4px_0_0_#39FF14] rotate-[-2deg] inline-block text-sm">
+              {t('whitepaper.badge')}
+            </span>
+            <h2 className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase italic leading-none text-pepe-green drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)]">
+              {t('whitepaper.title')}
+            </h2>
+            <p className="text-base sm:text-2xl font-bold text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              {t('whitepaper.desc')}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-6 pt-4 justify-center lg:justify-start">
+              <Button variant="primary" className="w-full sm:w-auto px-10 py-5 text-xl shadow-[6px_6px_0_0_#fff]">
+                <Download size={24} className="mr-3 rtl:ml-3 rtl:mr-0" strokeWidth={3} />
+                {t('whitepaper.download_btn')}
+              </Button>
+              <button onClick={() => openModal('about')} className="text-pepe-yellow font-black uppercase italic border-b-4 border-pepe-yellow hover:text-white hover:border-white transition-all py-2">
+                {t('whitepaper.read_online')}
+              </button>
+            </div>
+          </motion.div>
+
+          <div className="relative flex justify-center items-center py-10">
+            {/* 3D Book Mockup Effect */}
+            <motion.div 
+              animate={{ rotateY: [10, -10, 10], y: [0, -15, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="relative w-64 h-80 sm:w-80 sm:h-[450px] preserve-3d group cursor-pointer"
+            >
+              {/* Book Spine */}
+              <div className="absolute left-0 top-0 w-12 h-full bg-pepe-green border-4 border-pepe-black rounded-l-lg transform -translate-x-1/2 rotate-y-90 origin-right shadow-2xl z-20" />
+              
+              {/* Book Cover */}
+              <div className="absolute inset-0 bg-pepe-yellow border-4 border-pepe-black rounded-lg shadow-2xl flex flex-col items-center justify-between p-8 sm:p-12 overflow-hidden group-hover:bg-pepe-green transition-colors duration-500">
+                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+                <div className="w-full h-1 bg-pepe-black mb-4 opacity-20" />
+                <div className="text-center relative z-10">
+                  <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Logo" className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 sm:mb-8 object-contain drop-shadow-2xl animate-float" />
+                  <h3 className="text-2xl sm:text-4xl font-black text-pepe-black uppercase italic tracking-tighter leading-none mb-2">
+                    Pepe Wife
+                  </h3>
+                  <p className="text-xs sm:text-sm font-black text-pepe-black/60 uppercase tracking-[0.3em]">Official Document</p>
+                </div>
+                <div className="w-full h-1 bg-pepe-black mt-4 opacity-20" />
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-pepe-green/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-pepe-yellow/20 rounded-full blur-3xl animate-pulse delay-700" />
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-6 sm:gap-10 mt-20">
+          {features.map((feat, idx) => (
+            <motion.div 
+              key={feat.id}
+              initial={{ y: 50, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ delay: idx * 0.2 }}
+              className="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border-4 border-pepe-black hover:border-pepe-green transition-all group hover:-translate-y-2"
+            >
+              <div className={`w-16 h-16 ${feat.color} rounded-2xl border-4 border-pepe-black flex items-center justify-center mb-6 shadow-[4px_4px_0_0_#000] group-hover:scale-110 transition-transform`}>
+                {feat.icon}
+              </div>
+              <h4 className="text-xl sm:text-2xl font-black uppercase italic mb-4 text-pepe-yellow group-hover:text-pepe-green transition-colors">{feat.title}</h4>
+              <p className="text-gray-400 font-bold leading-relaxed">{feat.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const Footer = ({ t }) => (
   <footer className="footer-black py-16 sm:py-24">
@@ -688,6 +772,7 @@ const LandingPage = () => {
         <TokenomicsSection t={t} openModal={setActiveModal} />
         <WhyBuySection t={t} />
         <PartnersTicker t={t} />
+        <WhitepaperSection t={t} openModal={setActiveModal} />
         <RiskWarningSection t={t} />
       </main>
 
@@ -763,6 +848,7 @@ const LandingPage = () => {
       </Modal>
 
       <Footer t={t} />
+      <ViewModeToggle />
     </div>
   );
 };

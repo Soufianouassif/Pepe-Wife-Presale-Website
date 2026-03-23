@@ -114,6 +114,19 @@
     "reason3_title": "Proven Security",
     "reason3_desc": "Fully audited smart contract with locked liquidity for total peace of mind."
   },
+  "whitepaper": {
+    "badge": "Technical Blueprint",
+    "title": "Pepe Wife Whitepaper",
+    "desc": "Dive deep into the technical architecture, tokenomics, and the grand vision of the Pepe Wife ecosystem. Our whitepaper outlines every step of our journey to becoming the ultimate queen of memecoins.",
+    "download_btn": "Download PDF",
+    "read_online": "Read Summary",
+    "feat1_title": "Global Vision",
+    "feat1_desc": "Connecting the global meme community through a unified and elegant ecosystem built on Solana's lightning-fast network.",
+    "feat2_title": "Secure Assets",
+    "feat2_desc": "Multi-layered security protocols and fully audited smart contracts ensuring total safety for all $PWIFE holders.",
+    "feat3_title": "Grand Roadmap",
+    "feat3_desc": "A clear and ambitious path from presale to Tier 1 CEX listings and a thriving decentralized ecosystem."
+  },
   "risk": {
     "title": "Risk Warning",
     "p1": "Cryptocurrency investments carry high risk. Pepe Wife ($PWIFE) is a memecoin project created for entertainment and community purposes. There is no guarantee of profit, and you should never invest money you cannot afford to lose.",
@@ -167,5 +180,9 @@
       "roi": "ROI",
       "error": "Invalid Input Data"
     }
+  },
+  "view_mode": {
+    "switch_to_desktop": "Desktop Version",
+    "switch_to_mobile": "Mobile Version"
   }
 }

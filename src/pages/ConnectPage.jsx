@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,7 @@ import { useWallet } from '../context/WalletContext';
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
-import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X, ExternalLink } from 'lucide-react';
+import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X, ExternalLink, HelpCircle } from 'lucide-react';
 
 // --- CONFIGURATION ---
 const WALLETCONNECT_PROJECT_ID = 'YOUR_PROJECT_ID_HERE'; // Replace with real ID from cloud.walletconnect.com
@@ -14,12 +14,82 @@ const WALLETCONNECT_PROJECT_ID = 'YOUR_PROJECT_ID_HERE'; // Replace with real ID
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
-  const { connect } = useWallet();
+  const { connect, provider: authProvider, loginWithSocial } = useWallet();
   const { select, wallets: solanaWallets } = useSolanaWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); // idle, connecting
   const [error, setError] = useState(null);
+
+  // OKX Wallet Connection Logic
+  const handleOKXConnect = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    const provider = window.okxwallet;
+    if (!provider) {
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'محفظة OKX غير مثبتة.' : 'OKX Wallet is not installed.');
+      window.open('https://www.okx.com/web3', '_blank');
+      return;
+    }
+
+    try {
+      const accounts = await provider.request({ method: 'eth_requestAccounts' });
+      connect(accounts[0], 'OKX');
+      navigate('/loading');
+    } catch (err) {
+      console.error('OKX connection error:', err);
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'فشل الاتصال بمحفظة OKX.' : 'Failed to connect to OKX Wallet.');
+    }
+  };
+
+  // Binance Wallet Connection Logic
+  const handleBinanceConnect = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    const provider = window.BinanceChain;
+    if (!provider) {
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'محفظة Binance غير مثبتة.' : 'Binance Wallet is not installed.');
+      return;
+    }
+
+    try {
+      const accounts = await provider.request({ method: 'eth_requestAccounts' });
+      connect(accounts[0], 'Binance');
+      navigate('/loading');
+    } catch (err) {
+      console.error('Binance connection error:', err);
+      setStatus('idle');
+      setError(i18n.language === 'ar' ? 'فشل الاتصال بمحفظة Binance.' : 'Failed to connect to Binance Wallet.');
+    }
+  };
+
+  // Social Login Logic (Web3Auth)
+  const handleSocialLogin = async () => {
+    setStatus('connecting');
+    setError(null);
+
+    try {
+      const addr = await loginWithSocial();
+      if (addr) {
+        navigate('/loading');
+      } else {
+        setStatus('idle');
+      }
+    } catch (err) {
+      console.error('Social login error:', err);
+      setStatus('idle');
+      if (err.code === 5000) {
+        setError(i18n.language === 'ar' ? 'تم إغلاق نافذة تسجيل الدخول.' : 'Login modal closed.');
+      } else {
+        setError(i18n.language === 'ar' ? 'فشل تسجيل الدخول الاجتماعي.' : 'Social login failed.');
+      }
+    }
+  };
 
   // WalletConnect Connection Logic
   const handleWalletConnect = async () => {
@@ -89,7 +159,19 @@ const ConnectPage = () => {
     setStatus('connecting');
     setError(null);
 
-    if (typeof window.ethereum === 'undefined') {
+    let provider;
+    
+    // 1. Detect the correct MetaMask provider
+    if (window.ethereum) {
+      if (window.ethereum.providers) {
+        // If multiple providers (e.g. Phantom + MetaMask), find the MetaMask one
+        provider = window.ethereum.providers.find((p) => p.isMetaMask);
+      } else if (window.ethereum.isMetaMask) {
+        provider = window.ethereum;
+      }
+    }
+
+    if (!provider) {
       setStatus('idle');
       setError(i18n.language === 'ar' ? 'محفظة MetaMask غير مثبتة.' : 'MetaMask is not installed.');
       window.open('https://metamask.io/download/', '_blank');
@@ -97,17 +179,16 @@ const ConnectPage = () => {
     }
 
     try {
-      // 1. Request accounts
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
+      // 2. Request accounts using the specific provider
+      const browserProvider = new ethers.BrowserProvider(provider);
+      const accounts = await browserProvider.send("eth_requestAccounts", []);
       const address = accounts[0];
 
-      // 2. Check Network (Ethereum Mainnet is 1)
-      const network = await provider.getNetwork();
+      // 3. Check Network (Ethereum Mainnet is 1)
+      const network = await browserProvider.getNetwork();
       if (network.chainId !== 1n) {
         try {
-          // Attempt to switch to Mainnet
-          await window.ethereum.request({
+          await provider.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0x1' }],
           });
@@ -116,12 +197,6 @@ const ConnectPage = () => {
           setError(i18n.language === 'ar' ? 'يرجى التبديل إلى شبكة Ethereum Mainnet.' : 'Please switch to Ethereum Mainnet.');
           return;
         }
-      }
-
-      // 3. Check Balance (Gas availability)
-      const balance = await provider.getBalance(address);
-      if (balance === 0n) {
-        console.warn('Empty wallet balance detected');
       }
 
       // 4. Update global context
@@ -143,8 +218,9 @@ const ConnectPage = () => {
     setError(null);
 
     try {
-      // 1. Check if Phantom extension exists in the browser
-      const isPhantomInstalled = window?.solana?.isPhantom;
+      // 1. Check if Phantom extension exists - use specific phantom provider if available
+      const phantomProvider = window.phantom?.solana || window.solana;
+      const isPhantomInstalled = phantomProvider?.isPhantom;
 
       if (!isPhantomInstalled) {
         setStatus('idle');
@@ -154,7 +230,7 @@ const ConnectPage = () => {
       }
 
       // 2. Attempt to connect to Phantom
-      const response = await window.solana.connect();
+      const response = await phantomProvider.connect();
       const publicKey = response.publicKey.toString();
 
       // 3. Update global context
@@ -189,6 +265,21 @@ const ConnectPage = () => {
       return;
     }
 
+    if (walletName === 'Binance') {
+      handleBinanceConnect();
+      return;
+    }
+
+    if (walletName === 'OKX') {
+      handleOKXConnect();
+      return;
+    }
+
+    if (walletName === 'Google' || walletName === 'X') {
+      handleSocialLogin();
+      return;
+    }
+
     if (walletName === 'WalletConnect') {
       handleWalletConnect();
       return;
@@ -206,7 +297,11 @@ const ConnectPage = () => {
   const wallets = [
     { name: 'Phantom', icon: '/assets/hero-character.png', color: 'bg-[#AB9FF2]/10', borderColor: 'border-[#AB9FF2]', recommended: true },
     { name: 'MetaMask', icon: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Logo.svg', color: 'bg-[#E2761B]/10', borderColor: 'border-[#E2761B]' },
+    { name: 'OKX', icon: 'https://static.okx.com/cdn/assets/imgs/247/1C0D98E9A3C7E3B2.png', color: 'bg-black/10', borderColor: 'border-black' },
+    { name: 'Binance', icon: 'https://upload.wikimedia.org/wikipedia/commons/5/57/Binance_Logo.svg', color: 'bg-[#F3BA2F]/10', borderColor: 'border-[#F3BA2F]' },
     { name: 'Trust Wallet', icon: 'https://trustwallet.com/assets/images/media/assets/trust_platform.svg', color: 'bg-[#3375BB]/10', borderColor: 'border-[#3375BB]' },
+    { name: 'Google', icon: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_尊_Logo.svg', isSocial: true, color: 'bg-white', borderColor: 'border-gray-200' },
+    { name: 'X', icon: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/X_logo_2023.svg', isSocial: true, color: 'bg-black', borderColor: 'border-black' },
     { name: 'WalletConnect', icon: null, isWC: true, color: 'bg-[#3396FF]/10', borderColor: 'border-[#3396FF]' },
   ];
 
@@ -319,22 +414,25 @@ const ConnectPage = () => {
                   onClick={() => handleConnect(wallet.name)}
                   disabled={status === 'connecting'}
                   className={`
-                    group relative flex items-center justify-between p-5 rounded-2xl border-4 border-pepe-black transition-all
+                    group relative flex items-center justify-between p-4 sm:p-5 rounded-2xl border-4 border-pepe-black transition-all
                     hover:-translate-y-1 active:scale-[0.98] disabled:opacity-50
-                    ${wallet.recommended ? 'bg-pepe-yellow shadow-[6px_6px_0_0_#000] hover:shadow-[10px_10px_0_0_#000]' : 'bg-white hover:bg-gray-50 shadow-[6px_6px_0_0_#000] hover:shadow-[10px_10px_0_0_#000]'}
+                    ${wallet.recommended ? 'bg-pepe-yellow shadow-[6px_6px_0_0_#000] hover:shadow-[10px_10px_0_0_#000]' : 
+                      wallet.isSocial ? 'bg-white shadow-[4px_4px_0_0_#000] hover:shadow-[6px_6px_0_0_#000]' :
+                      'bg-white hover:bg-gray-50 shadow-[6px_6px_0_0_#000] hover:shadow-[10px_10px_0_0_#000]'}
                   `}
                 >
                   <div className="flex items-center space-x-4 space-x-reverse">
-                    <div className={`w-14 h-14 rounded-xl border-4 border-pepe-black flex items-center justify-center overflow-hidden bg-white`}>
+                    <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl border-4 border-pepe-black flex items-center justify-center overflow-hidden bg-white`}>
                       {wallet.isWC ? (
-                        <Globe size={32} strokeWidth={3} className="text-[#3396FF]" />
+                        <Globe size={24} strokeWidth={3} className="text-[#3396FF]" />
                       ) : (
-                        <img src={wallet.icon} alt={wallet.name} className="w-10 h-10 object-contain" />
+                        <img src={wallet.icon} alt={wallet.name} className="w-6 h-6 sm:w-10 sm:h-10 object-contain" />
                       )}
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-black uppercase block leading-none">{wallet.name}</span>
+                      <span className="text-xl sm:text-2xl font-black uppercase block leading-none">{wallet.name}</span>
                       {wallet.recommended && <span className="text-[10px] font-black uppercase tracking-widest text-pepe-black/60">Recommended</span>}
+                      {wallet.isSocial && <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Social Login</span>}
                     </div>
                   </div>
                   
@@ -373,6 +471,23 @@ const ConnectPage = () => {
               <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest max-w-[200px]">
                 By connecting, you agree to our Terms of Service and Privacy Policy
               </p>
+            </div>
+
+            {/* Troubleshooting / Multi-wallet conflict tip */}
+            <div className="bg-pepe-green/5 border-2 border-dashed border-pepe-green/30 p-4 rounded-2xl">
+              <div className="flex items-start space-x-3 space-x-reverse">
+                <HelpCircle size={18} className="text-pepe-green mt-1 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-[10px] sm:text-xs font-black uppercase text-pepe-green">
+                    {i18n.language === 'ar' ? 'هل تواجه تعارضاً بين المحافظ؟' : 'Wallet Conflict?'}
+                  </p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 leading-tight">
+                    {i18n.language === 'ar' 
+                      ? 'إذا ظهرت نافذة Phantom عند اختيار MetaMask، يرجى التحقق من إعدادات Phantom وإيقاف خيار "Default Wallet".' 
+                      : 'If Phantom pops up when selecting MetaMask, please check Phantom settings and disable "Default Wallet" option.'}
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
