@@ -447,10 +447,61 @@ const WhyBuySection = ({ t }) => (
   </section>
 );
 
+const PepeCoupleSVG = () => (
+  <div className="absolute inset-0 z-0 pointer-events-none opacity-10 flex items-center justify-around px-10 overflow-hidden">
+    {/* Pepe the Frog */}
+    <div className="w-64 h-64 relative transform -rotate-12 translate-y-10">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        {/* Head Shape */}
+        <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" fill="#4CAF50" stroke="#000" strokeWidth="4" />
+        {/* Eyes */}
+        <ellipse cx="75" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
+        <ellipse cx="125" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
+        <circle cx="75" cy="85" r="8" fill="black" />
+        <circle cx="125" cy="85" r="8" fill="black" />
+        {/* Mouth (Sad/Risk Face) */}
+        <path d="M70,130 Q100,110 130,130" fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
+        {/* Eyelids */}
+        <path d="M50,70 Q75,50 100,70" fill="none" stroke="#000" strokeWidth="2" />
+        <path d="M100,70 Q125,50 150,70" fill="none" stroke="#000" strokeWidth="2" />
+      </svg>
+    </div>
+
+    {/* Pepe's Wife */}
+    <div className="w-64 h-64 relative transform rotate-12 -translate-y-10">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        {/* Head Shape (Pepe Green but with pinkish tint or accessories) */}
+        <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" fill="#81C784" stroke="#000" strokeWidth="4" />
+        {/* Hair/Bow */}
+        <path d="M80,40 Q100,10 120,40" fill="#FF4081" stroke="#000" strokeWidth="2" />
+        <circle cx="100" cy="35" r="8" fill="#FF4081" stroke="#000" strokeWidth="2" />
+        {/* Eyes with Eyelashes */}
+        <ellipse cx="75" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
+        <ellipse cx="125" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
+        <circle cx="75" cy="85" r="8" fill="black" />
+        <circle cx="125" cy="85" r="8" fill="black" />
+        {/* Eyelashes */}
+        <path d="M55,65 L45,55" stroke="#000" strokeWidth="2" />
+        <path d="M65,55 L60,40" stroke="#000" strokeWidth="2" />
+        <path d="M135,55 L140,40" stroke="#000" strokeWidth="2" />
+        <path d="M145,65 L155,55" stroke="#000" strokeWidth="2" />
+        {/* Mouth (Worried/Sarcastic Face) */}
+        <path d="M80,135 Q100,125 120,135" fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
+        {/* Blush */}
+        <circle cx="60" cy="110" r="10" fill="#FF80AB" opacity="0.4" />
+        <circle cx="140" cy="110" r="10" fill="#FF80AB" opacity="0.4" />
+      </svg>
+    </div>
+  </div>
+);
+
 const RiskWarningSection = ({ t }) => (
   <section className="relative py-20 sm:py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
+    {/* Pepe Couple Background */}
+    <PepeCoupleSVG />
+    
     <div className="section-container relative z-20">
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white relative group">
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white/90 backdrop-blur-sm relative group">
         <div className="absolute top-6 right-6 text-pepe-pink opacity-20 group-hover:opacity-100 transition-opacity"><Info size={40} strokeWidth={3} /></div>
         <Shield size={60} strokeWidth={3} className="sm:w-[100px] sm:h-[100px] text-pepe-pink mx-auto mb-6 sm:mb-10 animate-pulse" />
         <h2 className="text-2xl sm:text-7xl font-black uppercase italic mb-6 sm:mb-10 tracking-tight text-pepe-black drop-shadow-sm animate-title-gradient">{t('risk.title')}</h2>

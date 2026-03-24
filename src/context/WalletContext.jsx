@@ -4,7 +4,7 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { Web3Auth } from "@web3auth/modal";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
+import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
@@ -292,10 +292,22 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  const loginWithSocial = async () => {
+  const loginWithSocial = async (loginProvider = null) => {
     if (!web3auth) return;
     try {
-      const web3authProvider = await web3auth.connect();
+      let web3authProvider;
+      if (loginProvider) {
+        // Direct OAuth login (e.g., 'google', 'twitter')
+        web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+          loginSettings: {
+            loginProvider,
+          },
+        });
+      } else {
+        // Open Web3Auth Modal
+        web3authProvider = await web3auth.connect();
+      }
+
       setProvider(web3authProvider);
       
       const accounts = await web3authProvider.request({ method: "getAccounts" });
@@ -304,7 +316,7 @@ export const WalletProvider = ({ children }) => {
         return accounts[0];
       }
     } catch (error) {
-      console.error("Social login failed:", error);
+      console.error(`Social login (${loginProvider || 'modal'}) failed:`, error);
       throw error;
     }
   };
