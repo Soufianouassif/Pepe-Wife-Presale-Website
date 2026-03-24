@@ -10,15 +10,16 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      buffer: 'buffer',
+      'process/browser': 'process/browser',
       process: 'process/browser',
+      buffer: 'buffer',
       stream: 'stream-browserify',
       util: 'util',
       crypto: 'crypto-browserify',
     },
   },
   optimizeDeps: {
-    include: ['buffer', 'process', 'util', 'stream-browserify', 'crypto-browserify'],
+    include: ['process', 'buffer', 'util', 'stream-browserify', 'crypto-browserify'],
   },
   build: {
     rollupOptions: {
