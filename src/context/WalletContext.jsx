@@ -114,9 +114,17 @@ export const WalletProvider = ({ children }) => {
 
   useEffect(() => {
     // Use sessionStorage for temporary session state (more secure than localStorage)
-    const connected = sessionStorage.getItem('walletConnected') === 'true';
-    const savedAddress = sessionStorage.getItem('walletAddress') || '';
-    const savedType = sessionStorage.getItem('walletType') || '';
+    let connected = false;
+    let savedAddress = '';
+    let savedType = '';
+    
+    try {
+      connected = sessionStorage.getItem('walletConnected') === 'true';
+      savedAddress = sessionStorage.getItem('walletAddress') || '';
+      savedType = sessionStorage.getItem('walletType') || '';
+    } catch (e) {
+      console.warn("Storage access failed:", e);
+    }
     
     setIsConnected(connected);
     setAddress(savedAddress);
