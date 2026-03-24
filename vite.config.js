@@ -10,8 +10,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'process/browser': 'process/browser',
-      process: 'process/browser',
+      'process/': 'process/browser.js',
+      'process': 'process/browser.js',
       buffer: 'buffer',
       stream: 'stream-browserify',
       util: 'util',
