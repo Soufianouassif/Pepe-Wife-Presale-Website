@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       buffer: 'buffer',
+      process: 'process/browser',
       stream: 'stream-browserify',
       util: 'util',
       crypto: 'crypto-browserify',

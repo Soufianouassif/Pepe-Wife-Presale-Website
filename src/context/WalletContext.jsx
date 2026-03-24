@@ -130,24 +130,60 @@ export const WalletProvider = ({ children }) => {
     setAddress(savedAddress);
     setWalletType(savedType);
 
-    // Listen for MetaMask account changes
+    // Safe MetaMask/Ethereum event listeners
+    const registerEthereumEvents = (provider) => {
+      if (provider && typeof provider.on === 'function') {
+        try {
+          provider.on('accountsChanged', handleEthereumAccounts);
+          provider.on('chainChanged', handleEthereumChain);
+        } catch (e) {
+          console.warn("Failed to register Ethereum events for provider:", e);
+        }
+      }
+    };
+
+    const unregisterEthereumEvents = (provider) => {
+      if (provider && typeof provider.removeListener === 'function') {
+        try {
+          provider.removeListener('accountsChanged', handleEthereumAccounts);
+          provider.removeListener('chainChanged', handleEthereumChain);
+        } catch (e) {
+          console.warn("Failed to unregister Ethereum events for provider:", e);
+        }
+      }
+    };
+
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleEthereumAccounts);
-      window.ethereum.on('chainChanged', handleEthereumChain);
+      if (window.ethereum.providers) {
+        window.ethereum.providers.forEach(registerEthereumEvents);
+      } else {
+        registerEthereumEvents(window.ethereum);
+      }
     }
 
     // Listen for Phantom account changes
-    if (window.solana) {
-      window.solana.on('accountChanged', handleSolanaAccount);
+    if (window.solana && typeof window.solana.on === 'function') {
+      try {
+        window.solana.on('accountChanged', handleSolanaAccount);
+      } catch (e) {
+        console.warn("Failed to register Solana events:", e);
+      }
     }
 
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleEthereumAccounts);
-        window.ethereum.removeListener('chainChanged', handleEthereumChain);
+        if (window.ethereum.providers) {
+          window.ethereum.providers.forEach(unregisterEthereumEvents);
+        } else {
+          unregisterEthereumEvents(window.ethereum);
+        }
       }
-      if (window.solana) {
-        window.solana.removeListener('accountChanged', handleSolanaAccount);
+      if (window.solana && typeof window.solana.removeListener === 'function') {
+        try {
+          window.solana.removeListener('accountChanged', handleSolanaAccount);
+        } catch (e) {
+          console.warn("Failed to unregister Solana events:", e);
+        }
       }
     };
   }, []);

@@ -28,10 +28,13 @@
   <body>
     <div id="root"></div>
     <script>
-      window.global = window;
-      if (typeof window.process === 'undefined') {
-        window.process = { env: {} };
-      }
+      // Early polyfills to prevent "Buffer is not defined"
+      (function() {
+        window.global = window;
+        if (typeof window.process === 'undefined') {
+          window.process = { env: {} };
+        }
+      })();
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
