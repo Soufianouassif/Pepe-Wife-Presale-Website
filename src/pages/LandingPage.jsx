@@ -4,6 +4,7 @@ import { Menu, X, Rocket, Info, Shield, Map, HelpCircle, ArrowRight, Download, G
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
+import { formatAddress } from '../utils/format';
 import ProfitCalculator from '../components/ProfitCalculator';
 import ViewModeToggle from '../components/ViewModeToggle';
 
@@ -120,7 +121,7 @@ const WalletButton = ({ t }) => {
           <Globe size={20} strokeWidth={3} />
         )}
         <span>
-          {isConnected ? (address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : t('nav.wallet.connected')) : t('nav.wallet.connect')}
+          {isConnected ? formatAddress(address) : t('nav.wallet.connect')}
         </span>
       </span>
     </button>

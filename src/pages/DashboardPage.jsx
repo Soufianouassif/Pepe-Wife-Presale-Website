@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
+import { formatAddress } from '../utils/format';
 import { 
   Rocket, Shield, Globe, Copy, Check, Lock, 
   ExternalLink, TrendingUp, TrendingDown, 
@@ -33,9 +34,11 @@ const DashboardPage = () => {
   };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const sidebarItems = [
@@ -139,7 +142,7 @@ const DashboardPage = () => {
             
             <div className="flex items-center bg-pepe-black text-white px-6 py-2 rounded-2xl border-4 border-pepe-black shadow-[4px_4px_0_0_#FF69B4] hover:-translate-y-1 transition-all cursor-pointer">
               <Wallet size={20} className="mr-3 rtl:mr-0 rtl:ml-3 text-pepe-yellow" />
-              <span className="font-black text-sm">{address}</span>
+              <span className="font-black text-sm">{formatAddress(address)}</span>
             </div>
 
             <div className="w-12 h-12 bg-pepe-yellow rounded-xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] cursor-pointer hover:rotate-6 transition-transform">
@@ -244,7 +247,7 @@ const DashboardPage = () => {
                         <div className="flex flex-col">
                           <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Referral Link</span>
                           <code className="text-sm font-black text-pepe-black truncate max-w-[200px]">
-                            pepewife.com/?ref={address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : '...'}
+                            pepewife.com/?ref={formatAddress(address)}
                           </code>
                         </div>
                         <button 
@@ -364,7 +367,7 @@ const DashboardPage = () => {
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Unique Link</span>
                       <code className="text-sm font-black text-pepe-black">
-                        pepewife.com/?ref={address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : '...'}
+                        pepewife.com/?ref={formatAddress(address)}
                       </code>
                     </div>
                     <button onClick={copyAddress} className="p-4 bg-pepe-pink text-white rounded-xl border-4 border-pepe-black shadow-[4px_4px_0_0_#000] hover:translate-y-1 transition-all">

@@ -76,7 +76,7 @@ export const WalletProvider = ({ children }) => {
 
   const handleEthereumAccounts = (accounts) => {
     console.log("Ethereum accounts changed:", accounts);
-    if (accounts.length > 0) {
+    if (Array.isArray(accounts) && accounts.length > 0) {
       if (addressRef.current !== accounts[0]) {
         connect(accounts[0], 'MetaMask');
       }
@@ -225,7 +225,8 @@ export const WalletProvider = ({ children }) => {
         }
 
         // Convert amount to hex wei
-        const value = (parseFloat(amount) * 1e18).toString(16);
+        const parsedAmount = parseFloat(amount || '0');
+        const value = isNaN(parsedAmount) ? '0' : (parsedAmount * 1e18).toString(16);
         const params = [{
           from: address,
           to: to,
@@ -279,7 +280,7 @@ export const WalletProvider = ({ children }) => {
 
         const signedTx = await provider.request({
           method: "signTransaction",
-          params: { transaction: transaction.serialize({ verifySignatures: false }).toString("base64") },
+          params: { transaction: transaction?.serialize({ verifySignatures: false })?.toString("base64") || "" },
         });
 
         const signature = await connection.sendRawTransaction(Buffer.from(signedTx, "base64"));

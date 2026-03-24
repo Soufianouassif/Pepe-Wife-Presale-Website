@@ -231,7 +231,11 @@ const ConnectPage = () => {
 
       // 2. Attempt to connect to Phantom
       const response = await phantomProvider.connect();
-      const publicKey = response.publicKey.toString();
+      const publicKey = response?.publicKey?.toString() || '';
+
+      if (!publicKey) {
+        throw new Error('No public key returned');
+      }
 
       // 3. Update global context
       connect(publicKey, 'Phantom');
