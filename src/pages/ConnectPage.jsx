@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import { ethers } from 'ethers';
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X, ExternalLink, HelpCircle } from 'lucide-react';
 
 // --- CONFIGURATION ---
@@ -36,8 +35,12 @@ const ConnectPage = () => {
 
     try {
       const accounts = await provider.request({ method: 'eth_requestAccounts' });
-      connect(accounts[0], 'OKX');
-      navigate('/loading');
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        connect(accounts[0], 'OKX');
+        navigate('/loading');
+      } else {
+        throw new Error('No accounts returned from OKX');
+      }
     } catch (err) {
       console.error('OKX connection error:', err);
       setStatus('idle');
@@ -59,8 +62,12 @@ const ConnectPage = () => {
 
     try {
       const accounts = await provider.request({ method: 'eth_requestAccounts' });
-      connect(accounts[0], 'Binance');
-      navigate('/loading');
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        connect(accounts[0], 'Binance');
+        navigate('/loading');
+      } else {
+        throw new Error('No accounts returned from Binance Wallet');
+      }
     } catch (err) {
       console.error('Binance connection error:', err);
       setStatus('idle');
@@ -102,6 +109,9 @@ const ConnectPage = () => {
     setError(null);
 
     try {
+      // Dynamic import to avoid build-time issues if module is missing
+      const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
+      
       const provider = await EthereumProvider.init({
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
@@ -112,7 +122,7 @@ const ConnectPage = () => {
 
       await provider.connect();
       const accounts = provider.accounts;
-      const address = accounts[0];
+      const address = Array.isArray(accounts) ? accounts[0] : null;
 
       if (address) {
         connect(address, 'WalletConnect');
@@ -143,10 +153,14 @@ const ConnectPage = () => {
     try {
       const ethProvider = new ethers.BrowserProvider(provider);
       const accounts = await ethProvider.send("eth_requestAccounts", []);
-      const address = accounts[0];
-
-      connect(address, 'Trust Wallet');
-      navigate('/loading');
+      
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        const address = accounts[0];
+        connect(address, 'Trust Wallet');
+        navigate('/loading');
+      } else {
+        throw new Error('No accounts returned from Trust Wallet');
+      }
     } catch (err) {
       console.error('Trust Wallet error:', err);
       setStatus('idle');
@@ -182,26 +196,31 @@ const ConnectPage = () => {
       // 2. Request accounts using the specific provider
       const browserProvider = new ethers.BrowserProvider(provider);
       const accounts = await browserProvider.send("eth_requestAccounts", []);
-      const address = accounts[0];
+      
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        const address = accounts[0];
 
-      // 3. Check Network (Ethereum Mainnet is 1)
-      const network = await browserProvider.getNetwork();
-      if (network.chainId !== 1n) {
-        try {
-          await provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x1' }],
-          });
-        } catch (switchError) {
-          setStatus('idle');
-          setError(i18n.language === 'ar' ? 'يرجى التبديل إلى شبكة Ethereum Mainnet.' : 'Please switch to Ethereum Mainnet.');
-          return;
+        // 3. Check Network (Ethereum Mainnet is 1)
+        const network = await browserProvider.getNetwork();
+        if (network.chainId !== 1n) {
+          try {
+            await provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x1' }],
+            });
+          } catch (switchError) {
+            setStatus('idle');
+            setError(i18n.language === 'ar' ? 'يرجى التبديل إلى شبكة Ethereum Mainnet.' : 'Please switch to Ethereum Mainnet.');
+            return;
+          }
         }
-      }
 
-      // 4. Update global context
-      connect(address, 'MetaMask');
-      navigate('/loading');
+        // 4. Update global context
+        connect(address, 'MetaMask');
+        navigate('/loading');
+      } else {
+        throw new Error('No accounts returned from MetaMask');
+      }
     } catch (err) {
       console.error('MetaMask connection error:', err);
       setStatus('idle');

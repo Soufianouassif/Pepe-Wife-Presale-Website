@@ -247,32 +247,41 @@ const DashboardPage = () => {
                         <div className="flex flex-col">
                           <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Referral Link</span>
                           <code className="text-sm font-black text-pepe-black truncate max-w-[200px]">
-                            pepewife.com/?ref={formatAddress(address)}
+                            {address ? `pepewife.com/?ref=${address}` : 'Connect Wallet'}
                           </code>
                         </div>
                         <button 
-                          onClick={copyAddress}
-                          className={`p-4 rounded-xl border-4 border-pepe-black transition-all ${copied ? 'bg-pepe-green text-white' : 'bg-pepe-pink text-white hover:scale-110 shadow-[4px_4px_0_0_#000]'}`}
+                          onClick={() => {
+                            if (address) {
+                              navigator.clipboard.writeText(`pepewife.com/?ref=${address}`);
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            }
+                          }}
+                          className={`
+                            p-4 rounded-xl border-4 border-pepe-black transition-all shadow-[4px_4px_0_0_#000] active:translate-y-1 active:shadow-none
+                            ${copied ? 'bg-pepe-green text-pepe-black' : 'bg-pepe-pink text-white hover:rotate-6'}
+                          `}
                         >
                           {copied ? <Check size={24} strokeWidth={3} /> : <Copy size={24} strokeWidth={3} />}
                         </button>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/50 border-4 border-pepe-black p-4 rounded-2xl text-center">
-                          <p className="text-xs font-black uppercase text-gray-500">Total Referrals</p>
-                          <p className="text-3xl font-black">24</p>
+                        <div className="bg-white/40 backdrop-blur-sm border-4 border-pepe-black p-6 rounded-3xl text-center shadow-[4px_4px_0_0_#000]">
+                          <p className="text-[10px] font-black uppercase text-pepe-black/40 mb-1">Total Referrals</p>
+                          <p className="text-3xl font-black italic">12</p>
                         </div>
-                        <div className="bg-white/50 border-4 border-pepe-black p-4 rounded-2xl text-center">
-                          <p className="text-xs font-black uppercase text-gray-500">Earned Rewards</p>
-                          <p className="text-3xl font-black text-pepe-green">+5,200</p>
+                        <div className="bg-white/40 backdrop-blur-sm border-4 border-pepe-black p-6 rounded-3xl text-center shadow-[4px_4px_0_0_#000]">
+                          <p className="text-[10px] font-black uppercase text-pepe-black/40 mb-1">Earned Rewards</p>
+                          <p className="text-3xl font-black italic text-pepe-pink">4.5 SOL</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Calculator */}
-                  <div className="bg-white border-8 border-pepe-black rounded-[4rem] p-10 shadow-[20px_20px_0_0_#000]">
+                  {/* Profit Calculator Container */}
+                  <div className="lg:mt-0 mt-10">
                     <ProfitCalculator t={t} />
                   </div>
                 </div>

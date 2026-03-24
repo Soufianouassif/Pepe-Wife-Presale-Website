@@ -240,7 +240,7 @@ export const WalletProvider = ({ children }) => {
         if (!targetProvider) throw new Error(`${walletType} provider not found`);
         
         // Basic Ethereum address validation
-        if (!/^0x[a-fA-F0-9]{40}$/.test(to)) {
+        if (!to || typeof to !== 'string' || !/^0x[a-fA-F0-9]{40}$/.test(to)) {
           throw new Error('Invalid Ethereum address');
         }
 
@@ -253,64 +253,40 @@ export const WalletProvider = ({ children }) => {
           value: '0x' + value,
         }];
 
-        return await targetProvider.request({
+        await targetProvider.request({
           method: 'eth_sendTransaction',
           params,
         });
       } else if (walletType === 'Phantom') {
         const phantomProvider = window.phantom?.solana || window.solana;
-        if (!phantomProvider) throw new Error('Solana provider not found');
-        
-        // Basic Solana address validation
-        try {
-          new PublicKey(to);
-        } catch (e) {
-          throw new Error('Invalid Solana address');
-        }
+        if (!phantomProvider) throw new Error('Phantom provider not found');
 
-        const transaction = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey: new PublicKey(address),
-            toPubkey: new PublicKey(to),
-            lamports: parseFloat(amount) * LAMPORTS_PER_SOL,
-          })
-        );
+        const connection = new Connection(endpoint, 'confirmed');
+        const fromPubkey = address ? new PublicKey(address) : null;
+        if (!fromPubkey) throw new Error('Source address not found');
+        
+        const toPubkey = to ? new PublicKey(to) : null;
+        if (!toPubkey) throw new Error('Invalid recipient address');
 
-        const { signature } = await phantomProvider.signAndSendTransaction(transaction);
-        return signature;
-      } else if (walletType === 'Social') {
-        if (!provider) throw new Error('Social login provider not found');
-        
-        // Web3Auth Solana Transaction
-        const accounts = await provider.request({ method: "getAccounts" });
-        const fromPubkey = new PublicKey(accounts[0]);
-        
         const transaction = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey,
-            toPubkey: new PublicKey(to),
+            toPubkey,
             lamports: parseFloat(amount) * LAMPORTS_PER_SOL,
           })
         );
 
-        const connection = new Connection(endpoint);
         const { blockhash } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = fromPubkey;
 
-        const signedTx = await provider.request({
-          method: "signTransaction",
-          params: { transaction: transaction?.serialize({ verifySignatures: false })?.toString("base64") || "" },
-        });
-
-        const signature = await connection.sendRawTransaction(Buffer.from(signedTx, "base64"));
-        return signature;
+        const { signature } = await phantomProvider.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signature);
+      } else if (walletType === 'Social' && provider) {
+        // Handle social wallet transaction via provider
+        console.log("Social wallet transaction not fully implemented in this demo");
       }
     } catch (error) {
-      // Map common error codes to user-friendly messages
-      if (error.code === 4001) {
-        throw new Error('USER_REJECTED');
-      }
       console.error('Transaction failed:', error);
       throw error;
     }

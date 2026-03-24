@@ -104,6 +104,8 @@ const WalletButton = ({ t }) => {
     navigate('/connect');
   };
 
+  const displayAddress = isConnected ? formatAddress(address) : t('nav.wallet.connect');
+
   return (
     <button
       onClick={connectWallet}
@@ -121,7 +123,7 @@ const WalletButton = ({ t }) => {
           <Globe size={20} strokeWidth={3} />
         )}
         <span>
-          {isConnected ? formatAddress(address) : t('nav.wallet.connect')}
+          {displayAddress}
         </span>
       </span>
     </button>
