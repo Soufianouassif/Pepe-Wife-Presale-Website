@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
@@ -21,6 +21,15 @@ export const WalletProvider = ({ children }) => {
   const [walletType, setWalletType] = useState('');
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
+
+  // Refs for stable event handlers
+  const addressRef = useRef('');
+  const isConnectedRef = useRef(false);
+
+  useEffect(() => {
+    addressRef.current = address;
+    isConnectedRef.current = isConnected;
+  }, [address, isConnected]);
 
   // Solana setup
   const network = WalletAdapterNetwork.Mainnet;
@@ -65,22 +74,41 @@ export const WalletProvider = ({ children }) => {
     initWeb3Auth();
   }, [endpoint]);
 
-  // Use named functions for event listeners to avoid memory leaks
   const handleEthereumAccounts = (accounts) => {
+    console.log("Ethereum accounts changed:", accounts);
     if (accounts.length > 0) {
-      connect(accounts[0], 'MetaMask');
+      if (addressRef.current !== accounts[0]) {
+        connect(accounts[0], 'MetaMask');
+      }
     } else {
-      disconnect();
+      if (isConnectedRef.current) {
+        disconnect();
+      }
     }
   };
 
-  const handleEthereumChain = () => window.location.reload();
+  const handleEthereumChain = (chainId) => {
+    console.log("Ethereum chain changed:", chainId);
+    const lastChainId = sessionStorage.getItem('lastChainId');
+    if (lastChainId && lastChainId !== chainId) {
+      sessionStorage.setItem('lastChainId', chainId);
+      window.location.reload();
+    } else if (!lastChainId) {
+      sessionStorage.setItem('lastChainId', chainId);
+    }
+  };
 
   const handleSolanaAccount = (publicKey) => {
-    if (publicKey) {
-      connect(publicKey.toString(), 'Phantom');
+    console.log("Solana account changed:", publicKey?.toString());
+    const pubKeyStr = publicKey?.toString();
+    if (pubKeyStr) {
+      if (addressRef.current !== pubKeyStr) {
+        connect(pubKeyStr, 'Phantom');
+      }
     } else {
-      disconnect();
+      if (isConnectedRef.current) {
+        disconnect();
+      }
     }
   };
 
