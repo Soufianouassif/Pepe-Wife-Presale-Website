@@ -723,11 +723,14 @@ const BuyModal = ({ isOpen, onClose, t }) => {
 };
 
 const LandingPage = () => {
+  console.log("LandingPage: Component rendering...");
   const { t, i18n } = useTranslation();
+  console.log("LandingPage: t is ready, language:", i18n.language);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const isRTL = i18n.language === 'ar';
+  console.log("LandingPage: isRTL is", isRTL);
 
   useEffect(() => {
     document.body.dir = isRTL ? 'rtl' : 'ltr';

@@ -16,6 +16,7 @@ const WalletContext = createContext();
 const WEB3AUTH_CLIENT_ID = "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
 
 export const WalletProvider = ({ children }) => {
+  console.log("WalletProvider: Initializing state...");
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState('');
   const [walletType, setWalletType] = useState('');
@@ -33,12 +34,28 @@ export const WalletProvider = ({ children }) => {
 
   // Solana setup
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  const endpoint = useMemo(() => {
+    try {
+      return clusterApiUrl(network);
+    } catch (e) {
+      console.error("WalletProvider: Failed to get cluster API URL", e);
+      return "";
+    }
+  }, [network]);
+
+  const wallets = useMemo(() => {
+    try {
+      return [new PhantomWalletAdapter()];
+    } catch (e) {
+      console.error("WalletProvider: Failed to initialize Phantom adapter", e);
+      return [];
+    }
+  }, []);
 
   useEffect(() => {
     const initWeb3Auth = async () => {
       try {
+        console.log("WalletProvider: Initializing Web3Auth...");
         const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.SOLANA,
           chainId: "0x1", // Mainnet
@@ -55,7 +72,7 @@ export const WalletProvider = ({ children }) => {
 
         const web3authInstance = new Web3Auth({
           clientId: WEB3AUTH_CLIENT_ID,
-          web3AuthNetwork: "cyan", // Use 'cyan' or 'mainnet' based on your project settings
+          web3AuthNetwork: "cyan",
           chainConfig,
           privateKeyProvider: solanaPrivateKeyProvider,
         });
@@ -66,12 +83,13 @@ export const WalletProvider = ({ children }) => {
         if (web3authInstance.provider) {
           setProvider(web3authInstance.provider);
         }
+        console.log("WalletProvider: Web3Auth initialized.");
       } catch (error) {
-        console.error("Web3Auth initialization failed:", error);
+        console.error("WalletProvider: Web3Auth initialization failed:", error);
       }
     };
 
-    initWeb3Auth();
+    if (endpoint) initWeb3Auth();
   }, [endpoint]);
 
   const handleEthereumAccounts = (accounts) => {
@@ -131,33 +149,35 @@ export const WalletProvider = ({ children }) => {
     setWalletType(savedType);
 
     // Safe MetaMask/Ethereum event listeners
-    const registerEthereumEvents = (provider) => {
-      if (provider && typeof provider.on === 'function') {
+    const registerEthereumEvents = (ethProvider) => {
+      if (ethProvider && typeof ethProvider.on === 'function') {
         try {
-          provider.on('accountsChanged', handleEthereumAccounts);
-          provider.on('chainChanged', handleEthereumChain);
+          // Check if it's already registered to avoid duplicates
+          ethProvider.on('accountsChanged', handleEthereumAccounts);
+          ethProvider.on('chainChanged', handleEthereumChain);
         } catch (e) {
           console.warn("Failed to register Ethereum events for provider:", e);
         }
       }
     };
 
-    const unregisterEthereumEvents = (provider) => {
-      if (provider && typeof provider.removeListener === 'function') {
+    const unregisterEthereumEvents = (ethProvider) => {
+      if (ethProvider && typeof ethProvider.removeListener === 'function') {
         try {
-          provider.removeListener('accountsChanged', handleEthereumAccounts);
-          provider.removeListener('chainChanged', handleEthereumChain);
+          ethProvider.removeListener('accountsChanged', handleEthereumAccounts);
+          ethProvider.removeListener('chainChanged', handleEthereumChain);
         } catch (e) {
           console.warn("Failed to unregister Ethereum events for provider:", e);
         }
       }
     };
 
-    if (window.ethereum) {
-      if (window.ethereum.providers) {
-        window.ethereum.providers.forEach(registerEthereumEvents);
+    const eth = window.ethereum;
+    if (eth) {
+      if (Array.isArray(eth.providers)) {
+        eth.providers.forEach(registerEthereumEvents);
       } else {
-        registerEthereumEvents(window.ethereum);
+        registerEthereumEvents(eth);
       }
     }
 

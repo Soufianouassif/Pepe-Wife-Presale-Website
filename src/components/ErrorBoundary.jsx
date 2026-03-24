@@ -20,30 +20,40 @@ class ErrorBoundary extends React.Component {
         <div style={{ 
           padding: '20px', 
           textAlign: 'center', 
-          backgroundColor: '#fff', 
-          color: '#000',
+          backgroundColor: '#ff0000', 
+          color: '#fff',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          fontFamily: 'sans-serif'
+          fontFamily: 'sans-serif',
+          zIndex: 9999,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
         }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Oops! Something went wrong.</h1>
-          <p style={{ marginBottom: '2rem' }}>{this.state.error?.message || "An unexpected error occurred."}</p>
+          <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>CRITICAL ERROR CAUGHT</h1>
+          <pre style={{ backgroundColor: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '10px', maxWidth: '90%', overflow: 'auto' }}>
+            {this.state.error?.stack || this.state.error?.message || "Unknown error"}
+          </pre>
           <button 
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.location.reload()}
             style={{
-              padding: '10px 20px',
-              backgroundColor: '#000',
-              color: '#fff',
+              marginTop: '20px',
+              padding: '15px 30px',
+              backgroundColor: '#fff',
+              color: '#ff0000',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              fontSize: '1.2rem'
             }}
           >
-            Go Back Home
+            Reload Page
           </button>
         </div>
       );

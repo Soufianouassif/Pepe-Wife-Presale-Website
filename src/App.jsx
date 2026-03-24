@@ -9,7 +9,9 @@ import LoadingPage from './pages/LoadingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  console.log("App: Component rendering...");
   const { i18n } = useTranslation();
+  console.log("App: i18n language is", i18n.language);
   const isRTL = i18n.language === 'ar';
   const isFrench = i18n.language === 'fr';
   const [viewMode, setViewMode] = useState(() => {
@@ -19,6 +21,7 @@ function App() {
       return 'mobile';
     }
   });
+  console.log("App: viewMode is", viewMode);
 
   useEffect(() => {
     // ...
