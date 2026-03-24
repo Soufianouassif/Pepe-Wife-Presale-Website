@@ -9,7 +9,7 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { Globe, Shield, Rocket, ArrowLeft, Check, Lock, Wallet, AlertCircle, X, ExternalLink, HelpCircle } from 'lucide-react';
 
 // --- CONFIGURATION ---
-const WALLETCONNECT_PROJECT_ID = 'YOUR_PROJECT_ID_HERE'; // Replace with real ID from cloud.walletconnect.com
+const WALLETCONNECT_PROJECT_ID = '90be08cc5b7174d4051d2de451af0d9b'; // Updated with the provided ID
 // ---------------------
 
 const ConnectPage = () => {
