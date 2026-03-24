@@ -14,6 +14,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 const WalletContext = createContext();
 
 const WEB3AUTH_CLIENT_ID = "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
+const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
 
 export const WalletProvider = ({ children }) => {
   console.log("WalletProvider: Initializing state...");
@@ -22,6 +23,7 @@ export const WalletProvider = ({ children }) => {
   const [walletType, setWalletType] = useState('');
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Refs for stable event handlers
   const addressRef = useRef('');
@@ -55,6 +57,7 @@ export const WalletProvider = ({ children }) => {
   useEffect(() => {
     const initWeb3Auth = async () => {
       try {
+        setIsInitializing(true);
         console.log("WalletProvider: Initializing Web3Auth...");
         const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -86,6 +89,8 @@ export const WalletProvider = ({ children }) => {
         console.log("WalletProvider: Web3Auth initialized.");
       } catch (error) {
         console.error("WalletProvider: Web3Auth initialization failed:", error);
+      } finally {
+        setIsInitializing(false);
       }
     };
 
@@ -380,7 +385,7 @@ export const WalletProvider = ({ children }) => {
       const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
       
       const providerWC = await EthereumProvider.init({
-        projectId: WEB3AUTH_CLIENT_ID, // Using the same ID or a dedicated WC ID
+        projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
         chains: [56], // BSC Mainnet for Binance
         methods: ["eth_sendTransaction", "personal_sign"],
@@ -408,6 +413,7 @@ export const WalletProvider = ({ children }) => {
           address, 
           walletType, 
           provider, 
+          isInitializing,
           connect, 
           disconnect, 
           sendTransaction, 

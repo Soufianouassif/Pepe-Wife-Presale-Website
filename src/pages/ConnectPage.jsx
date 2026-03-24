@@ -8,7 +8,7 @@ import { ethers } from 'ethers';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   Wallet, AlertCircle, X, ExternalLink, HelpCircle,
-  Mail
+  Mail, Zap
 } from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
@@ -53,7 +53,7 @@ const BackgroundDecor = React.memo(() => (
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
-  const { connect, loginWithSocial, connectEVMWallet, connectWalletConnect } = useWallet();
+  const { connect, loginWithSocial, connectEVMWallet, connectWalletConnect, isInitializing } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); 
@@ -101,15 +101,17 @@ const ConnectPage = () => {
       console.error(`ConnectPage: ${walletId} error:`, err);
       setStatus('idle');
       // Special message for Binance QR if no extension
-      if (walletId === 'Binance' && err.message.includes('not found')) {
+      const errMsg = err?.message || '';
+      if (walletId === 'Binance' && (errMsg.includes('not found') || errMsg.includes('provider'))) {
         setError(i18n.language === 'ar' ? 'يتم الآن فتح QR Code للربط بتطبيق Binance...' : 'Opening QR Code to connect with Binance App...');
       } else {
-        setError(err.message || 'Connection failed');
+        setError(errMsg || 'Connection failed');
       }
     }
   }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language]);
 
   const handleSocialConnect = useCallback(async (loginProvider) => {
+    if (isInitializing) return;
     setStatus('connecting');
     setError(null);
     try {
@@ -125,7 +127,7 @@ const ConnectPage = () => {
       setStatus('idle');
       setError(err.message || `${loginProvider} login failed.`);
     }
-  }, [loginWithSocial, navigate, i18n.language]);
+  }, [loginWithSocial, navigate, isInitializing]);
 
   const handleConnect = useCallback((walletId) => {
     if (walletId === 'google' || walletId === 'twitter') {
@@ -212,15 +214,31 @@ const ConnectPage = () => {
             <div className="space-y-6">
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Social Login</h2>
               <div className="grid grid-cols-2 gap-4">
-                {socialOptions.map((social) => (
+                {socialOptions.map((option) => (
                   <button
-                    key={social.id}
-                    onClick={() => handleConnect(social.id)}
-                    disabled={status === 'connecting'}
-                    className="flex items-center justify-center gap-3 p-4 rounded-2xl border-4 border-pepe-black bg-white shadow-[4px_4px_0_0_#000] hover:-translate-y-1 transition-all active:scale-95"
+                    key={option.id}
+                    onClick={() => handleConnect(option.id)}
+                    disabled={status === 'connecting' || isInitializing}
+                    className={`
+                      relative group flex flex-col items-center gap-3 p-6 rounded-3xl border-4 
+                      transition-all duration-300 active:scale-95
+                      ${option.borderColor} ${option.color}
+                      ${status === 'connecting' || isInitializing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[8px_8px_0_0_#000] hover:-translate-y-1'}
+                    `}
                   >
-                    <div className="w-6 h-6">{social.icon}</div>
-                    <span className="font-black uppercase text-xs">{social.name}</span>
+                    <div className="w-10 h-10 flex items-center justify-center">
+                      {isInitializing ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        >
+                          <Zap size={20} className="text-gray-400" />
+                        </motion.div>
+                      ) : option.icon}
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${option.id === 'twitter' ? 'text-white' : 'text-pepe-black'}`}>
+                      {isInitializing ? (i18n.language === 'ar' ? 'تحميل...' : 'Loading...') : option.name}
+                    </span>
                   </button>
                 ))}
               </div>

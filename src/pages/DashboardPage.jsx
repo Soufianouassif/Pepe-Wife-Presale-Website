@@ -295,7 +295,7 @@ const DashboardPage = () => {
                         <p className="text-[10px] font-black uppercase text-gray-400 px-2 tracking-widest">Your unique referral link</p>
                         <div className="bg-white border-2 border-pepe-black/10 rounded-2xl p-4 flex items-center justify-between gap-4">
                           <code className="text-sm font-black text-pepe-black truncate">
-                            {address ? `pepewife.com/?ref=${address.slice(0, 10)}...` : 'Connect Wallet'}
+                            {address ? `pepewife.com/?ref=${formatAddress(address)}` : 'Connect Wallet'}
                           </code>
                           <button 
                             onClick={copyAddress}
@@ -443,7 +443,7 @@ const DashboardPage = () => {
                       <div className="flex flex-col gap-2">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Share this link to earn</span>
                         <code className="text-xl font-black text-pepe-black tracking-tight">
-                          pepewife.com/?ref={address?.slice(0, 15)}...
+                          pepewife.com/?ref={formatAddress(address)}
                         </code>
                       </div>
                       <button onClick={copyAddress} className="w-full md:w-auto px-10 py-5 bg-pepe-pink text-white rounded-2xl border-4 border-pepe-black shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all flex items-center justify-center gap-3">
