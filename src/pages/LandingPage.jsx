@@ -120,7 +120,7 @@ const WalletButton = ({ t }) => {
           <Globe size={20} strokeWidth={3} />
         )}
         <span>
-          {isConnected ? (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : t('nav.wallet.connected')) : t('nav.wallet.connect')}
+          {isConnected ? (address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : t('nav.wallet.connected')) : t('nav.wallet.connect')}
         </span>
       </span>
     </button>

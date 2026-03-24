@@ -243,7 +243,9 @@ const DashboardPage = () => {
                       <div className="bg-white border-4 border-pepe-black rounded-2xl p-6 flex items-center justify-between shadow-[8px_8px_0_0_#000]">
                         <div className="flex flex-col">
                           <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Referral Link</span>
-                          <code className="text-sm font-black text-pepe-black truncate max-w-[200px]">pepewife.com/?ref={address?.slice(0, 6)}...{address?.slice(-4)}</code>
+                          <code className="text-sm font-black text-pepe-black truncate max-w-[200px]">
+                            pepewife.com/?ref={address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : '...'}
+                          </code>
                         </div>
                         <button 
                           onClick={copyAddress}
@@ -361,7 +363,9 @@ const DashboardPage = () => {
                   <div className="bg-white border-4 border-pepe-black rounded-2xl p-6 flex items-center justify-between shadow-[8px_8px_0_0_#000]">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Unique Link</span>
-                      <code className="text-sm font-black text-pepe-black">pepewife.com/?ref={address?.slice(0, 6)}...{address?.slice(-4)}</code>
+                      <code className="text-sm font-black text-pepe-black">
+                        pepewife.com/?ref={address && typeof address === 'string' ? `${address.slice(0, 6)}...${address.slice(-4)}` : '...'}
+                      </code>
                     </div>
                     <button onClick={copyAddress} className="p-4 bg-pepe-pink text-white rounded-xl border-4 border-pepe-black shadow-[4px_4px_0_0_#000] hover:translate-y-1 transition-all">
                       <Copy size={24} />
