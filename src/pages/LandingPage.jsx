@@ -448,48 +448,51 @@ const WhyBuySection = ({ t }) => (
 );
 
 const PepeCoupleSVG = () => (
-  <div className="absolute inset-0 z-0 pointer-events-none opacity-10 flex items-center justify-around px-10 overflow-hidden">
-    {/* Pepe the Frog */}
-    <div className="w-64 h-64 relative transform -rotate-12 translate-y-10">
+  <div className="absolute inset-0 z-0 pointer-events-none opacity-15 flex items-center justify-around px-10 overflow-hidden">
+    {/* Pepe the Frog - Sarcastic/Funny Face */}
+    <div className="w-64 h-64 relative transform -rotate-12 translate-y-10 scale-125">
       <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        {/* Head Shape */}
-        <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" fill="#4CAF50" stroke="#000" strokeWidth="4" />
-        {/* Eyes */}
-        <ellipse cx="75" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
-        <ellipse cx="125" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
-        <circle cx="75" cy="85" r="8" fill="black" />
-        <circle cx="125" cy="85" r="8" fill="black" />
-        {/* Mouth (Sad/Risk Face) */}
-        <path d="M70,130 Q100,110 130,130" fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-        {/* Eyelids */}
-        <path d="M50,70 Q75,50 100,70" fill="none" stroke="#000" strokeWidth="2" />
-        <path d="M100,70 Q125,50 150,70" fill="none" stroke="#000" strokeWidth="2" />
+        {/* Head */}
+        <path d="M30,110 Q30,40 100,40 Q170,40 170,110 Q170,180 100,180 Q30,180 30,110" fill="#4CAF50" stroke="#000" strokeWidth="5" />
+        {/* Famous Big Eyes */}
+        <ellipse cx="70" cy="80" rx="30" ry="35" fill="white" stroke="#000" strokeWidth="4" />
+        <ellipse cx="130" cy="80" rx="30" ry="35" fill="white" stroke="#000" strokeWidth="4" />
+        {/* Pupils looking slightly upward/sarcastic */}
+        <circle cx="70" cy="75" r="10" fill="black" />
+        <circle cx="130" cy="75" r="10" fill="black" />
+        {/* Sarcastic Mouth */}
+        <path d="M60,140 Q100,160 140,140" fill="none" stroke="#000" strokeWidth="5" strokeLinecap="round" />
+        <path d="M50,130 Q60,135 70,130" fill="none" stroke="#000" strokeWidth="3" />
+        <path d="M130,130 Q140,135 150,130" fill="none" stroke="#000" strokeWidth="3" />
+        {/* Heavy Eyelids */}
+        <path d="M40,75 Q70,50 100,75" fill="none" stroke="#000" strokeWidth="3" />
+        <path d="M100,75 Q130,50 160,75" fill="none" stroke="#000" strokeWidth="3" />
       </svg>
     </div>
 
-    {/* Pepe's Wife */}
-    <div className="w-64 h-64 relative transform rotate-12 -translate-y-10">
+    {/* Pepe's Wife - Funny/Sarcastic Female Version */}
+    <div className="w-64 h-64 relative transform rotate-12 -translate-y-10 scale-125">
       <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        {/* Head Shape (Pepe Green but with pinkish tint or accessories) */}
-        <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" fill="#81C784" stroke="#000" strokeWidth="4" />
-        {/* Hair/Bow */}
-        <path d="M80,40 Q100,10 120,40" fill="#FF4081" stroke="#000" strokeWidth="2" />
-        <circle cx="100" cy="35" r="8" fill="#FF4081" stroke="#000" strokeWidth="2" />
-        {/* Eyes with Eyelashes */}
-        <ellipse cx="75" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
-        <ellipse cx="125" cy="80" rx="25" ry="30" fill="white" stroke="#000" strokeWidth="3" />
-        <circle cx="75" cy="85" r="8" fill="black" />
-        <circle cx="125" cy="85" r="8" fill="black" />
+        {/* Head */}
+        <path d="M30,110 Q30,40 100,40 Q170,40 170,110 Q170,180 100,180 Q30,180 30,110" fill="#81C784" stroke="#000" strokeWidth="5" />
+        {/* Big Pink Bow */}
+        <path d="M80,30 L120,30 L130,10 L70,10 Z" fill="#FF4081" stroke="#000" strokeWidth="3" />
+        <circle cx="100" cy="25" r="12" fill="#FF4081" stroke="#000" strokeWidth="3" />
+        {/* Big Eyes with Long Eyelashes */}
+        <ellipse cx="70" cy="80" rx="30" ry="35" fill="white" stroke="#000" strokeWidth="4" />
+        <ellipse cx="130" cy="80" rx="30" ry="35" fill="white" stroke="#000" strokeWidth="4" />
+        <circle cx="70" cy="85" r="10" fill="black" />
+        <circle cx="130" cy="85" r="10" fill="black" />
         {/* Eyelashes */}
-        <path d="M55,65 L45,55" stroke="#000" strokeWidth="2" />
-        <path d="M65,55 L60,40" stroke="#000" strokeWidth="2" />
-        <path d="M135,55 L140,40" stroke="#000" strokeWidth="2" />
-        <path d="M145,65 L155,55" stroke="#000" strokeWidth="2" />
-        {/* Mouth (Worried/Sarcastic Face) */}
-        <path d="M80,135 Q100,125 120,135" fill="none" stroke="#000" strokeWidth="4" strokeLinecap="round" />
+        <path d="M40,60 L25,40" stroke="#000" strokeWidth="3" strokeLinecap="round" />
+        <path d="M55,50 L45,30" stroke="#000" strokeWidth="3" strokeLinecap="round" />
+        <path d="M145,50 L155,30" stroke="#000" strokeWidth="3" strokeLinecap="round" />
+        <path d="M160,60 L175,40" stroke="#000" strokeWidth="3" strokeLinecap="round" />
+        {/* Sarcastic/Worried Smile */}
+        <path d="M75,145 Q100,130 125,145" fill="none" stroke="#000" strokeWidth="5" strokeLinecap="round" />
         {/* Blush */}
-        <circle cx="60" cy="110" r="10" fill="#FF80AB" opacity="0.4" />
-        <circle cx="140" cy="110" r="10" fill="#FF80AB" opacity="0.4" />
+        <circle cx="50" cy="120" r="15" fill="#FF80AB" opacity="0.5" />
+        <circle cx="150" cy="120" r="15" fill="#FF80AB" opacity="0.5" />
       </svg>
     </div>
   </div>

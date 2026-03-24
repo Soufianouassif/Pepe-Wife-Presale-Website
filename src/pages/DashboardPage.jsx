@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -9,13 +9,15 @@ import {
   ExternalLink, TrendingUp, TrendingDown, 
   ArrowLeft, LogOut, LayoutDashboard, Wallet,
   Flame, ShieldCheck, Droplets, History, Settings,
-  HelpCircle, User, Menu, X, Bell
+  HelpCircle, User, Menu, X, Bell, Zap,
+  ChevronRight, ArrowUpRight, Plus, Minus
 } from 'lucide-react';
 import ProfitCalculator from '../components/ProfitCalculator';
+import BuyBox from '../components/BuyBox';
 
 const DashboardPage = () => {
   const { t, i18n } = useTranslation();
-  const { isConnected, address, disconnect } = useWallet();
+  const { isConnected, address, disconnect, walletType } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [copied, setCopied] = useState(false);
@@ -41,118 +43,142 @@ const DashboardPage = () => {
     }
   };
 
-  const sidebarItems = [
-    { id: 'overview', icon: <LayoutDashboard size={24} />, label: t('dashboard.tabs.overview', 'Overview') },
-    { id: 'history', icon: <History size={24} />, label: t('dashboard.tabs.history', 'History') },
-    { id: 'referrals', icon: <Globe size={24} />, label: t('dashboard.tabs.referrals', 'Referrals') },
-    { id: 'staking', icon: <Lock size={24} />, label: t('dashboard.tabs.staking', 'Staking') },
-    { id: 'settings', icon: <Settings size={24} />, label: t('dashboard.tabs.settings', 'Settings') },
-  ];
+  const sidebarItems = useMemo(() => [
+    { id: 'overview', icon: <LayoutDashboard size={22} />, label: t('dashboard.tabs.overview', 'Overview') },
+    { id: 'history', icon: <History size={22} />, label: t('dashboard.tabs.history', 'History') },
+    { id: 'referrals', icon: <Globe size={22} />, label: t('dashboard.tabs.referrals', 'Referrals') },
+    { id: 'staking', icon: <Lock size={22} />, label: t('dashboard.tabs.staking', 'Staking') },
+    { id: 'settings', icon: <Settings size={22} />, label: t('dashboard.tabs.settings', 'Settings') },
+  ], [t]);
+
+  const BackgroundDecor = React.memo(() => (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-pepe-yellow/10 blur-[150px] rounded-full" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-pepe-pink/5 blur-[120px] rounded-full" />
+      <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-pepe-green/5 blur-[100px] rounded-full" />
+    </div>
+  ));
 
   return (
-    <div className={`min-h-screen bg-[#F0F2F5] text-pepe-black font-sans flex ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Sidebar - Desktop */}
+    <div className={`min-h-screen bg-[#F8FAFC] text-pepe-black font-sans flex ${isRTL ? 'rtl' : 'ltr'}`}>
+      <BackgroundDecor />
+
+      {/* Sidebar - Professional & Sleek */}
       <aside className={`
-        fixed inset-y-0 z-50 w-80 bg-white border-r-8 border-pepe-black transition-transform duration-300 lg:translate-x-0 lg:static lg:block
+        fixed inset-y-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r-4 border-pepe-black/5 transition-transform duration-300 lg:translate-x-0 lg:static lg:block
         ${isSidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
       `}>
-        <div className="h-full flex flex-col p-8 space-y-10">
-          {/* Logo */}
-          <div className="flex items-center space-x-4 space-x-reverse cursor-pointer group" onClick={() => navigate('/')}>
-            <div className="flex items-center space-x-2 space-x-reverse group-hover:scale-105 transition-transform">
-              <img src="/assets/hero-character.png" alt="Logo" className="w-14 h-14 object-contain" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-black uppercase leading-none bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                  Pepe Wife
-                </span>
-                <span className="text-xs font-black uppercase tracking-widest bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                  $PWIFE
-                </span>
-              </div>
+        <div className="h-full flex flex-col p-6 space-y-8">
+          {/* Logo Section */}
+          <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group px-2" onClick={() => navigate('/')}>
+            <div className="w-12 h-12 bg-white rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:rotate-6 transition-transform overflow-hidden">
+              <img src="/assets/hero-character.png" alt="Logo" className="w-10 h-10 object-contain" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-black uppercase italic tracking-tighter">
+                PEPE<span className="text-pepe-pink">WIFE</span>
+              </span>
+              <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none">
+                PRE-SALE HUB
+              </span>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-4">
+          {/* Navigation Links */}
+          <nav className="flex-1 space-y-2">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                }}
                 className={`
-                  w-full flex items-center space-x-4 space-x-reverse p-4 rounded-2xl border-4 transition-all
+                  w-full flex items-center justify-between p-4 rounded-2xl transition-all group
                   ${activeTab === item.id 
-                    ? 'bg-pepe-yellow border-pepe-black shadow-[6px_6px_0_0_#000] translate-x-1 translate-y-1' 
-                    : 'bg-white border-transparent hover:bg-gray-50'}
+                    ? 'bg-pepe-black text-white shadow-[8px_8px_0_0_#FF69B4] -translate-y-1' 
+                    : 'text-gray-400 hover:bg-gray-100 hover:text-pepe-black'}
                 `}
               >
-                <div className={`${activeTab === item.id ? 'text-pepe-black' : 'text-gray-400'}`}>
-                  {item.icon}
+                <div className="flex items-center gap-4">
+                  <div className={`${activeTab === item.id ? 'text-pepe-yellow' : 'group-hover:text-pepe-pink'}`}>
+                    {item.icon}
+                  </div>
+                  <span className="font-black uppercase italic text-sm tracking-tight">
+                    {item.label}
+                  </span>
                 </div>
-                <span className={`text-lg font-black uppercase italic ${activeTab === item.id ? 'text-pepe-black' : 'text-gray-400'}`}>
-                  {item.label}
-                </span>
+                {activeTab === item.id && <ChevronRight size={18} className="text-white/20" />}
               </button>
             ))}
           </nav>
 
-          {/* Bottom Sidebar Info */}
-          <div className="pt-6 border-t-4 border-pepe-black/5 space-y-6">
-            <div className="bg-pepe-pink/10 p-6 rounded-[2rem] border-4 border-pepe-black text-center space-y-4">
-              <div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#000]">
-                <HelpCircle size={24} className="text-white" />
+          {/* User Profile Card Mini */}
+          <div className="pt-6 border-t-2 border-gray-100 space-y-4">
+            <div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-pepe-yellow rounded-xl border-2 border-pepe-black flex items-center justify-center">
+                  <User size={20} strokeWidth={3} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase text-gray-400">Connected via</span>
+                  <span className="text-xs font-black uppercase">{walletType || 'Wallet'}</span>
+                </div>
               </div>
-              <p className="text-sm font-black uppercase">Need Help?</p>
-              <button className="w-full bg-white border-4 border-pepe-black py-2 rounded-xl text-xs font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-y-1 hover:shadow-none transition-all">
-                Contact Support
+              <button 
+                onClick={handleDisconnect}
+                className="w-full flex items-center justify-center gap-2 bg-white border-2 border-red-500/20 py-2 rounded-xl text-[10px] font-black uppercase text-red-500 hover:bg-red-500 hover:text-white transition-all"
+              >
+                <LogOut size={14} strokeWidth={3} />
+                <span>{t('dashboard.disconnect')}</span>
               </button>
             </div>
-
-            <button 
-              onClick={handleDisconnect}
-              className="w-full flex items-center justify-center space-x-3 space-x-reverse bg-red-50 text-red-500 border-4 border-red-500 p-4 rounded-2xl font-black uppercase italic hover:bg-red-500 hover:text-white transition-all shadow-[6px_6px_0_0_rgba(239,68,68,0.2)]"
-            >
-              <LogOut size={24} strokeWidth={3} />
-              <span>{t('dashboard.disconnect')}</span>
-            </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top Navbar */}
-        <header className="bg-white border-b-8 border-pepe-black p-6 sticky top-0 z-40 flex items-center justify-between">
-          <div className="flex items-center space-x-4 space-x-reverse">
+      {/* Main Layout */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Modern Top Header */}
+        <header className="h-24 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 bg-white/50 backdrop-blur-md border-b-2 border-gray-100">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-3 border-4 border-pepe-black rounded-xl hover:bg-pepe-yellow transition-colors"
+              className="lg:hidden p-3 bg-white border-2 border-pepe-black rounded-xl hover:bg-pepe-yellow transition-colors"
             >
-              {isSidebarOpen ? <X size={24} strokeWidth={3} /> : <Menu size={24} strokeWidth={3} />}
+              <Menu size={24} strokeWidth={3} />
             </button>
-            <h2 className="text-2xl font-black uppercase italic hidden sm:block">
-              {sidebarItems.find(i => i.id === activeTab)?.label}
-            </h2>
+            <div className="hidden lg:block">
+              <h2 className="text-3xl font-black uppercase italic animate-title-gradient">
+                {sidebarItems.find(i => i.id === activeTab)?.label}
+              </h2>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <button className="p-3 bg-white border-4 border-pepe-black rounded-xl shadow-[4px_4px_0_0_#000] hover:translate-y-1 hover:shadow-none transition-all relative">
-              <Bell size={24} strokeWidth={3} />
-              <span className="absolute top-0 right-0 w-4 h-4 bg-pepe-pink rounded-full border-2 border-pepe-black animate-pulse" />
-            </button>
-            
-            <div className="flex items-center bg-pepe-black text-white px-6 py-2 rounded-2xl border-4 border-pepe-black shadow-[4px_4px_0_0_#FF69B4] hover:-translate-y-1 transition-all cursor-pointer">
-              <Wallet size={20} className="mr-3 rtl:mr-0 rtl:ml-3 text-pepe-yellow" />
-              <span className="font-black text-sm">{formatAddress(address)}</span>
+          <div className="flex items-center gap-4">
+            {/* Network Indicator */}
+            <div className="hidden md:flex items-center gap-2 bg-pepe-green/10 px-4 py-2 rounded-full border-2 border-pepe-green/20">
+              <div className="w-2 h-2 bg-pepe-green rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase text-pepe-green">Mainnet Alpha</span>
             </div>
 
-            <div className="w-12 h-12 bg-pepe-yellow rounded-xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] cursor-pointer hover:rotate-6 transition-transform">
-              <User size={28} strokeWidth={3} />
+            {/* Notification & Wallet */}
+            <div className="flex items-center gap-3">
+              <button className="w-12 h-12 bg-white border-2 border-gray-100 rounded-2xl flex items-center justify-center hover:border-pepe-black transition-all relative">
+                <Bell size={20} />
+                <span className="absolute top-3 right-3 w-2 h-2 bg-pepe-pink rounded-full border-2 border-white" />
+              </button>
+              
+              <div className="flex items-center bg-pepe-black text-white px-5 h-12 rounded-2xl border-2 border-pepe-black shadow-[4px_4px_0_0_#FF69B4] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer">
+                <Wallet size={18} className="mr-3 rtl:mr-0 rtl:ml-3 text-pepe-yellow" />
+                <span className="font-black text-xs tracking-wider">{formatAddress(address)}</span>
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Scrollable Content */}
-        <main className="flex-1 p-6 lg:p-10 space-y-10">
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10 bg-transparent">
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && (
               <motion.div
@@ -160,162 +186,186 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="space-y-10"
+                className="max-w-7xl mx-auto space-y-10 pb-10"
               >
-                {/* Welcome & Quick Stats */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Main Balance Card */}
-                  <div className="lg:col-span-2 bg-pepe-black text-white p-10 rounded-[3rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] relative overflow-hidden flex flex-col justify-between min-h-[350px] group">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-pepe-pink opacity-10 rounded-full -mr-48 -mt-48 group-hover:scale-110 transition-transform duration-1000" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-pepe-yellow opacity-5 rounded-full -ml-32 -mb-32" />
-                    
-                    <div className="relative z-10 space-y-8">
-                      <div className="flex justify-between items-start">
-                        <div className="bg-white/10 px-6 py-2 rounded-full border-2 border-white/20 flex items-center space-x-3 space-x-reverse backdrop-blur-md">
-                          <Rocket className="text-pepe-yellow" size={20} />
-                          <span className="text-xs font-black uppercase tracking-[0.2em]">{t('dashboard.balance')}</span>
+                {/* Hero Section: Balance & Buy Box */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+                  
+                  {/* Premium Balance Card */}
+                  <div className="lg:col-span-3 flex flex-col gap-8">
+                    <div className="bg-pepe-black text-white p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#FF69B4] relative overflow-hidden flex flex-col justify-between min-h-[420px] group">
+                      {/* Decorative Background */}
+                      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pepe-pink opacity-5 rounded-full -mr-[250px] -mt-[250px] blur-[100px] group-hover:opacity-20 transition-opacity duration-1000" />
+                      <div className="absolute bottom-0 left-0 w-80 h-80 bg-pepe-yellow opacity-5 rounded-full -ml-40 -mb-40 blur-[80px]" />
+                      
+                      <div className="relative z-10 space-y-10">
+                        <div className="flex justify-between items-start">
+                          <div className="bg-white/10 px-6 py-2 rounded-full border-2 border-white/20 flex items-center space-x-3 space-x-reverse backdrop-blur-md">
+                            <Rocket className="text-pepe-yellow" size={20} />
+                            <span className="text-xs font-black uppercase tracking-[0.2em]">{t('dashboard.balance')}</span>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="bg-pepe-green/20 text-pepe-green px-4 py-1 rounded-full text-[10px] font-black uppercase border border-pepe-green/20">
+                              Stage 1: LIVE
+                            </span>
+                            <span className="text-[10px] font-bold text-white/40 uppercase">Presale ending in 12d 4h</span>
+                          </div>
                         </div>
-                        <div className="bg-pepe-green text-pepe-black px-4 py-1 rounded-full text-[10px] font-black uppercase animate-pulse">
-                          Price Up +12%
+
+                        <div className="space-y-4">
+                          <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] ml-2">Estimated Balance</p>
+                          <div className="flex items-baseline gap-4">
+                            <p className="text-8xl lg:text-[10rem] font-black italic text-pepe-yellow leading-none tracking-tighter animate-title-gradient drop-shadow-[8px_8px_0px_#000]">
+                              500K
+                            </p>
+                            <span className="text-4xl font-black text-white/20 uppercase tracking-tighter">$PWIFE</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <p className="text-7xl sm:text-9xl font-black italic text-pepe-yellow leading-none tracking-tighter animate-title-gradient drop-shadow-[5px_5px_0px_#000]">
-                          500,000
-                        </p>
-                        <p className="text-3xl font-black text-white/40 uppercase tracking-tighter">$PWIFE TOKENS</p>
+                      <div className="relative z-10 grid grid-cols-2 gap-10 mt-10">
+                        <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black uppercase text-gray-500">Current Value</p>
+                            <p className="text-3xl font-black text-white italic">$1,250.00</p>
+                          </div>
+                          <div className="w-10 h-10 bg-pepe-green rounded-xl flex items-center justify-center rotate-[-10deg] group-hover/card:rotate-0 transition-transform">
+                            <TrendingUp size={20} className="text-pepe-black" strokeWidth={3} />
+                          </div>
+                        </div>
+                        <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black uppercase text-gray-500">Claim Date</p>
+                            <p className="text-3xl font-black text-pepe-pink italic">Q3 2026</p>
+                          </div>
+                          <div className="w-10 h-10 bg-pepe-pink/20 rounded-xl flex items-center justify-center rotate-[10deg] group-hover/card:rotate-0 transition-transform">
+                            <ArrowUpRight size={20} className="text-pepe-pink" strokeWidth={3} />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="relative z-10 mt-10 pt-10 border-t-4 border-white/10 grid grid-cols-2 gap-10">
-                      <div className="space-y-1">
-                        <p className="text-xs font-black uppercase text-gray-500">{t('dashboard.claim_date')}</p>
-                        <p className="text-3xl font-black text-pepe-green italic">Q3 2026</p>
+                    {/* Staking Banner Mini */}
+                    <div className="bg-pepe-yellow p-8 rounded-[3rem] border-4 border-pepe-black shadow-[10px_10px_0_0_#000] flex items-center justify-between group hover:translate-y-[-4px] transition-transform cursor-pointer">
+                      <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 bg-white rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:scale-110 transition-transform">
+                          <Lock size={32} strokeWidth={3} className="text-pepe-pink" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xl font-black uppercase italic leading-none">High-Yield Staking</h4>
+                          <p className="text-sm font-bold text-pepe-black/60">Earn up to 450% APR by staking your $PWIFE</p>
+                        </div>
                       </div>
-                      <div className="text-right space-y-1">
-                        <p className="text-xs font-black uppercase text-gray-500">Estimated Value</p>
-                        <p className="text-3xl font-black text-pepe-pink italic">~$1,250.00</p>
+                      <div className="hidden sm:flex items-center gap-2 bg-pepe-black text-white px-6 py-3 rounded-2xl font-black uppercase italic text-sm">
+                        Go Stake <ChevronRight size={18} />
                       </div>
                     </div>
                   </div>
 
-                  {/* Secondary Actions Column */}
-                  <div className="space-y-8">
-                    {/* Buy More Card */}
-                    <div className="bg-white border-8 border-pepe-black rounded-[3rem] p-8 shadow-[15px_15px_0_0_#000] text-center space-y-6">
-                      <div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#000]">
-                        <Flame size={32} className="text-pepe-black" strokeWidth={3} />
-                      </div>
-                      <h4 className="text-2xl font-black uppercase italic leading-none">Presale is Live!</h4>
-                      <p className="text-sm font-bold text-gray-500">Buy more $PWIFE before the price increases in the next phase.</p>
-                      <button className="w-full bg-pepe-green text-pepe-black border-4 border-pepe-black py-4 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-                        Buy Now
-                      </button>
-                    </div>
-
-                    {/* Staking Preview */}
-                    <div className="bg-pepe-black p-8 rounded-[3rem] border-8 border-pepe-black shadow-[15px_15px_0_0_#FF69B4] text-white">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-xs font-black uppercase text-gray-400">Current APR</span>
-                        <span className="text-pepe-green font-black text-2xl">450%</span>
-                      </div>
-                      <p className="text-sm font-bold text-white/60 mb-6">Stake your tokens to earn massive rewards daily.</p>
-                      <button className="w-full bg-white text-pepe-black border-4 border-pepe-black py-3 rounded-xl font-black uppercase text-sm shadow-[4px_4px_0_0_#000]">
-                        Go to Staking
-                      </button>
-                    </div>
+                  {/* Professional Buy Box Component */}
+                  <div className="lg:col-span-2">
+                    <BuyBox t={t} />
                   </div>
                 </div>
 
-                {/* Main Content Grid: Calculator & Referrals */}
+                {/* Second Grid: Referral & Calculator */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                  {/* Referral System */}
-                  <div className="bg-pepe-yellow p-10 rounded-[4rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#000] flex flex-col justify-between group">
-                    <div className="relative">
-                      <div className="w-20 h-20 bg-white rounded-3xl border-4 border-pepe-black flex items-center justify-center mb-8 shadow-[6px_6px_0_0_#000] group-hover:rotate-12 transition-transform">
-                        <Globe size={40} strokeWidth={3} className="text-pepe-pink" />
+                  
+                  {/* Modern Referral System */}
+                  <div className="bg-white p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#000] flex flex-col justify-between group overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-pepe-yellow opacity-5 rounded-full -mr-32 -mt-32" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[6px_6px_0_0_#000]">
+                          <Globe size={32} strokeWidth={3} />
+                        </div>
+                        <div>
+                          <h4 className="text-3xl font-black uppercase italic leading-none">{t('dashboard.referral')}</h4>
+                          <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mt-1">Earn 5% instantly</p>
+                        </div>
                       </div>
-                      <h4 className="text-4xl font-black uppercase italic mb-4 leading-none">{t('dashboard.referral')}</h4>
-                      <p className="text-xl font-bold text-pepe-black/70 mb-10 leading-relaxed max-w-md">
+                      <p className="text-lg font-bold text-gray-600 mb-10 leading-relaxed max-w-md">
                         {t('dashboard.referral_desc')}
                       </p>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="bg-white border-4 border-pepe-black rounded-2xl p-6 flex items-center justify-between shadow-[8px_8px_0_0_#000]">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Referral Link</span>
-                          <code className="text-sm font-black text-pepe-black truncate max-w-[200px]">
-                            {address ? `pepewife.com/?ref=${address}` : 'Connect Wallet'}
+                    <div className="space-y-6 relative z-10">
+                      <div className="bg-gray-50 border-4 border-pepe-black/5 rounded-[2rem] p-6 space-y-4">
+                        <p className="text-[10px] font-black uppercase text-gray-400 px-2 tracking-widest">Your unique referral link</p>
+                        <div className="bg-white border-2 border-pepe-black/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+                          <code className="text-sm font-black text-pepe-black truncate">
+                            {address ? `pepewife.com/?ref=${address.slice(0, 10)}...` : 'Connect Wallet'}
                           </code>
+                          <button 
+                            onClick={copyAddress}
+                            className={`
+                              p-4 rounded-xl transition-all active:scale-95
+                              ${copied ? 'bg-pepe-green text-pepe-black' : 'bg-pepe-black text-white hover:bg-pepe-pink'}
+                            `}
+                          >
+                            {copied ? <Check size={20} strokeWidth={4} /> : <Copy size={20} strokeWidth={2} />}
+                          </button>
                         </div>
-                        <button 
-                          onClick={() => {
-                            if (address) {
-                              navigator.clipboard.writeText(`pepewife.com/?ref=${address}`);
-                              setCopied(true);
-                              setTimeout(() => setCopied(false), 2000);
-                            }
-                          }}
-                          className={`
-                            p-4 rounded-xl border-4 border-pepe-black transition-all shadow-[4px_4px_0_0_#000] active:translate-y-1 active:shadow-none
-                            ${copied ? 'bg-pepe-green text-pepe-black' : 'bg-pepe-pink text-white hover:rotate-6'}
-                          `}
-                        >
-                          {copied ? <Check size={24} strokeWidth={3} /> : <Copy size={24} strokeWidth={3} />}
-                        </button>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/40 backdrop-blur-sm border-4 border-pepe-black p-6 rounded-3xl text-center shadow-[4px_4px_0_0_#000]">
-                          <p className="text-[10px] font-black uppercase text-pepe-black/40 mb-1">Total Referrals</p>
-                          <p className="text-3xl font-black italic">12</p>
+                        <div className="bg-pepe-green/5 border-2 border-pepe-green/10 p-6 rounded-3xl text-center">
+                          <p className="text-[10px] font-black uppercase text-pepe-green/60 mb-1">Total Referrals</p>
+                          <p className="text-4xl font-black italic text-pepe-black">24</p>
                         </div>
-                        <div className="bg-white/40 backdrop-blur-sm border-4 border-pepe-black p-6 rounded-3xl text-center shadow-[4px_4px_0_0_#000]">
-                          <p className="text-[10px] font-black uppercase text-pepe-black/40 mb-1">Earned Rewards</p>
-                          <p className="text-3xl font-black italic text-pepe-pink">4.5 SOL</p>
+                        <div className="bg-pepe-pink/5 border-2 border-pepe-pink/10 p-6 rounded-3xl text-center">
+                          <p className="text-[10px] font-black uppercase text-pepe-pink/60 mb-1">Earned Rewards</p>
+                          <p className="text-4xl font-black italic text-pepe-pink">5.2 SOL</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Profit Calculator Container */}
-                  <div className="lg:mt-0 mt-10">
+                  {/* Profit Calculator with High-end Styling */}
+                  <div className="relative">
+                    <div className="absolute -top-6 -right-6 w-32 h-32 bg-pepe-pink opacity-5 blur-[40px] rounded-full" />
                     <ProfitCalculator t={t} />
                   </div>
                 </div>
 
-                {/* Security Section */}
-                <div className="bg-white border-8 border-pepe-black rounded-[4rem] p-10 shadow-[20px_20px_0_0_#000] space-y-10">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                    <div className="flex items-center space-x-6 space-x-reverse">
-                      <div className="w-16 h-16 bg-pepe-green rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[6px_6px_0_0_#000]">
-                        <ShieldCheck className="text-white" size={40} strokeWidth={3} />
+                {/* Trust & Security Section */}
+                <div className="bg-pepe-black text-white p-10 lg:p-14 rounded-[4rem] border-4 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] space-y-12 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,105,180,0.1)_0%,transparent_100%)]" />
+                  
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="flex items-center space-x-8 space-x-reverse">
+                      <div className="w-24 h-24 bg-pepe-green rounded-[2rem] border-4 border-pepe-black flex items-center justify-center shadow-[8px_8px_0_0_#000] rotate-[-5deg] group-hover:rotate-0 transition-transform">
+                        <ShieldCheck className="text-pepe-black" size={56} strokeWidth={3} />
                       </div>
-                      <div>
-                        <h4 className="text-3xl font-black uppercase italic leading-none">Security Dashboard</h4>
-                        <p className="text-gray-500 font-bold">Your assets are protected by smart contract audits</p>
+                      <div className="space-y-2">
+                        <h4 className="text-4xl font-black uppercase italic leading-none">Protocol Integrity</h4>
+                        <p className="text-white/40 font-bold text-lg">Smart contracts audited by industry-leading security firms</p>
                       </div>
                     </div>
-                    <button className="bg-pepe-black text-white border-4 border-pepe-black px-8 py-3 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all">
-                      View Audit Report
+                    <button className="bg-pepe-yellow text-pepe-black border-4 border-pepe-black px-12 py-5 rounded-2xl font-black uppercase italic text-xl shadow-[8px_8px_0_0_#fff] hover:translate-y-1 transition-all active:shadow-none">
+                      Audit Report
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {[
-                      { icon: <Flame className="text-pepe-yellow" />, label: t('tokenomics.zero_tax'), status: 'Active', color: 'bg-pepe-yellow/5' },
-                      { icon: <Lock className="text-pepe-pink" />, label: t('tokenomics.liquidity_lock'), status: 'Verified', color: 'bg-pepe-pink/5' },
-                      { icon: <ShieldCheck className="text-pepe-green" />, label: t('tokenomics.team_lock'), status: 'Locked', color: 'bg-pepe-green/5' },
-                      { icon: <Droplets className="text-blue-400" />, label: t('tokenomics.linear_vesting'), status: 'Enabled', color: 'bg-blue-400/5' }
+                      { icon: <Flame className="text-pepe-yellow" />, label: t('tokenomics.zero_tax'), status: 'Active', desc: 'No tax on trades' },
+                      { icon: <Lock className="text-pepe-pink" />, label: t('tokenomics.liquidity_lock'), status: 'Verified', desc: 'Locked for 2 years' },
+                      { icon: <ShieldCheck className="text-pepe-green" />, label: t('tokenomics.team_lock'), status: 'Locked', desc: 'Vesting implemented' },
+                      { icon: <Droplets className="text-blue-400" />, label: t('tokenomics.linear_vesting'), status: 'Enabled', desc: 'Secure distribution' }
                     ].map((item, idx) => (
-                      <div key={idx} className={`${item.color} p-6 rounded-3xl border-4 border-pepe-black shadow-[6px_6px_0_0_#000] flex flex-col items-center text-center space-y-4 hover:-translate-y-2 transition-transform`}>
-                        <div className="w-12 h-12 bg-white rounded-xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000]">
+                      <div key={idx} className="bg-white/5 p-8 rounded-[2.5rem] border-2 border-white/10 flex flex-col items-center text-center space-y-5 hover:bg-white/10 transition-all hover:-translate-y-2 group">
+                        <div className="w-16 h-16 bg-white/10 rounded-2xl border-2 border-white/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                           {item.icon}
                         </div>
-                        <span className="font-black uppercase italic text-sm">{item.label}</span>
-                        <span className="bg-pepe-black text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{item.status}</span>
+                        <div className="space-y-1">
+                          <span className="font-black uppercase italic text-sm block">{item.label}</span>
+                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.desc}</p>
+                        </div>
+                        <span className="bg-pepe-green text-pepe-black px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                          {item.status}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -326,30 +376,45 @@ const DashboardPage = () => {
             {activeTab === 'history' && (
               <motion.div
                 key="history"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="bg-white border-8 border-pepe-black rounded-[4rem] p-10 shadow-[20px_20px_0_0_#000] space-y-8"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="max-w-5xl mx-auto bg-white border-4 border-pepe-black rounded-[3.5rem] p-10 shadow-[15px_15px_0_0_#000] space-y-10"
               >
-                <h3 className="text-4xl font-black uppercase italic">Transaction History</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-4xl font-black uppercase italic">Activity Log</h3>
+                  <button className="p-4 bg-gray-50 border-2 border-pepe-black/5 rounded-2xl hover:bg-pepe-yellow transition-colors">
+                    <Plus size={24} />
+                  </button>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-right border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b-4 border-pepe-black">
-                        <th className="p-6 font-black uppercase italic">Date</th>
-                        <th className="p-6 font-black uppercase italic">Type</th>
-                        <th className="p-6 font-black uppercase italic">Amount</th>
-                        <th className="p-6 font-black uppercase italic">Status</th>
+                      <tr className="bg-gray-50/50 border-b-4 border-pepe-black">
+                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Date & Time</th>
+                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Transaction Type</th>
+                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Amount ($PWIFE)</th>
+                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-gray-100">
                       {[1, 2, 3, 4, 5].map(i => (
-                        <tr key={i} className="hover:bg-gray-50 transition-colors">
-                          <td className="p-6 font-bold text-gray-500">March {21-i}, 2026</td>
-                          <td className="p-6 font-black uppercase">Presale Purchase</td>
-                          <td className="p-6 font-black text-pepe-pink">+100,000 $PWIFE</td>
-                          <td className="p-6">
-                            <span className="bg-pepe-green/20 text-pepe-green px-4 py-1 rounded-full text-xs font-black uppercase border-2 border-pepe-green/20">Success</span>
+                        <tr key={i} className="group hover:bg-gray-50 transition-colors">
+                          <td className="p-8 font-bold text-gray-500 text-sm">March {21-i}, 2026 • 14:20</td>
+                          <td className="p-8">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-pepe-green/10 rounded-lg flex items-center justify-center">
+                                <Plus size={14} className="text-pepe-green" strokeWidth={4} />
+                              </div>
+                              <span className="font-black uppercase text-sm">Presale Purchase</span>
+                            </div>
+                          </td>
+                          <td className="p-8 font-black text-pepe-pink text-lg">+100,000</td>
+                          <td className="p-8">
+                            <div className="flex items-center gap-2 bg-pepe-green/10 w-fit px-4 py-1.5 rounded-full border-2 border-pepe-green/10">
+                              <Check size={12} className="text-pepe-green" strokeWidth={4} />
+                              <span className="text-[10px] font-black uppercase text-pepe-green">Confirmed</span>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -365,38 +430,46 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-10"
+                className="max-w-6xl mx-auto space-y-10"
               >
-                <div className="bg-pepe-yellow p-10 rounded-[4rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#000] space-y-8">
-                  <h3 className="text-4xl font-black uppercase italic">Referral Program</h3>
-                  <p className="text-xl font-bold text-pepe-black/70 leading-relaxed">
-                    Invite your friends and earn 5% of their total $PWIFE purchases instantly!
-                  </p>
-                  <div className="bg-white border-4 border-pepe-black rounded-2xl p-6 flex items-center justify-between shadow-[8px_8px_0_0_#000]">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Your Unique Link</span>
-                      <code className="text-sm font-black text-pepe-black">
-                        pepewife.com/?ref={formatAddress(address)}
-                      </code>
+                <div className="bg-pepe-yellow p-12 rounded-[4rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#000] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-20 rounded-full -mr-40 -mt-40" />
+                  <div className="relative z-10 space-y-8">
+                    <h3 className="text-5xl font-black uppercase italic leading-none">Partner Program</h3>
+                    <p className="text-xl font-bold text-pepe-black/70 max-w-2xl">
+                      Become a Pepe Wife ambassador. Share your link and earn <span className="text-pepe-pink underline">5% of every purchase</span> made by your referrals, instantly paid in SOL/ETH.
+                    </p>
+                    <div className="bg-white border-4 border-pepe-black rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[10px_10px_0_0_#000]">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Share this link to earn</span>
+                        <code className="text-xl font-black text-pepe-black tracking-tight">
+                          pepewife.com/?ref={address?.slice(0, 15)}...
+                        </code>
+                      </div>
+                      <button onClick={copyAddress} className="w-full md:w-auto px-10 py-5 bg-pepe-pink text-white rounded-2xl border-4 border-pepe-black shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all flex items-center justify-center gap-3">
+                        <Copy size={24} strokeWidth={3} />
+                        <span className="font-black uppercase italic">{copied ? 'Copied!' : 'Copy Link'}</span>
+                      </button>
                     </div>
-                    <button onClick={copyAddress} className="p-4 bg-pepe-pink text-white rounded-xl border-4 border-pepe-black shadow-[4px_4px_0_0_#000] hover:translate-y-1 transition-all">
-                      <Copy size={24} />
-                    </button>
                   </div>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
-                    <p className="text-xs font-black uppercase text-gray-400">Total Referrals</p>
-                    <p className="text-5xl font-black italic">24</p>
-                  </div>
-                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
-                    <p className="text-xs font-black uppercase text-gray-400">Total Earnings</p>
-                    <p className="text-5xl font-black italic text-pepe-green">5,200</p>
-                  </div>
-                  <div className="bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[15px_15px_0_0_#000] text-center">
-                    <p className="text-xs font-black uppercase text-gray-400">Tier Status</p>
-                    <p className="text-5xl font-black italic text-pepe-pink">GOLD</p>
-                  </div>
+                  {[
+                    { label: 'Total Referrals', value: '42', icon: <User className="text-pepe-pink" /> },
+                    { label: 'Rewards Earned', value: '8.4 SOL', icon: <Zap className="text-pepe-yellow" fill="currentColor" /> },
+                    { label: 'Network Level', value: 'Diamond', icon: <Shield className="text-pepe-green" /> }
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-white border-4 border-pepe-black p-10 rounded-[3rem] shadow-[12px_12px_0_0_#000] flex flex-col items-center text-center gap-4 hover:-translate-y-2 transition-transform">
+                      <div className="w-16 h-16 bg-gray-50 rounded-2xl border-2 border-gray-100 flex items-center justify-center">
+                        {stat.icon}
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] mb-1">{stat.label}</p>
+                        <p className="text-4xl font-black italic">{stat.value}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -404,30 +477,61 @@ const DashboardPage = () => {
             {activeTab === 'staking' && (
               <motion.div
                 key="staking"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="max-w-6xl mx-auto space-y-10"
               >
-                <div className="bg-pepe-black text-white p-10 rounded-[4rem] border-8 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] flex flex-col md:flex-row items-center gap-10">
-                  <div className="flex-1 space-y-6">
-                    <h3 className="text-4xl font-black uppercase italic text-pepe-yellow">PWIFE Staking</h3>
-                    <p className="text-xl font-bold text-white/70">Stake your $PWIFE tokens to earn passive rewards. High APR for early believers!</p>
+                <div className="bg-pepe-black text-white p-12 rounded-[4rem] border-4 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] relative overflow-hidden flex flex-col lg:flex-row items-center gap-12">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-pepe-pink opacity-10 rounded-full blur-[100px]" />
+                  
+                  <div className="flex-1 space-y-8 relative z-10">
+                    <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border-2 border-white/10 backdrop-blur-md">
+                      <Lock size={18} className="text-pepe-pink" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Locked Staking v2</span>
+                    </div>
+                    <h3 className="text-5xl font-black uppercase italic text-pepe-yellow leading-none tracking-tighter">
+                      Maximize Your <br /> $PWIFE Rewards
+                    </h3>
+                    <p className="text-xl font-bold text-white/60 leading-relaxed max-w-xl">
+                      Stake your tokens in our high-yield pools and earn passive income daily. Join over 15,000 holders securing the network.
+                    </p>
                     <div className="grid grid-cols-2 gap-6">
-                      <div className="bg-white/10 p-4 rounded-2xl border-2 border-white/20">
-                        <p className="text-xs font-black uppercase text-gray-400">Current APR</p>
-                        <p className="text-3xl font-black text-pepe-green">450%</p>
+                      <div className="bg-white/5 p-6 rounded-3xl border-2 border-white/10">
+                        <p className="text-[10px] font-black uppercase text-white/40 mb-2">Current APR</p>
+                        <p className="text-4xl font-black text-pepe-green italic">450%</p>
                       </div>
-                      <div className="bg-white/10 p-4 rounded-2xl border-2 border-white/20">
-                        <p className="text-xs font-black uppercase text-gray-400">Total Staked</p>
-                        <p className="text-3xl font-black">15.4M</p>
+                      <div className="bg-white/5 p-6 rounded-3xl border-2 border-white/10">
+                        <p className="text-[10px] font-black uppercase text-white/40 mb-2">Total Staked</p>
+                        <p className="text-4xl font-black italic">15.4M</p>
                       </div>
                     </div>
                   </div>
-                  <div className="w-full md:w-80 bg-white border-8 border-pepe-black p-8 rounded-[3rem] shadow-[10px_10px_0_0_#000] text-pepe-black space-y-6">
-                    <p className="text-center font-black uppercase italic">Stake Tokens</p>
-                    <input type="number" placeholder="0.00" className="w-full border-4 border-pepe-black p-4 rounded-xl font-black outline-none" />
-                    <button className="w-full bg-pepe-yellow border-4 border-pepe-black py-4 rounded-xl font-black uppercase italic shadow-[4px_4px_0_0_#000]">Stake Now</button>
+
+                  <div className="w-full lg:w-96 bg-white border-4 border-pepe-black p-8 rounded-[3rem] shadow-[12px_12px_0_0_#000] text-pepe-black space-y-8 relative z-10">
+                    <div className="space-y-4">
+                      <div className="flex justify-between px-2">
+                        <span className="text-[10px] font-black uppercase text-gray-400">Amount to stake</span>
+                        <span className="text-[10px] font-black uppercase text-pepe-pink">Balance: 500K</span>
+                      </div>
+                      <div className="relative">
+                        <input type="number" placeholder="0.00" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black text-2xl outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
+                        <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-pepe-black text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-pepe-pink transition-colors">MAX</button>
+                      </div>
+                    </div>
+                    <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/5">
+                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
+                        <span>Lock Period</span>
+                        <span className="text-pepe-black">30 Days</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
+                        <span>Expected Rewards</span>
+                        <span className="text-pepe-green font-black">+12,500 $PWIFE</span>
+                      </div>
+                    </div>
+                    <button className="w-full bg-pepe-yellow border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-xl shadow-[6px_6px_0_0_#000] hover:translate-y-1 active:shadow-none transition-all">
+                      Stake Now
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -436,29 +540,60 @@ const DashboardPage = () => {
             {activeTab === 'settings' && (
               <motion.div
                 key="settings"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="bg-white border-8 border-pepe-black rounded-[4rem] p-10 shadow-[20px_20px_0_0_#000] space-y-10"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="max-w-4xl mx-auto bg-white border-4 border-pepe-black rounded-[3.5rem] p-12 shadow-[20px_20px_0_0_#000] space-y-12 relative overflow-hidden"
               >
-                <h3 className="text-4xl font-black uppercase italic">Account Settings</h3>
-                <div className="grid gap-10">
-                  <div className="space-y-4">
-                    <label className="font-black uppercase italic text-sm">Display Name</label>
-                    <input type="text" placeholder="Pepe Enjoyer" className="w-full md:w-1/2 border-4 border-pepe-black p-4 rounded-xl font-black outline-none" />
-                  </div>
-                  <div className="space-y-4">
-                    <label className="font-black uppercase italic text-sm">Email Notifications</label>
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-8 bg-pepe-green border-4 border-pepe-black rounded-full relative cursor-pointer">
-                        <div className="absolute right-1 top-1 w-4 h-4 bg-white border-2 border-pepe-black rounded-full" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-pepe-pink/5 rounded-full blur-[60px]" />
+                
+                <div className="relative z-10 space-y-2">
+                  <h3 className="text-4xl font-black uppercase italic">Profile Settings</h3>
+                  <p className="text-gray-400 font-bold">Manage your account and preferences</p>
+                </div>
+
+                <div className="relative z-10 space-y-10">
+                  <div className="grid md:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <label className="font-black uppercase italic text-xs tracking-widest text-gray-400 ml-2">Display Name</label>
+                      <div className="relative">
+                        <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
+                        <input type="text" placeholder="Pepe Enjoyer" className="w-full border-4 border-pepe-black p-5 pl-14 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
                       </div>
-                      <span className="font-bold text-gray-500">Enabled</span>
+                    </div>
+                    <div className="space-y-4">
+                      <label className="font-black uppercase italic text-xs tracking-widest text-gray-400 ml-2">Email Address</label>
+                      <input type="email" placeholder="pepe@crypto.com" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
                     </div>
                   </div>
-                  <div className="pt-6 border-t-4 border-pepe-black/5">
-                    <button className="bg-pepe-black text-white border-4 border-pepe-black px-8 py-3 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#FF69B4] hover:translate-y-1 transition-all">
-                      Save Changes
+
+                  <div className="space-y-6 bg-gray-50 p-8 rounded-[2.5rem] border-4 border-pepe-black/5">
+                    <h4 className="font-black uppercase italic text-sm">Notifications</h4>
+                    <div className="space-y-4">
+                      {[
+                        { label: 'Presale Phase Updates', desc: 'Get notified when a new stage begins', checked: true },
+                        { label: 'Referral Rewards', desc: 'Alert when someone uses your link', checked: true },
+                        { label: 'Security Alerts', desc: 'Critical account security notifications', checked: false }
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between group">
+                          <div className="space-y-1">
+                            <p className="font-black uppercase text-xs">{item.label}</p>
+                            <p className="text-[10px] font-bold text-gray-400">{item.desc}</p>
+                          </div>
+                          <div className={`w-14 h-8 rounded-full border-4 border-pepe-black relative cursor-pointer transition-colors ${item.checked ? 'bg-pepe-green' : 'bg-gray-200'}`}>
+                            <div className={`absolute top-1 w-4 h-4 bg-white border-2 border-pepe-black rounded-full transition-all ${item.checked ? 'right-1' : 'left-1'}`} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-6 flex flex-col sm:flex-row gap-4">
+                    <button className="flex-1 bg-pepe-black text-white border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-lg shadow-[8px_8px_0_0_#FF69B4] hover:translate-y-1 active:shadow-none transition-all">
+                      Save Profile
+                    </button>
+                    <button className="px-10 border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-lg hover:bg-gray-50 transition-all">
+                      Cancel
                     </button>
                   </div>
                 </div>
@@ -468,7 +603,7 @@ const DashboardPage = () => {
         </main>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Modern Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -476,7 +611,7 @@ const DashboardPage = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 z-40 bg-pepe-black/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-pepe-black/40 backdrop-blur-sm lg:hidden"
           />
         )}
       </AnimatePresence>

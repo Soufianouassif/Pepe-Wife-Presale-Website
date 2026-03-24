@@ -293,9 +293,15 @@ export const WalletProvider = ({ children }) => {
   };
 
   const loginWithSocial = async (loginProvider = null) => {
-    if (!web3auth) return;
+    if (!web3auth) {
+      console.error("WalletProvider: Web3Auth not initialized yet");
+      throw new Error("Login system is still loading. Please wait a moment.");
+    }
+    
     try {
+      console.log(`WalletProvider: Initiating ${loginProvider || 'modal'} login...`);
       let web3authProvider;
+      
       if (loginProvider) {
         // Direct OAuth login (e.g., 'google', 'twitter')
         web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
@@ -308,15 +314,88 @@ export const WalletProvider = ({ children }) => {
         web3authProvider = await web3auth.connect();
       }
 
+      if (!web3authProvider) {
+        throw new Error("Failed to get provider from Web3Auth");
+      }
+
       setProvider(web3authProvider);
       
+      // Get accounts - handle both SOL and ETH namespaces if needed
+      // For now, sticking to the initialized namespace (Solana)
       const accounts = await web3authProvider.request({ method: "getAccounts" });
+      console.log("WalletProvider: Social login accounts:", accounts);
+      
       if (accounts && accounts.length > 0) {
         connect(accounts[0], 'Social', web3authProvider);
         return accounts[0];
+      } else {
+        throw new Error("No accounts found for this social login");
       }
     } catch (error) {
-      console.error(`Social login (${loginProvider || 'modal'}) failed:`, error);
+      console.error(`WalletProvider: Social login (${loginProvider || 'modal'}) failed:`, error);
+      throw error;
+    }
+  };
+
+  const connectEVMWallet = async (walletName) => {
+    console.log(`WalletProvider: Connecting to ${walletName}...`);
+    let targetProvider = null;
+    
+    if (walletName === 'MetaMask') {
+      targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
+    } else if (walletName === 'Binance') {
+      // If Binance extension exists (legacy)
+      targetProvider = window.BinanceChain || window.ethereum?.isBinance || window.ethereum?.providers?.find(p => p.isBinance);
+    } else if (walletName === 'OKX') {
+      targetProvider = window.okxwallet;
+    } else if (walletName === 'Trust') {
+      targetProvider = window.ethereum?.isTrust || window.ethereum?.providers?.find(p => p.isTrust);
+    }
+
+    if (!targetProvider) {
+      // If it's Binance and no extension, we suggest WalletConnect
+      if (walletName === 'Binance') {
+        return await connectWalletConnect('Binance');
+      }
+      throw new Error(`${walletName} wallet not found. Please install the extension.`);
+    }
+
+    try {
+      const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
+      if (accounts && accounts.length > 0) {
+        connect(accounts[0], walletName, targetProvider);
+        return accounts[0];
+      }
+      throw new Error("No accounts returned from wallet");
+    } catch (error) {
+      console.error(`WalletProvider: ${walletName} connection failed:`, error);
+      throw error;
+    }
+  };
+
+  const connectWalletConnect = async (preferredWallet = 'Generic') => {
+    console.log("WalletProvider: Initiating WalletConnect...");
+    try {
+      // Dynamic import to avoid build errors and optimize bundle
+      const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
+      
+      const providerWC = await EthereumProvider.init({
+        projectId: WEB3AUTH_CLIENT_ID, // Using the same ID or a dedicated WC ID
+        showQrModal: true,
+        chains: [56], // BSC Mainnet for Binance
+        methods: ["eth_sendTransaction", "personal_sign"],
+        events: ["chainChanged", "accountsChanged"],
+      });
+
+      await providerWC.connect();
+      const accounts = providerWC.accounts;
+      
+      if (accounts && accounts.length > 0) {
+        connect(accounts[0], preferredWallet, providerWC);
+        return accounts[0];
+      }
+    } catch (error) {
+      console.error("WalletProvider: WalletConnect error:", error);
       throw error;
     }
   };
@@ -324,7 +403,18 @@ export const WalletProvider = ({ children }) => {
   return (
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect>
-        <WalletContext.Provider value={{ isConnected, address, walletType, provider, connect, disconnect, sendTransaction, loginWithSocial }}>
+        <WalletContext.Provider value={{ 
+          isConnected, 
+          address, 
+          walletType, 
+          provider, 
+          connect, 
+          disconnect, 
+          sendTransaction, 
+          loginWithSocial,
+          connectEVMWallet,
+          connectWalletConnect
+        }}>
           {children}
         </WalletContext.Provider>
       </SolanaWalletProvider>
