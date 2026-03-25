@@ -146,7 +146,14 @@ const ConnectPage = () => {
     } catch (err) {
       console.error(`ConnectPage: Social login error (${loginProvider}):`, err);
       setStatus('idle');
-      setError(err.message || `${loginProvider} login failed.`);
+      
+      // Detailed error messages based on common Web3Auth issues
+      let friendlyMsg = err.message || `${loginProvider} login failed.`;
+      if (friendlyMsg.includes('clientId')) friendlyMsg = "Web3Auth Client ID is invalid or for wrong network.";
+      if (friendlyMsg.includes('whitelist')) friendlyMsg = "This domain is not whitelisted in Web3Auth Dashboard.";
+      if (friendlyMsg.includes('origin')) friendlyMsg = "Domain mismatch. Check Web3Auth Dashboard settings.";
+      
+      setError(friendlyMsg);
     }
   }, [loginWithSocial, navigate, isInitializing]);
 

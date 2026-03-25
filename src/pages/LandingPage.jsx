@@ -7,12 +7,11 @@ import { useWallet } from '../context/WalletContext';
 import { formatAddress } from '../utils/format';
 import ProfitCalculator from '../components/ProfitCalculator';
 import ViewModeToggle from '../components/ViewModeToggle';
-import MoneyRain from '../components/MoneyRain';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
-  HERO_BACKGROUND_IMAGE: '/assets/fomo-pump-bg.svg', // تم التحديث للخلفية الجديدة
-  HERO_MOBILE_BG: '/assets/fomo-pump-bg.svg', // استخدام نفس الخلفية للموبايل حالياً أو صورة متوافقة
+  HERO_BACKGROUND_IMAGE: '/assets/hero-section.svg',
+  HERO_MOBILE_BG: '/assets/her-sectionmb-bg.svg',
   HERO_CHARACTER_IMAGE: '/assets/hero-character.png',
   TOKENOMICS_FULL_IMAGE: '/assets/hero-character.png', // Placeholder if missing
   RISK_WARNING_BACKGROUND: '/assets/risk-bg.svg',
@@ -215,12 +214,10 @@ const HeroSection = ({ t, openBuyModal }) => {
           <img 
             src={ASSETS.HERO_BACKGROUND_IMAGE} 
             alt="Hero BG" 
-            className="section-bg-full opacity-40 grayscale-[20%]" 
+            className="section-bg-full" 
             loading="eager"
           />
         </picture>
-        {/* Money Rain Component */}
-        <MoneyRain />
       </div>
       <div className="section-container relative z-10 w-full flex flex-col items-center justify-center text-center space-y-8 sm:space-y-12 py-0">
         <motion.div 
@@ -229,24 +226,6 @@ const HeroSection = ({ t, openBuyModal }) => {
           transition={{ duration: 0.8 }}
           className="max-w-[95%] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl mx-auto"
         >
-          {/* Floating Character Pair Animation */}
-          <div className="relative mb-8 flex justify-center space-x-[-20px] scale-75 sm:scale-100">
-             <motion.div
-               animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-               className="relative z-10 w-32 h-32 sm:w-48 sm:h-48"
-             >
-                <img src="/assets/hero-character.png" alt="Pepe Male" className="w-full h-full object-contain filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" />
-             </motion.div>
-             <motion.div
-               animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
-               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-               className="relative z-20 w-32 h-32 sm:w-48 sm:h-48 mt-8"
-             >
-                <img src="/assets/hero-character.png" alt="Pepe Wife" className="w-full h-full object-contain filter hue-rotate-[180deg] drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" />
-             </motion.div>
-          </div>
-
           <span className="bg-pepe-pink text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] rotate-[-2deg] inline-block mb-6 sm:mb-8 text-xs sm:text-base">
             {t('hero.badge')}
           </span>

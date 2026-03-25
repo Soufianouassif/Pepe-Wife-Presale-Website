@@ -75,12 +75,43 @@ export const WalletProvider = ({ children }) => {
 
         const web3authInstance = new Web3Auth({
           clientId: WEB3AUTH_CLIENT_ID,
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "sapphire_mainnet", // تم التحديث ليتطابق مع لوحة التحكم الخاصة بك
           chainConfig,
           privateKeyProvider: solanaPrivateKeyProvider,
+          uiConfig: {
+            appName: "Pepe Wife Presale",
+            mode: "dark",
+            loginMethodsOrder: ["google", "twitter", "facebook", "apple", "email_passwordless", "sms_passwordless"],
+            logoLight: "https://pepewife.com/logo.png",
+            logoDark: "https://pepewife.com/logo.png",
+            defaultLanguage: "en",
+          },
         });
 
-        await web3authInstance.initModal();
+        // Better to explicitly configure OpenLogin adapter for redirect/popup modes
+        // and to ensure all social methods are active.
+        await web3authInstance.initModal({
+          modalConfig: {
+            [WALLET_ADAPTERS.OPENLOGIN]: {
+              label: "Social Login",
+              loginMethods: {
+                google: { name: "google", showOnModal: true },
+                facebook: { name: "facebook", showOnModal: true },
+                twitter: { name: "twitter", showOnModal: true },
+                apple: { name: "apple", showOnModal: true },
+                email_passwordless: { name: "email_passwordless", showOnModal: true },
+                sms_passwordless: { name: "sms_passwordless", showOnModal: true },
+              },
+              adapterSettings: {
+                uxMode: "popup", // Change to "redirect" if popup is blocked
+                whiteLabel: {
+                  name: "Pepe Wife",
+                  theme: { primary: "#FF69B4" },
+                },
+              }
+            }
+          }
+        });
         setWeb3auth(web3authInstance);
         
         if (web3authInstance.provider) {
@@ -328,7 +359,7 @@ export const WalletProvider = ({ children }) => {
       let web3authProvider;
       
       if (loginProvider) {
-        // Direct OAuth login (e.g., 'google', 'twitter')
+        // Direct OAuth login
         web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
           loginSettings: {
             loginProvider,
@@ -345,15 +376,31 @@ export const WalletProvider = ({ children }) => {
 
       setProvider(web3authProvider);
       
-      // Get accounts - ensure safe request call
-      const accounts = await web3authProvider.request({ method: "getAccounts" });
-      console.log("WalletProvider: Social login accounts:", accounts);
-      
-      if (Array.isArray(accounts) && accounts.length > 0 && accounts[0]) {
-        connect(accounts[0], 'Social', web3authProvider);
-        return accounts[0];
+      // Better Solana account retrieval
+      let account = "";
+      try {
+        const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
+        if (Array.isArray(accounts) && accounts.length > 0) {
+          account = accounts[0];
+        } else {
+          // Fallback to generic request if solana_getAccounts fails
+          const genAccounts = await web3authProvider.request({ method: "getAccounts" });
+          account = Array.isArray(genAccounts) ? genAccounts[0] : genAccounts;
+        }
+      } catch (reqError) {
+        console.warn("WalletProvider: Failed to get accounts via request, trying alternative...", reqError);
+        // If it's a social login, we might be able to get user info
+        const userInfo = await web3auth.getUserInfo();
+        console.log("WalletProvider: User info retrieved:", userInfo);
+      }
+
+      if (account && typeof account === 'string') {
+        connect(account, 'Social', web3authProvider);
+        return account;
       } else {
-        throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم العثور على حسابات لهذا الدخول الاجتماعي." : "No accounts found for this social login.");
+        // One last try: if we have a provider, it should be able to give us the public key
+        // through the private key provider logic
+        throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم العثور على حسابات لهذا الدخول الاجتماعي. تأكد من إعدادات النطاق في لوحة تحكم Web3Auth." : "No accounts found. Please check your domain whitelist in Web3Auth Dashboard.");
       }
     } catch (error) {
       console.error(`WalletProvider: Social login (${loginProvider || 'modal'}) failed:`, error);
