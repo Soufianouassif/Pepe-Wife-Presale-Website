@@ -79,12 +79,15 @@ export const WalletProvider = ({ children }) => {
           web3AuthNetwork: "sapphire_mainnet",
           chainConfig,
           privateKeyProvider: solanaPrivateKeyProvider,
+          sessionTime: 86400, // 1 day session
+          useCoreKitKey: false,
         });
 
         // Add Auth Adapter explicitly
         const authAdapter = new AuthAdapter({
           adapterSettings: {
             uxMode: "popup",
+            network: "sapphire_mainnet",
           },
         });
         web3authInstance.configureAdapter(authAdapter);
@@ -95,6 +98,7 @@ export const WalletProvider = ({ children }) => {
           modalConfig: {
             [WALLET_ADAPTERS.AUTH]: {
               label: "Social Login",
+              showOnModal: true,
               loginMethods: {
                 google: { name: "google", showOnModal: true },
                 facebook: { name: "facebook", showOnModal: true },
@@ -103,7 +107,10 @@ export const WalletProvider = ({ children }) => {
                 email_passwordless: { name: "email_passwordless", showOnModal: true },
                 sms_passwordless: { name: "sms_passwordless", showOnModal: true },
               },
-            }
+            },
+            // Ensure other adapters are disabled if not explicitly used
+            [WALLET_ADAPTERS.METAMASK]: { label: "MetaMask", showOnModal: false },
+            [WALLET_ADAPTERS.PHANTOM]: { label: "Phantom", showOnModal: false },
           }
         });
         setWeb3auth(web3authInstance);
@@ -359,11 +366,12 @@ export const WalletProvider = ({ children }) => {
       
       if (loginProvider) {
         // Direct OAuth login
+        console.log(`WalletProvider: Connecting to ${loginProvider} via AUTH adapter...`);
         web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
-          loginSettings: {
-            loginProvider,
+          loginProvider,
+          extraLoginOptions: {
             ...extraOptions
-          },
+          }
         });
       } else {
         // Open Web3Auth Modal
@@ -416,13 +424,23 @@ export const WalletProvider = ({ children }) => {
       if (walletName === 'MetaMask') {
         targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || (window.ethereum?.isMetaMask ? window.ethereum : null);
       } else if (walletName === 'Binance') {
-        // More robust Binance Wallet detection (Classic + New Injected)
+        // Advanced Binance Wallet Detection
+        // 1. Check for dedicated Binance extension object
+        // 2. Check for ethereum.isBinance
+        // 3. Check for ethereum.providers array
         targetProvider = window.BinanceChain || 
                         window.ethereum?.isBinance || 
                         window.ethereum?.providers?.find(p => p.isBinance);
         
-        // If Binance extension is not found but user clicked it, 
-        // we check if they are on a browser that has it or fallback to WC
+        // If not found, it might be the new Binance Web3 Wallet (injected differently)
+        if (!targetProvider && window.ethereum) {
+          try {
+            // Check if current ethereum provider is Binance even if isBinance is not set
+            const info = await window.ethereum.request({ method: 'eth_accounts' }).catch(() => []);
+            console.log("WalletProvider: Binance detection check...", window.ethereum);
+          } catch (e) {}
+        }
+
         if (!targetProvider) {
           console.log("WalletProvider: Binance extension not found, trying WalletConnect fallback...");
           return await connectWalletConnect('Binance');

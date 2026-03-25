@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { calculateProfit } from '../utils/calculator';
 import { Calculator, RotateCcw, TrendingUp, TrendingDown, Info } from 'lucide-react';
 
