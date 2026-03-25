@@ -7,7 +7,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { AuthAdapter } from "@web3auth/auth-adapter";
 
 // Import UI styles if needed
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -89,8 +89,8 @@ export const WalletProvider = ({ children }) => {
           },
         });
 
-        // Add Openlogin Adapter explicitly
-        const openloginAdapter = new OpenloginAdapter({
+        // Add Auth Adapter explicitly
+        const authAdapter = new AuthAdapter({
           adapterSettings: {
             uxMode: "popup",
             whiteLabel: {
@@ -99,13 +99,13 @@ export const WalletProvider = ({ children }) => {
             },
           },
         });
-        web3authInstance.configureAdapter(openloginAdapter);
+        web3authInstance.configureAdapter(authAdapter);
 
-        // Better to explicitly configure OpenLogin adapter for redirect/popup modes
+        // Better to explicitly configure Auth adapter for redirect/popup modes
         // and to ensure all social methods are active.
         await web3authInstance.initModal({
           modalConfig: {
-            [WALLET_ADAPTERS.OPENLOGIN]: {
+            [WALLET_ADAPTERS.AUTH]: {
               label: "Social Login",
               loginMethods: {
                 google: { name: "google", showOnModal: true },
@@ -372,7 +372,7 @@ export const WalletProvider = ({ children }) => {
       
       if (loginProvider) {
         // Direct OAuth login
-        web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+        web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
           loginSettings: {
             loginProvider,
           },
