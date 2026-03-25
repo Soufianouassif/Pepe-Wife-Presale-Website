@@ -102,13 +102,14 @@ const DashboardPage = () => {
   ));
 
   return (
-    <div className={`min-h-screen bg-[#F8FAFC] text-pepe-black font-sans flex ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-[#F8FAFC] text-pepe-black font-sans relative flex overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
       <BackgroundDecor />
 
-      {/* Sidebar - Professional & Sleek */}
+      {/* Modern Sidebar */}
       <aside className={`
-        fixed inset-y-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r-4 border-pepe-black/5 transition-transform duration-300 lg:translate-x-0 lg:static lg:block
+        fixed lg:static inset-y-0 left-0 z-50 w-80 bg-white border-r-4 border-pepe-black transition-transform duration-500 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
+        lg:translate-x-0
       `}>
         <div className="h-full flex flex-col p-6 space-y-8">
           {/* Logo Section */}
