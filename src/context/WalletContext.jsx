@@ -76,27 +76,15 @@ export const WalletProvider = ({ children }) => {
 
         const web3authInstance = new Web3Auth({
           clientId: WEB3AUTH_CLIENT_ID,
-          web3AuthNetwork: "sapphire_mainnet", // تم التحديث ليتطابق مع لوحة التحكم الخاصة بك
+          web3AuthNetwork: "sapphire_mainnet",
           chainConfig,
           privateKeyProvider: solanaPrivateKeyProvider,
-          uiConfig: {
-            appName: "Pepe Wife Presale",
-            mode: "dark",
-            loginMethodsOrder: ["google", "twitter", "facebook", "apple", "email_passwordless", "sms_passwordless"],
-            logoLight: "https://pepewife.com/logo.png",
-            logoDark: "https://pepewife.com/logo.png",
-            defaultLanguage: "en",
-          },
         });
 
         // Add Auth Adapter explicitly
         const authAdapter = new AuthAdapter({
           adapterSettings: {
             uxMode: "popup",
-            whiteLabel: {
-              name: "Pepe Wife",
-              theme: { primary: "#FF69B4" },
-            },
           },
         });
         web3authInstance.configureAdapter(authAdapter);
@@ -251,20 +239,19 @@ export const WalletProvider = ({ children }) => {
   }, []);
 
   const connect = (addr, type, customProvider = null) => {
-    if (!addr) {
-      console.warn("WalletProvider: Attempted to connect with undefined address");
-      return;
-    }
+    console.log(`WalletProvider: Connecting ${type} with address:`, addr);
     
-    // Safety string conversion and validation
+    // Address normalization and validation
     let safeAddr = '';
     if (typeof addr === 'string') {
-      safeAddr = addr;
+      safeAddr = addr.trim();
+    } else if (Array.isArray(addr) && addr.length > 0) {
+      safeAddr = addr[0].toString().trim();
     } else if (addr && typeof addr.toString === 'function') {
-      safeAddr = addr.toString();
+      safeAddr = addr.toString().trim();
     }
 
-    if (!safeAddr || safeAddr === '[object Object]' || safeAddr === 'undefined' || safeAddr === 'null') {
+    if (!safeAddr || safeAddr === '[object Object]' || safeAddr === 'undefined' || safeAddr === 'null' || safeAddr === '') {
       console.error("WalletProvider: Invalid address received in connect:", addr);
       return;
     }
@@ -360,7 +347,7 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  const loginWithSocial = async (loginProvider = null) => {
+  const loginWithSocial = async (loginProvider = null, extraOptions = {}) => {
     if (!web3auth) {
       console.error("WalletProvider: Web3Auth not initialized yet");
       throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "نظام تسجيل الدخول لا يزال قيد التحميل. يرجى الانتظار لحظة." : "Login system is still loading. Please wait a moment.");
@@ -375,6 +362,7 @@ export const WalletProvider = ({ children }) => {
         web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
           loginSettings: {
             loginProvider,
+            ...extraOptions
           },
         });
       } else {
@@ -428,10 +416,17 @@ export const WalletProvider = ({ children }) => {
       if (walletName === 'MetaMask') {
         targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || (window.ethereum?.isMetaMask ? window.ethereum : null);
       } else if (walletName === 'Binance') {
-        // More robust Binance Wallet detection
+        // More robust Binance Wallet detection (Classic + New Injected)
         targetProvider = window.BinanceChain || 
                         window.ethereum?.isBinance || 
                         window.ethereum?.providers?.find(p => p.isBinance);
+        
+        // If Binance extension is not found but user clicked it, 
+        // we check if they are on a browser that has it or fallback to WC
+        if (!targetProvider) {
+          console.log("WalletProvider: Binance extension not found, trying WalletConnect fallback...");
+          return await connectWalletConnect('Binance');
+        }
       } else if (walletName === 'OKX') {
         targetProvider = window.okxwallet;
       } else if (walletName === 'Trust') {
@@ -439,15 +434,16 @@ export const WalletProvider = ({ children }) => {
       }
 
       if (!targetProvider) {
-        if (walletName === 'Binance') {
-          console.log("WalletProvider: Binance extension not found, trying WalletConnect...");
-          return await connectWalletConnect('Binance');
-        }
         throw new Error(`${walletName} wallet not found. Please install the extension.`);
       }
 
-      // Request accounts and handle the response safely
-      const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
+      // Special handling for BinanceChain to ensure account retrieval
+      let accounts = [];
+      if (walletName === 'Binance' && window.BinanceChain && targetProvider === window.BinanceChain) {
+        accounts = await targetProvider.enable(); // Classic Binance method
+      } else {
+        accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
+      }
       
       if (Array.isArray(accounts) && accounts.length > 0) {
         const addr = accounts[0];
@@ -477,10 +473,18 @@ export const WalletProvider = ({ children }) => {
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
         chains: [56], // BSC Mainnet
-        methods: ["eth_sendTransaction", "personal_sign"],
+        optionalChains: [1, 56, 137], // Ethereum, BSC, Polygon
+        methods: ["eth_sendTransaction", "personal_sign", "eth_accounts", "eth_requestAccounts"],
         events: ["chainChanged", "accountsChanged"],
         rpcMap: {
-          56: "https://bsc-dataseed.binance.org/"
+          56: "https://bsc-dataseed.binance.org/",
+          1: "https://cloudflare-eth.com"
+        },
+        metadata: {
+          name: "Pepe Wife Presale",
+          description: "Connect to Pepe Wife Presale Dashboard",
+          url: window.location.origin,
+          icons: ["https://pepewife.com/logo.png"]
         }
       });
 

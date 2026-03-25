@@ -9,6 +9,7 @@ import ProfitCalculator from '../components/ProfitCalculator';
 import ViewModeToggle from '../components/ViewModeToggle';
 import MoneyRain from '../components/MoneyRain';
 import TokenomicsBackground from '../components/TokenomicsBackground';
+import RiskWarningBackground from '../components/RiskWarningBackground';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -525,12 +526,12 @@ const PepeCoupleSVG = () => (
 );
 
 const RiskWarningSection = ({ t }) => (
-  <section className="relative py-20 sm:py-32 overflow-hidden border-y-8 border-pepe-black bg-pepe-pink/5">
-    {/* Pepe Couple Background */}
-    <PepeCoupleSVG />
+  <section className="relative py-20 sm:py-32 overflow-hidden border-y-8 border-pepe-black">
+    {/* Animated Floating Circles Background */}
+    <RiskWarningBackground />
     
     <div className="section-container relative z-20">
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white/90 backdrop-blur-sm relative group">
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }} className="risk-card max-w-5xl mx-auto text-center transform rotate-1 bg-white/80 backdrop-blur-md relative group border-4 border-pepe-black shadow-[12px_12px_0_0_#000]">
         <div className="absolute top-6 right-6 text-pepe-pink opacity-20 group-hover:opacity-100 transition-opacity"><Info size={40} strokeWidth={3} /></div>
         <Shield size={60} strokeWidth={3} className="sm:w-[100px] sm:h-[100px] text-pepe-pink mx-auto mb-6 sm:mb-10 animate-pulse" />
         <h2 className="text-2xl sm:text-7xl font-black uppercase italic mb-6 sm:mb-10 tracking-tight text-pepe-black drop-shadow-sm animate-title-gradient">{t('risk.title')}</h2>

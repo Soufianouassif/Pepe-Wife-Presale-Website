@@ -1,72 +1,99 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
+const ScrollingStrip = ({ text, color, rotate, speed, reverse = false }) => {
+  return (
+    <div 
+      className={`absolute w-[200%] h-12 sm:h-16 flex items-center overflow-hidden border-y-4 border-pepe-black ${color} shadow-[0_8px_0_0_#000]`}
+      style={{ 
+        transform: `rotate(${rotate}deg) translateY(-50%)`,
+        left: '-50%',
+        top: '50%'
+      }}
+    >
+      <motion.div
+        animate={{ x: reverse ? [0, '50%'] : [0, '-50%'] }}
+        transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
+        className="flex whitespace-nowrap"
+      >
+        {Array.from({ length: 10 }).map((_, i) => (
+          <span key={i} className="text-xl sm:text-2xl font-black italic uppercase px-8 flex items-center gap-4">
+            {text}
+            <span className="w-3 h-3 rounded-full bg-pepe-black" />
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
 const TokenomicsBackground = ({ isEnabled = true }) => {
-  // إنشاء دوائر عائمة عشوائية
-  const circles = useMemo(() => {
-    return Array.from({ length: 15 }).map((_, i) => ({
-      id: i,
-      size: Math.random() * 300 + 100,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 20 + 10,
-      delay: Math.random() * 5,
-    }));
-  }, []);
+  if (!isEnabled) return <div className="absolute inset-0 bg-gray-50" />;
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-pepe-yellow/5">
-      {/* شبكة خلفية ناعمة */}
+    <div className="absolute inset-0 z-0 overflow-hidden bg-[#F8FAFC]">
+      {/* Dynamic Animated Background Blobs */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          x: [0, 50, 0],
+          y: [0, 30, 0]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-pepe-green/20 blur-[100px] rounded-full" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          x: [0, -40, 0],
+          y: [0, 50, 0]
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -bottom-[10%] -right-[10%] w-[60%] h-[60%] bg-pepe-pink/20 blur-[100px] rounded-full" 
+      />
+      <motion.div 
+        animate={{ 
+          opacity: [0.3, 0.6, 0.3],
+          scale: [1, 1.5, 1]
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-pepe-yellow/20 blur-[120px] rounded-full" 
+      />
+
+      {/* Grid Pattern */}
       <div 
-        className="absolute inset-0 opacity-[0.03]" 
+        className="absolute inset-0 opacity-[0.05]" 
         style={{ 
-          backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, 
-          backgroundSize: '30px 30px' 
+          backgroundImage: `radial-gradient(#000 2px, transparent 2px)`, 
+          backgroundSize: '40px 40px' 
         }} 
       />
 
-      {/* دوائر متحركة */}
-      {circles.map((circle) => (
-        <motion.div
-          key={circle.id}
-          className="absolute rounded-full bg-pepe-yellow/10 border-2 border-pepe-yellow/20"
-          style={{
-            width: circle.size,
-            height: circle.size,
-            left: `${circle.x}%`,
-            top: `${circle.y}%`,
-          }}
-          animate={isEnabled ? {
-            x: [0, 50, -50, 0],
-            y: [0, -50, 50, 0],
-            scale: [1, 1.1, 0.9, 1],
-            rotate: [0, 90, -90, 0],
-          } : {}}
-          transition={{
-            duration: circle.duration,
-            repeat: Infinity,
-            delay: circle.delay,
-            ease: "easeInOut",
-          }}
+      {/* Animated Strips */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-40 sm:opacity-60 pointer-events-none">
+        <ScrollingStrip 
+          text="Pepe Wife • $PWIFE • Be Early ... or Cry Later" 
+          color="bg-pepe-yellow" 
+          rotate={-15} 
+          speed={30} 
         />
-      ))}
-
-      {/* موجات سفلية ناعمة */}
-      <div className="absolute bottom-0 left-0 w-full h-64 opacity-10">
-        <svg viewBox="0 0 1440 320" className="w-full h-full preserve-3d">
-          <motion.path
-            fill="#FFD700"
-            animate={isEnabled ? {
-              d: [
-                "M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
-                "M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,106.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
-                "M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-              ]
-            } : {}}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </svg>
+        <ScrollingStrip 
+          text="Be Early ... or Cry Later • Pepe Wife • $PWIFE" 
+          color="bg-pepe-pink" 
+          rotate={10} 
+          speed={25} 
+          reverse={true}
+        />
+        <ScrollingStrip 
+          text="$PWIFE • Be Early ... or Cry Later • Pepe Wife" 
+          color="bg-pepe-green" 
+          rotate={-5} 
+          speed={40} 
+        />
       </div>
+
+      {/* Noise Texture Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
     </div>
   );
 };
