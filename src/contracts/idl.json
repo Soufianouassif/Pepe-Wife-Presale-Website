@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "name": "pepe_wife_presale",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "buyTokens",
+      "accounts": [],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [],
+  "errors": [],
+  "metadata": {
+    "address": "YOUR_PROGRAM_ID"
+  }
+}

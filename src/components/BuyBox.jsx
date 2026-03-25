@@ -16,7 +16,7 @@ const TOKENS = [
 
 const PWIFE_PRICE = 0.00012; // 1 $PWIFE = 0.00012 USDT
 
-const BuyBox = ({ t }) => {
+const BuyBox = ({ t, onSuccess }) => {
   const { isConnected, sendTransaction } = useWallet();
   const [fromToken, setFromToken] = useState(TOKENS[0]);
   const [amount, setAmount] = useState('');
@@ -24,11 +24,15 @@ const BuyBox = ({ t }) => {
   const [isBuying, setIsBuying] = useState(false);
   const [txStatus, setTxStatus] = useState('idle'); // idle, pending, success, error
 
-  const calculatedTokens = useMemo(() => {
-    if (!amount || isNaN(amount)) return '0';
+  const calculatedTokensNum = useMemo(() => {
+    if (!amount || isNaN(amount)) return 0;
     const usdValue = parseFloat(amount) * fromToken.price;
-    return (usdValue / PWIFE_PRICE).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    return Math.floor(usdValue / PWIFE_PRICE);
   }, [amount, fromToken]);
+
+  const calculatedTokens = useMemo(() => {
+    return calculatedTokensNum.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }, [calculatedTokensNum]);
 
   const handleBuy = async () => {
     if (!isConnected) return;
@@ -38,10 +42,15 @@ const BuyBox = ({ t }) => {
     setTxStatus('pending');
     
     try {
-      // For demo purposes, we'll simulate the transaction
-      // In a real app, you would use the sendTransaction function from WalletContext
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Simulate transaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (onSuccess) {
+        onSuccess(calculatedTokensNum);
+      }
+      
       setTxStatus('success');
+      setAmount('');
     } catch (error) {
       console.error("BuyBox: Purchase failed", error);
       setTxStatus('error');

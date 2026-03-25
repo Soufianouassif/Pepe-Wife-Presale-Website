@@ -23,12 +23,54 @@ const DashboardPage = () => {
   const [copied, setCopied] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [balance, setBalance] = useState(500000);
+  const [stakedBalance, setStakedBalance] = useState(0);
+  const [stakingAmount, setStakingAmount] = useState('');
+  const [isStaking, setIsStaking] = useState(false);
+  const [history, setHistory] = useState([
+    { id: 1, date: 'March 24, 2026', type: 'Presale Purchase', amount: 100000, status: 'Confirmed' },
+    { id: 2, date: 'March 22, 2026', type: 'Referral Reward', amount: 5000, status: 'Confirmed' },
+    { id: 3, date: 'March 20, 2026', type: 'Presale Purchase', amount: 395000, status: 'Confirmed' },
+  ]);
 
   useEffect(() => {
     if (!isConnected) {
       navigate('/connect');
     }
   }, [isConnected, navigate]);
+
+  const handleStake = async () => {
+    const amount = parseFloat(stakingAmount);
+    if (amount > 0 && amount <= balance) {
+      setIsStaking(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setBalance(prev => prev - amount);
+      setStakedBalance(prev => prev + amount);
+      setHistory(prev => [{
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        type: 'Staking Deposit',
+        amount: -amount,
+        status: 'Confirmed'
+      }, ...prev]);
+      setStakingAmount('');
+      setIsStaking(false);
+      return true;
+    }
+    return false;
+  };
+
+  const handleBuySuccess = (pwifeAmount) => {
+    setBalance(prev => prev + pwifeAmount);
+    setHistory(prev => [{
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      type: 'Presale Purchase',
+      amount: pwifeAmount,
+      status: 'Confirmed'
+    }, ...prev]);
+  };
 
   const handleDisconnect = () => {
     disconnect();
@@ -216,7 +258,7 @@ const DashboardPage = () => {
                           <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] ml-2">Estimated Balance</p>
                           <div className="flex items-baseline gap-4">
                             <p className="text-8xl lg:text-[10rem] font-black italic text-pepe-yellow leading-none tracking-tighter animate-title-gradient drop-shadow-[8px_8px_0px_#000]">
-                              500K
+                              {balance >= 1000000 ? `${(balance / 1000000).toFixed(1)}M` : balance >= 1000 ? `${(balance / 1000).toFixed(0)}K` : balance}
                             </p>
                             <span className="text-4xl font-black text-white/20 uppercase tracking-tighter">$PWIFE</span>
                           </div>
@@ -227,7 +269,7 @@ const DashboardPage = () => {
                         <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
                           <div className="space-y-1">
                             <p className="text-[10px] font-black uppercase text-gray-500">Current Value</p>
-                            <p className="text-3xl font-black text-white italic">$1,250.00</p>
+                            <p className="text-3xl font-black text-white italic">${(balance * 0.00012 + stakedBalance * 0.00012).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                           </div>
                           <div className="w-10 h-10 bg-pepe-green rounded-xl flex items-center justify-center rotate-[-10deg] group-hover/card:rotate-0 transition-transform">
                             <TrendingUp size={20} className="text-pepe-black" strokeWidth={3} />
@@ -235,18 +277,21 @@ const DashboardPage = () => {
                         </div>
                         <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
                           <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase text-gray-500">Claim Date</p>
-                            <p className="text-3xl font-black text-pepe-pink italic">Q3 2026</p>
+                            <p className="text-[10px] font-black uppercase text-gray-500">Staked Balance</p>
+                            <p className="text-3xl font-black text-pepe-pink italic">{stakedBalance > 0 ? (stakedBalance >= 1000 ? `${(stakedBalance / 1000).toFixed(0)}K` : stakedBalance) : '0'}</p>
                           </div>
                           <div className="w-10 h-10 bg-pepe-pink/20 rounded-xl flex items-center justify-center rotate-[10deg] group-hover/card:rotate-0 transition-transform">
-                            <ArrowUpRight size={20} className="text-pepe-pink" strokeWidth={3} />
+                            <Lock size={20} className="text-pepe-pink" strokeWidth={3} />
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Staking Banner Mini */}
-                    <div className="bg-pepe-yellow p-8 rounded-[3rem] border-4 border-pepe-black shadow-[10px_10px_0_0_#000] flex items-center justify-between group hover:translate-y-[-4px] transition-transform cursor-pointer">
+                    <div 
+                      onClick={() => setActiveTab('staking')}
+                      className="bg-pepe-yellow p-8 rounded-[3rem] border-4 border-pepe-black shadow-[10px_10px_0_0_#000] flex items-center justify-between group hover:translate-y-[-4px] transition-transform cursor-pointer"
+                    >
                       <div className="flex items-center gap-6">
                         <div className="w-16 h-16 bg-white rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:scale-110 transition-transform">
                           <Lock size={32} strokeWidth={3} className="text-pepe-pink" />
@@ -264,7 +309,7 @@ const DashboardPage = () => {
 
                   {/* Professional Buy Box Component */}
                   <div className="lg:col-span-2">
-                    <BuyBox t={t} />
+                    <BuyBox t={t} onSuccess={handleBuySuccess} />
                   </div>
                 </div>
 
@@ -398,22 +443,24 @@ const DashboardPage = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-gray-100">
-                      {[1, 2, 3, 4, 5].map(i => (
-                        <tr key={i} className="group hover:bg-gray-50 transition-colors">
-                          <td className="p-8 font-bold text-gray-500 text-sm">March {21-i}, 2026 • 14:20</td>
+                      {history.map(item => (
+                        <tr key={item.id} className="group hover:bg-gray-50 transition-colors">
+                          <td className="p-8 font-bold text-gray-500 text-sm">{item.date}</td>
                           <td className="p-8">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-pepe-green/10 rounded-lg flex items-center justify-center">
-                                <Plus size={14} className="text-pepe-green" strokeWidth={4} />
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.amount > 0 ? 'bg-pepe-green/10' : 'bg-pepe-pink/10'}`}>
+                                {item.amount > 0 ? <Plus size={14} className="text-pepe-green" strokeWidth={4} /> : <Minus size={14} className="text-pepe-pink" strokeWidth={4} />}
                               </div>
-                              <span className="font-black uppercase text-sm">Presale Purchase</span>
+                              <span className="font-black uppercase text-sm">{item.type}</span>
                             </div>
                           </td>
-                          <td className="p-8 font-black text-pepe-pink text-lg">+100,000</td>
+                          <td className={`p-8 font-black text-lg ${item.amount > 0 ? 'text-pepe-green' : 'text-pepe-pink'}`}>
+                            {item.amount > 0 ? '+' : ''}{item.amount.toLocaleString()}
+                          </td>
                           <td className="p-8">
                             <div className="flex items-center gap-2 bg-pepe-green/10 w-fit px-4 py-1.5 rounded-full border-2 border-pepe-green/10">
                               <Check size={12} className="text-pepe-green" strokeWidth={4} />
-                              <span className="text-[10px] font-black uppercase text-pepe-green">Confirmed</span>
+                              <span className="text-[10px] font-black uppercase text-pepe-green">{item.status}</span>
                             </div>
                           </td>
                         </tr>
@@ -443,8 +490,8 @@ const DashboardPage = () => {
                       <div className="flex flex-col gap-2">
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Share this link to earn</span>
                         <code className="text-xl font-black text-pepe-black tracking-tight">
-                          pepewife.com/?ref={formatAddress(address)}
-                        </code>
+                            {address ? `pepewife.com/?ref=${address}` : '...'}
+                          </code>
                       </div>
                       <button onClick={copyAddress} className="w-full md:w-auto px-10 py-5 bg-pepe-pink text-white rounded-2xl border-4 border-pepe-black shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all flex items-center justify-center gap-3">
                         <Copy size={24} strokeWidth={3} />
@@ -512,11 +559,22 @@ const DashboardPage = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between px-2">
                         <span className="text-[10px] font-black uppercase text-gray-400">Amount to stake</span>
-                        <span className="text-[10px] font-black uppercase text-pepe-pink">Balance: 500K</span>
+                        <span className="text-[10px] font-black uppercase text-pepe-pink">Balance: {balance >= 1000 ? `${(balance / 1000).toFixed(0)}K` : balance}</span>
                       </div>
                       <div className="relative">
-                        <input type="number" placeholder="0.00" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black text-2xl outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
-                        <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-pepe-black text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-pepe-pink transition-colors">MAX</button>
+                        <input 
+                          type="number" 
+                          value={stakingAmount}
+                          onChange={(e) => setStakingAmount(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black text-2xl outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" 
+                        />
+                        <button 
+                          onClick={() => setStakingAmount(balance.toString())}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-pepe-black text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-pepe-pink transition-colors"
+                        >
+                          MAX
+                        </button>
                       </div>
                     </div>
                     <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/5">
@@ -526,11 +584,15 @@ const DashboardPage = () => {
                       </div>
                       <div className="flex justify-between text-[10px] font-bold text-gray-500">
                         <span>Expected Rewards</span>
-                        <span className="text-pepe-green font-black">+12,500 $PWIFE</span>
+                        <span className="text-pepe-green font-black">+{stakingAmount ? (parseFloat(stakingAmount) * 0.025).toLocaleString() : '0'} $PWIFE</span>
                       </div>
                     </div>
-                    <button className="w-full bg-pepe-yellow border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-xl shadow-[6px_6px_0_0_#000] hover:translate-y-1 active:shadow-none transition-all">
-                      Stake Now
+                    <button 
+                      onClick={handleStake}
+                      disabled={isStaking || !stakingAmount || parseFloat(stakingAmount) <= 0 || parseFloat(stakingAmount) > balance}
+                      className="w-full bg-pepe-yellow border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-xl shadow-[6px_6px_0_0_#000] hover:translate-y-1 active:shadow-none transition-all disabled:opacity-50"
+                    >
+                      {isStaking ? 'Staking...' : 'Stake Now'}
                     </button>
                   </div>
                 </div>

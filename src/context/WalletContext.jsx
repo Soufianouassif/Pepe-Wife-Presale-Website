@@ -214,26 +214,46 @@ export const WalletProvider = ({ children }) => {
   }, []);
 
   const connect = (addr, type, customProvider = null) => {
+    if (!addr) {
+      console.warn("WalletProvider: Attempted to connect with undefined address");
+      return;
+    }
+    
+    // Safety string conversion
+    const safeAddr = typeof addr === 'string' ? addr : (addr?.toString?.() || '');
+    if (!safeAddr || safeAddr === '[object Object]') {
+      console.error("WalletProvider: Invalid address received in connect:", addr);
+      return;
+    }
+
     sessionStorage.setItem('walletConnected', 'true');
-    sessionStorage.setItem('walletAddress', addr);
+    sessionStorage.setItem('walletAddress', safeAddr);
     sessionStorage.setItem('walletType', type);
     setIsConnected(true);
-    setAddress(addr);
+    setAddress(safeAddr);
     setWalletType(type);
     if (customProvider) setProvider(customProvider);
+    console.log(`WalletProvider: Connected to ${type} address ${safeAddr}`);
   };
 
   const disconnect = async () => {
-    if (web3auth && web3auth.connected) {
-      await web3auth.logout();
+    try {
+      if (walletType === 'Social' && web3auth) {
+        await web3auth.logout();
+      } else if (walletType === 'Phantom' && (window.phantom?.solana || window.solana)) {
+        const phantomProvider = window.phantom?.solana || window.solana;
+        await phantomProvider.disconnect();
+      }
+    } catch (error) {
+      console.error("WalletProvider: Logout error:", error);
+    } finally {
+      sessionStorage.clear();
+      setIsConnected(false);
+      setAddress('');
+      setWalletType('');
+      setProvider(null);
+      console.log("WalletProvider: Disconnected and storage cleared.");
     }
-    sessionStorage.removeItem('walletConnected');
-    sessionStorage.removeItem('walletAddress');
-    sessionStorage.removeItem('walletType');
-    setIsConnected(false);
-    setAddress('');
-    setWalletType('');
-    setProvider(null);
   };
 
   const sendTransaction = async (to, amount, currency) => {
@@ -300,7 +320,7 @@ export const WalletProvider = ({ children }) => {
   const loginWithSocial = async (loginProvider = null) => {
     if (!web3auth) {
       console.error("WalletProvider: Web3Auth not initialized yet");
-      throw new Error("Login system is still loading. Please wait a moment.");
+      throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "نظام تسجيل الدخول لا يزال قيد التحميل. يرجى الانتظار لحظة." : "Login system is still loading. Please wait a moment.");
     }
     
     try {
@@ -325,16 +345,15 @@ export const WalletProvider = ({ children }) => {
 
       setProvider(web3authProvider);
       
-      // Get accounts - handle both SOL and ETH namespaces if needed
-      // For now, sticking to the initialized namespace (Solana)
+      // Get accounts - ensure safe request call
       const accounts = await web3authProvider.request({ method: "getAccounts" });
       console.log("WalletProvider: Social login accounts:", accounts);
       
-      if (accounts && accounts.length > 0) {
+      if (Array.isArray(accounts) && accounts.length > 0 && accounts[0]) {
         connect(accounts[0], 'Social', web3authProvider);
         return accounts[0];
       } else {
-        throw new Error("No accounts found for this social login");
+        throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم العثور على حسابات لهذا الدخول الاجتماعي." : "No accounts found for this social login.");
       }
     } catch (error) {
       console.error(`WalletProvider: Social login (${loginProvider || 'modal'}) failed:`, error);
@@ -346,28 +365,26 @@ export const WalletProvider = ({ children }) => {
     console.log(`WalletProvider: Connecting to ${walletName}...`);
     let targetProvider = null;
     
-    if (walletName === 'MetaMask') {
-      targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || window.ethereum;
-    } else if (walletName === 'Binance') {
-      // If Binance extension exists (legacy)
-      targetProvider = window.BinanceChain || window.ethereum?.isBinance || window.ethereum?.providers?.find(p => p.isBinance);
-    } else if (walletName === 'OKX') {
-      targetProvider = window.okxwallet;
-    } else if (walletName === 'Trust') {
-      targetProvider = window.ethereum?.isTrust || window.ethereum?.providers?.find(p => p.isTrust);
-    }
-
-    if (!targetProvider) {
-      // If it's Binance and no extension, we suggest WalletConnect
-      if (walletName === 'Binance') {
-        return await connectWalletConnect('Binance');
-      }
-      throw new Error(`${walletName} wallet not found. Please install the extension.`);
-    }
-
     try {
+      if (walletName === 'MetaMask') {
+        targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || (window.ethereum?.isMetaMask ? window.ethereum : null);
+      } else if (walletName === 'Binance') {
+        targetProvider = window.BinanceChain || (window.ethereum?.isBinance ? window.ethereum : null) || window.ethereum?.providers?.find(p => p.isBinance);
+      } else if (walletName === 'OKX') {
+        targetProvider = window.okxwallet;
+      } else if (walletName === 'Trust') {
+        targetProvider = window.ethereum?.isTrust ? window.ethereum : window.ethereum?.providers?.find(p => p.isTrust);
+      }
+
+      if (!targetProvider) {
+        if (walletName === 'Binance') {
+          return await connectWalletConnect('Binance');
+        }
+        throw new Error(`${walletName} wallet not found. Please install the extension.`);
+      }
+
       const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts.length > 0) {
+      if (Array.isArray(accounts) && accounts.length > 0 && accounts[0]) {
         connect(accounts[0], walletName, targetProvider);
         return accounts[0];
       }
@@ -381,24 +398,31 @@ export const WalletProvider = ({ children }) => {
   const connectWalletConnect = async (preferredWallet = 'Generic') => {
     console.log("WalletProvider: Initiating WalletConnect...");
     try {
-      // Dynamic import to avoid build errors and optimize bundle
       const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
       
+      if (!WALLETCONNECT_PROJECT_ID || WALLETCONNECT_PROJECT_ID === "") {
+        throw new Error("WalletConnect Project ID is missing.");
+      }
+
       const providerWC = await EthereumProvider.init({
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
-        chains: [56], // BSC Mainnet for Binance
+        chains: [56], // BSC Mainnet
         methods: ["eth_sendTransaction", "personal_sign"],
         events: ["chainChanged", "accountsChanged"],
+        rpcMap: {
+          56: "https://bsc-dataseed.binance.org/"
+        }
       });
 
       await providerWC.connect();
       const accounts = providerWC.accounts;
       
-      if (accounts && accounts.length > 0) {
+      if (Array.isArray(accounts) && accounts.length > 0 && accounts[0]) {
         connect(accounts[0], preferredWallet, providerWC);
         return accounts[0];
       }
+      throw new Error("Connection established but no accounts found.");
     } catch (error) {
       console.error("WalletProvider: WalletConnect error:", error);
       throw error;

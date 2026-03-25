@@ -8,7 +8,8 @@ import { ethers } from 'ethers';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   Wallet, AlertCircle, X, ExternalLink, HelpCircle,
-  Mail, Zap
+  Mail, Zap, MessageSquare, Facebook, 
+  Github, Chrome, Smartphone, Ghost
 } from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
@@ -37,7 +38,22 @@ const Icons = {
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.08-1.01 1.71-2.5 1.71-4.26z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
     </svg>
-  )
+  ),
+  Facebook: () => (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="#1877F2">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  ),
+  Discord: () => (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="#5865F2">
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037 19.736 19.736 0 0 0-4.885 1.515.069.069 0 0 0-.032.027C.533 9.048-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.419-2.157 2.419z"/>
+    </svg>
+  ),
+  Apple: () => (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="black">
+      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.702z"/>
+    </svg>
+  ),
 };
 
 // --- CONFIGURATION ---
@@ -71,6 +87,11 @@ const ConnectPage = () => {
   const socialOptions = useMemo(() => [
     { id: 'google', name: 'Google', icon: <Icons.Google />, color: 'bg-white', borderColor: 'border-gray-200' },
     { id: 'twitter', name: 'X (Twitter)', icon: <Icons.X />, color: 'bg-black', borderColor: 'border-black' },
+    { id: 'facebook', name: 'Facebook', icon: <Icons.Facebook />, color: 'bg-[#1877F2]/10', borderColor: 'border-[#1877F2]' },
+    { id: 'discord', name: 'Discord', icon: <Icons.Discord />, color: 'bg-[#5865F2]/10', borderColor: 'border-[#5865F2]' },
+    { id: 'apple', name: 'Apple', icon: <Icons.Apple />, color: 'bg-gray-100', borderColor: 'border-black' },
+    { id: 'email_passwordless', name: 'Email OTP', icon: <Mail className="text-pepe-pink" />, color: 'bg-pepe-pink/5', borderColor: 'border-pepe-pink' },
+    { id: 'sms_passwordless', name: 'SMS OTP', icon: <Smartphone className="text-pepe-green" />, color: 'bg-pepe-green/5', borderColor: 'border-pepe-green' },
   ], []);
 
   const handleWalletConnect = useCallback(async (walletId) => {
@@ -130,7 +151,8 @@ const ConnectPage = () => {
   }, [loginWithSocial, navigate, isInitializing]);
 
   const handleConnect = useCallback((walletId) => {
-    if (walletId === 'google' || walletId === 'twitter') {
+    const socialProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'email_passwordless', 'sms_passwordless'];
+    if (socialProviders.includes(walletId)) {
       handleSocialConnect(walletId);
     } else {
       handleWalletConnect(walletId);
@@ -212,31 +234,31 @@ const ConnectPage = () => {
             </div>
 
             <div className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Social Login</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Social & Direct Login</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {socialOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleConnect(option.id)}
                     disabled={status === 'connecting' || isInitializing}
                     className={`
-                      relative group flex flex-col items-center gap-3 p-6 rounded-3xl border-4 
+                      relative group flex flex-col items-center gap-3 p-4 rounded-2xl border-2 
                       transition-all duration-300 active:scale-95
                       ${option.borderColor} ${option.color}
-                      ${status === 'connecting' || isInitializing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[8px_8px_0_0_#000] hover:-translate-y-1'}
+                      ${status === 'connecting' || isInitializing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[6px_6px_0_0_#000] hover:-translate-y-1'}
                     `}
                   >
-                    <div className="w-10 h-10 flex items-center justify-center">
+                    <div className="w-8 h-8 flex items-center justify-center">
                       {isInitializing ? (
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                         >
-                          <Zap size={20} className="text-gray-400" />
+                          <Zap size={16} className="text-gray-400" />
                         </motion.div>
                       ) : option.icon}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${option.id === 'twitter' ? 'text-white' : 'text-pepe-black'}`}>
+                    <span className={`text-[8px] font-black uppercase tracking-widest text-center ${option.id === 'twitter' || option.id === 'apple' ? 'text-pepe-black' : 'text-pepe-black'}`}>
                       {isInitializing ? (i18n.language === 'ar' ? 'تحميل...' : 'Loading...') : option.name}
                     </span>
                   </button>

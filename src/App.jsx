@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import ConnectPage from './pages/ConnectPage';
 import LoadingPage from './pages/LoadingPage';
+import AdminPage from './pages/AdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/connect" element={<ConnectPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/loading" element={<ProtectedRoute><LoadingPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
