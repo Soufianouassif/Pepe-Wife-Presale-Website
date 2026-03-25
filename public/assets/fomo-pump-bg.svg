@@ -1,0 +1,127 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Advanced Background (Dark Web3 Vibe) -->
+  <defs>
+    <linearGradient id="main-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#020617;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="solana-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#9945FF;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#14F195;stop-opacity:0" />
+    </radialGradient>
+
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="text-shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDE047;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#CA8A04;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="100%" height="100%" fill="url(#main-bg)"/>
+  <circle cx="600" cy="400" r="400" fill="url(#solana-glow)"/>
+
+  <!-- Large Central Solana Logo (Watermark style) -->
+  <g transform="translate(450, 250) scale(2.5)" opacity="0.1">
+    <path d="M0 10 L80 10 L90 25 L10 25 Z" fill="#9945FF"/>
+    <path d="M10 35 L90 35 L100 50 L20 50 Z" fill="#14F195"/>
+    <path d="M20 60 L100 60 L110 75 L30 75 Z" fill="#9945FF"/>
+  </g>
+
+  <!-- PUMP Visualization (Neon Candles) -->
+  <g transform="translate(0, 100)" opacity="0.6">
+    <rect x="50" y="600" width="30" height="80" fill="#22c55e" rx="4" filter="url(#neon-glow)"/>
+    <rect x="120" y="520" width="30" height="160" fill="#22c55e" rx="4" filter="url(#neon-glow)"/>
+    <rect x="190" y="400" width="30" height="280" fill="#22c55e" rx="4" filter="url(#neon-glow)"/>
+    <rect x="260" y="250" width="30" height="430" fill="#22c55e" rx="4" filter="url(#neon-glow)"/>
+    <rect x="330" y="100" width="30" height="580" fill="#22c55e" rx="4" filter="url(#neon-glow)"/>
+    <!-- Rocket Path -->
+    <path d="M50 650 Q 200 600, 350 50" stroke="#14F195" stroke-width="8" fill="none" stroke-dasharray="10 5" filter="url(#neon-glow)"/>
+  </g>
+
+  <!-- FEMALE PEPE WIFE (LEFT - Solana Fan) -->
+  <g transform="translate(150, 280)">
+    <!-- Detailed Head -->
+    <path d="M40,140 Q40,40 140,40 Q240,40 240,140 Q240,240 140,240 Q40,240 40,140" fill="#86efac" stroke="#166534" stroke-width="6" />
+    <!-- Pink Dress/Body -->
+    <path d="M70,240 L210,240 L230,350 L50,350 Z" fill="#f472b6" stroke="#9d174d" stroke-width="4"/>
+    <!-- Pink Bow -->
+    <path d="M110,20 L170,20 L180,50 L100,50 Z" fill="#ec4899" stroke="#9d174d" stroke-width="4"/>
+    <circle cx="140" cy="35" r="15" fill="#f472b6" stroke="#9d174d" stroke-width="3"/>
+    
+    <!-- Solana Professional Glasses -->
+    <rect x="60" y="90" width="80" height="70" rx="15" fill="#1e293b" stroke="#000" stroke-width="4"/>
+    <rect x="160" y="90" width="80" height="70" rx="15" fill="#1e293b" stroke="#000" stroke-width="4"/>
+    <path d="M140,125 L160,125" stroke="#000" stroke-width="6"/>
+    
+    <!-- Solana Icons in Glasses -->
+    <g transform="translate(75, 110) scale(0.4)">
+      <path d="M0 10 L80 10 L90 25 L10 25 Z" fill="#9945FF"/>
+      <path d="M10 35 L90 35 L100 50 L20 50 Z" fill="#14F195"/>
+      <path d="M20 60 L100 60 L110 75 L30 75 Z" fill="#9945FF"/>
+    </g>
+    <g transform="translate(175, 110) scale(0.4)">
+      <path d="M0 10 L80 10 L90 25 L10 25 Z" fill="#9945FF"/>
+      <path d="M10 35 L90 35 L100 50 L20 50 Z" fill="#14F195"/>
+      <path d="M20 60 L100 60 L110 75 L30 75 Z" fill="#9945FF"/>
+    </g>
+
+    <!-- Excited Smile -->
+    <path d="M100,190 Q140,220 180,190" fill="none" stroke="#166534" stroke-width="8" stroke-linecap="round" />
+  </g>
+
+  <!-- MALE PEPE (RIGHT - ETH Holder in FOMO) -->
+  <g transform="translate(750, 320)">
+    <!-- Detailed Head -->
+    <path d="M40,140 Q40,40 140,40 Q240,40 240,140 Q240,240 140,240 Q40,240 40,140" fill="#4ade80" stroke="#14532d" stroke-width="6" />
+    <!-- Blue Suit -->
+    <path d="M70,240 L210,240 L230,350 L50,350 Z" fill="#3b82f6" stroke="#1e3a8a" stroke-width="4"/>
+    
+    <!-- ETH Professional Glasses -->
+    <rect x="60" y="90" width="80" height="70" rx="15" fill="#1e293b" stroke="#000" stroke-width="4"/>
+    <rect x="160" y="90" width="80" height="70" rx="15" fill="#1e293b" stroke="#000" stroke-width="4"/>
+    <path d="M140,125 L160,125" stroke="#000" stroke-width="6"/>
+
+    <!-- Ethereum Icons in Glasses -->
+    <g transform="translate(85, 100) scale(0.3)">
+      <path d="M50 0 L0 80 L50 110 L100 80 Z" fill="#cbd5e1"/>
+      <path d="M50 120 L0 90 L50 170 L100 90 Z" fill="#94a3b8"/>
+    </g>
+    <g transform="translate(185, 100) scale(0.3)">
+      <path d="M50 0 L0 80 L50 110 L100 80 Z" fill="#cbd5e1"/>
+      <path d="M50 120 L0 90 L50 170 L100 90 Z" fill="#94a3b8"/>
+    </g>
+
+    <!-- Shocked/Excited O-Mouth -->
+    <ellipse cx="140" cy="200" rx="25" ry="15" fill="#14532d" opacity="0.8"/>
+  </g>
+
+  <!-- Floating Professional Typography -->
+  <g filter="url(#text-shadow)">
+    <text x="450" y="150" font-family="Arial Black, sans-serif" font-size="100" font-weight="900" fill="url(#gold-grad)" filter="url(#neon-glow)">PUMP!</text>
+    <text x="500" y="220" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#14F195">SOLANA SEASON</text>
+    <text x="400" y="700" font-family="Arial Black, sans-serif" font-size="80" font-weight="900" fill="#f43f5e" transform="rotate(-5)">FOMO</text>
+  </g>
+
+  <!-- Money Rain (Icons) -->
+  <g opacity="0.5">
+    <circle cx="200" cy="100" r="10" fill="#fbbf24"/>
+    <circle cx="1000" cy="200" r="8" fill="#fbbf24"/>
+    <circle cx="600" cy="50" r="12" fill="#fbbf24"/>
+    <circle cx="800" cy="700" r="6" fill="#fbbf24"/>
+  </g>
+
+  <!-- Action: Buy Button Floating -->
+  <rect x="520" y="720" width="160" height="50" rx="25" fill="#14F195" stroke="#fff" stroke-width="2"/>
+  <text x="555" y="755" font-family="Arial" font-size="24" font-weight="bold" fill="#000">BUY NOW</text>
+</svg>
