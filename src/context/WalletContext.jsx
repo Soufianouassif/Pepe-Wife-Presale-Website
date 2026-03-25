@@ -7,6 +7,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 
 // Import UI styles if needed
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -88,6 +89,18 @@ export const WalletProvider = ({ children }) => {
           },
         });
 
+        // Add Openlogin Adapter explicitly
+        const openloginAdapter = new OpenloginAdapter({
+          adapterSettings: {
+            uxMode: "popup",
+            whiteLabel: {
+              name: "Pepe Wife",
+              theme: { primary: "#FF69B4" },
+            },
+          },
+        });
+        web3authInstance.configureAdapter(openloginAdapter);
+
         // Better to explicitly configure OpenLogin adapter for redirect/popup modes
         // and to ensure all social methods are active.
         await web3authInstance.initModal({
@@ -102,13 +115,6 @@ export const WalletProvider = ({ children }) => {
                 email_passwordless: { name: "email_passwordless", showOnModal: true },
                 sms_passwordless: { name: "sms_passwordless", showOnModal: true },
               },
-              adapterSettings: {
-                uxMode: "popup", // Change to "redirect" if popup is blocked
-                whiteLabel: {
-                  name: "Pepe Wife",
-                  theme: { primary: "#FF69B4" },
-                },
-              }
             }
           }
         });
@@ -250,9 +256,15 @@ export const WalletProvider = ({ children }) => {
       return;
     }
     
-    // Safety string conversion
-    const safeAddr = typeof addr === 'string' ? addr : (addr?.toString?.() || '');
-    if (!safeAddr || safeAddr === '[object Object]') {
+    // Safety string conversion and validation
+    let safeAddr = '';
+    if (typeof addr === 'string') {
+      safeAddr = addr;
+    } else if (addr && typeof addr.toString === 'function') {
+      safeAddr = addr.toString();
+    }
+
+    if (!safeAddr || safeAddr === '[object Object]' || safeAddr === 'undefined' || safeAddr === 'null') {
       console.error("WalletProvider: Invalid address received in connect:", addr);
       return;
     }
@@ -416,7 +428,10 @@ export const WalletProvider = ({ children }) => {
       if (walletName === 'MetaMask') {
         targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || (window.ethereum?.isMetaMask ? window.ethereum : null);
       } else if (walletName === 'Binance') {
-        targetProvider = window.BinanceChain || (window.ethereum?.isBinance ? window.ethereum : null) || window.ethereum?.providers?.find(p => p.isBinance);
+        // More robust Binance Wallet detection
+        targetProvider = window.BinanceChain || 
+                        window.ethereum?.isBinance || 
+                        window.ethereum?.providers?.find(p => p.isBinance);
       } else if (walletName === 'OKX') {
         targetProvider = window.okxwallet;
       } else if (walletName === 'Trust') {
@@ -425,17 +440,24 @@ export const WalletProvider = ({ children }) => {
 
       if (!targetProvider) {
         if (walletName === 'Binance') {
+          console.log("WalletProvider: Binance extension not found, trying WalletConnect...");
           return await connectWalletConnect('Binance');
         }
         throw new Error(`${walletName} wallet not found. Please install the extension.`);
       }
 
+      // Request accounts and handle the response safely
       const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
-      if (Array.isArray(accounts) && accounts.length > 0 && accounts[0]) {
-        connect(accounts[0], walletName, targetProvider);
-        return accounts[0];
+      
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        const addr = accounts[0];
+        if (addr && typeof addr === 'string') {
+          connect(addr, walletName, targetProvider);
+          return addr;
+        }
       }
-      throw new Error("No accounts returned from wallet");
+      
+      throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم إرجاع أي حساب من المحفظة." : "No accounts returned from wallet.");
     } catch (error) {
       console.error(`WalletProvider: ${walletName} connection failed:`, error);
       throw error;

@@ -7,6 +7,8 @@ import { useWallet } from '../context/WalletContext';
 import { formatAddress } from '../utils/format';
 import ProfitCalculator from '../components/ProfitCalculator';
 import ViewModeToggle from '../components/ViewModeToggle';
+import MoneyRain from '../components/MoneyRain';
+import TokenomicsBackground from '../components/TokenomicsBackground';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -323,6 +325,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
 };
 
 const TokenomicsSection = ({ t, openModal }) => {
+  const [isAnimationEnabled, setIsAnimationEnabled] = useState(true);
   const distribution = [
     { label: t('tokenomics.category_presale', 'Presale'), percentage: 40, color: 'bg-pepe-pink' },
     { label: t('tokenomics.category_liquidity', 'Liquidity'), percentage: 30, color: 'bg-pepe-green' },
@@ -332,9 +335,32 @@ const TokenomicsSection = ({ t, openModal }) => {
   ];
   return (
     <section id="tokenomics" className="relative py-16 sm:py-24 overflow-hidden bg-white">
+      {/* Dynamic Background Component */}
+      <TokenomicsBackground isEnabled={isAnimationEnabled} />
+
       <div className="section-container relative z-10 px-4 sm:px-6">
-        <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient">{t('tokenomics.title')}</h2>
+        <div className="text-center mb-12 sm:mb-16 relative">
+          {/* Animation Control Toggle */}
+          <div className="absolute top-0 right-0 sm:right-4 z-20">
+            <button 
+              onClick={() => setIsAnimationEnabled(!isAnimationEnabled)}
+              className="bg-white/80 backdrop-blur-sm border-2 border-pepe-black px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-[2px_2px_0_0_#000] hover:bg-pepe-yellow transition-colors"
+            >
+              {isAnimationEnabled ? 'Pause BG' : 'Play BG'}
+            </button>
+          </div>
+
+          <h2 className="text-3xl sm:text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient relative inline-block">
+            {t('tokenomics.title')}
+            {/* Glowing Token Name Effect */}
+            <motion.span 
+              animate={isAnimationEnabled ? { opacity: [0.5, 1, 0.5] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="block text-pepe-green drop-shadow-[0_0_15px_rgba(20,241,149,0.5)] text-2xl sm:text-4xl mt-2"
+            >
+              $PWIFE TOKENOMICS
+            </motion.span>
+          </h2>
         </div>
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="space-y-8">
