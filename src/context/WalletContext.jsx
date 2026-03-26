@@ -20,7 +20,10 @@ const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
 export const WalletProvider = ({ children }) => {
   console.log("WalletProvider: Initializing state...");
   const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(() => {
+    const saved = sessionStorage.getItem('walletAddress');
+    return (saved && saved !== 'undefined' && saved !== 'null' && saved !== '[object Object]') ? saved : '';
+  });
   const [walletType, setWalletType] = useState('');
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -59,7 +62,11 @@ export const WalletProvider = ({ children }) => {
     const initWeb3Auth = async () => {
       try {
         setIsInitializing(true);
-        console.log("WalletProvider: Initializing Web3Auth...");
+        console.log("WalletProvider: Initializing Web3Auth SDK...");
+        const { Web3Auth } = await import("@web3auth/modal");
+        const { AuthAdapter } = await import("@web3auth/auth-adapter");
+        const { SolanaPrivateKeyProvider } = await import("@web3auth/solana-provider");
+
         const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.SOLANA,
           chainId: "0x1", // Mainnet
@@ -79,11 +86,10 @@ export const WalletProvider = ({ children }) => {
           web3AuthNetwork: "sapphire_mainnet",
           chainConfig,
           privateKeyProvider: solanaPrivateKeyProvider,
-          sessionTime: 86400, // 1 day session
+          sessionTime: 86400, // 24 hours
           useCoreKitKey: false,
         });
 
-        // Add Auth Adapter explicitly
         const authAdapter = new AuthAdapter({
           adapterSettings: {
             uxMode: "popup",
@@ -92,8 +98,9 @@ export const WalletProvider = ({ children }) => {
         });
         web3authInstance.configureAdapter(authAdapter);
 
-        // Better to explicitly configure Auth adapter for redirect/popup modes
-        // and to ensure all social methods are active.
+        // Check if user explicitly logged out in this session
+        const wasLoggedOut = sessionStorage.getItem('explicit_logout') === 'true';
+        
         await web3authInstance.initModal({
           modalConfig: {
             [WALLET_ADAPTERS.AUTH]: {
@@ -108,19 +115,35 @@ export const WalletProvider = ({ children }) => {
                 sms_passwordless: { name: "sms_passwordless", showOnModal: true },
               },
             },
-            // Ensure other adapters are disabled if not explicitly used
             [WALLET_ADAPTERS.METAMASK]: { label: "MetaMask", showOnModal: false },
             [WALLET_ADAPTERS.PHANTOM]: { label: "Phantom", showOnModal: false },
           }
         });
+
         setWeb3auth(web3authInstance);
-        
-        if (web3authInstance.provider) {
-          setProvider(web3authInstance.provider);
+
+        // Only restore session if not explicitly logged out
+        if (web3authInstance.status === "connected" && !wasLoggedOut) {
+          const web3authProvider = web3authInstance.provider;
+          const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
+          if (accounts && accounts.length > 0) {
+            const addr = accounts[0];
+            setAddress(addr);
+            setWalletType('Social');
+            setProvider(web3authProvider);
+            setIsConnected(true);
+            sessionStorage.setItem('walletConnected', 'true');
+            sessionStorage.setItem('walletAddress', addr);
+            sessionStorage.setItem('walletType', 'Social');
+          }
+        } else if (wasLoggedOut && web3authInstance.status === "connected") {
+          // If they were connected but explicitly logged out, ensure we clear the Web3Auth session too
+          await web3authInstance.logout();
         }
+
         console.log("WalletProvider: Web3Auth initialized.");
       } catch (error) {
-        console.error("WalletProvider: Web3Auth initialization failed:", error);
+        console.error("WalletProvider: Web3Auth initialization error:", error);
       } finally {
         setIsInitializing(false);
       }
@@ -246,50 +269,62 @@ export const WalletProvider = ({ children }) => {
   }, []);
 
   const connect = (addr, type, customProvider = null) => {
-    console.log(`WalletProvider: Connecting ${type} with address:`, addr);
+    if (!addr) return;
     
-    // Address normalization and validation
-    let safeAddr = '';
-    if (typeof addr === 'string') {
-      safeAddr = addr.trim();
-    } else if (Array.isArray(addr) && addr.length > 0) {
-      safeAddr = addr[0].toString().trim();
-    } else if (addr && typeof addr.toString === 'function') {
-      safeAddr = addr.toString().trim();
-    }
-
-    if (!safeAddr || safeAddr === '[object Object]' || safeAddr === 'undefined' || safeAddr === 'null' || safeAddr === '') {
-      console.error("WalletProvider: Invalid address received in connect:", addr);
+    const safeAddr = typeof addr === 'string' ? addr.trim() : (addr.toString ? addr.toString().trim() : '');
+    
+    if (!safeAddr || safeAddr === '[object Object]' || safeAddr === 'undefined') {
+      console.error("WalletProvider: Invalid address:", addr);
       return;
     }
 
     sessionStorage.setItem('walletConnected', 'true');
     sessionStorage.setItem('walletAddress', safeAddr);
     sessionStorage.setItem('walletType', type);
-    setIsConnected(true);
+    sessionStorage.removeItem('explicit_logout'); // Clear logout flag on success
+
     setAddress(safeAddr);
     setWalletType(type);
-    if (customProvider) setProvider(customProvider);
+    setProvider(customProvider);
+    setIsConnected(true);
     console.log(`WalletProvider: Connected to ${type} address ${safeAddr}`);
   };
 
   const disconnect = async () => {
+    console.log("WalletProvider: Performing strict logout...");
     try {
-      if (walletType === 'Social' && web3auth) {
-        await web3auth.logout();
-      } else if (walletType === 'Phantom' && (window.phantom?.solana || window.solana)) {
+      if (web3auth && web3auth.status === "connected") {
+        await web3auth.logout({ cleanup: true });
+      }
+      
+      if (walletType === 'Phantom' && (window.phantom?.solana || window.solana)) {
         const phantomProvider = window.phantom?.solana || window.solana;
-        await phantomProvider.disconnect();
+        if (typeof phantomProvider.disconnect === 'function') {
+          await phantomProvider.disconnect();
+        }
       }
     } catch (error) {
       console.error("WalletProvider: Logout error:", error);
     } finally {
-      sessionStorage.clear();
+      // Clear all state and storage
       setIsConnected(false);
       setAddress('');
       setWalletType('');
       setProvider(null);
-      console.log("WalletProvider: Disconnected and storage cleared.");
+      
+      sessionStorage.clear();
+      localStorage.clear(); // Clear any persistent flags
+      
+      // Set explicit logout flag to prevent auto-restore on next load
+      sessionStorage.setItem('explicit_logout', 'true');
+      
+      // Clear all cookies
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      console.log("WalletProvider: Logout successful. Redirecting...");
+      window.location.href = '/connect';
     }
   };
 
@@ -366,13 +401,25 @@ export const WalletProvider = ({ children }) => {
       
       if (loginProvider) {
         // Direct OAuth login
-        console.log(`WalletProvider: Connecting to ${loginProvider} via AUTH adapter...`);
-        web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
+        console.log(`WalletProvider: Connecting to ${loginProvider} via AUTH adapter...`, extraOptions);
+        
+        // Correct parameter structure for connectTo in v9
+        const connectOptions = {
           loginProvider,
-          extraLoginOptions: {
-            ...extraOptions
-          }
-        });
+        };
+
+        if (extraOptions.login_hint) {
+          // Strict formatting for E.164 (ensure only digits and +)
+          const cleanHint = extraOptions.login_hint.startsWith('+') 
+            ? `+${extraOptions.login_hint.replace(/\D/g, '')}`
+            : extraOptions.login_hint;
+            
+          connectOptions.extraLoginOptions = {
+            login_hint: cleanHint
+          };
+        }
+
+        web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, connectOptions);
       } else {
         // Open Web3Auth Modal
         web3authProvider = await web3auth.connect();

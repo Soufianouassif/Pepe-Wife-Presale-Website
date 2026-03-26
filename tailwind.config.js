@@ -14,8 +14,8 @@ export default {
         'pepe-dark-gray': '#1a1a1a',
       },
       fontFamily: {
-        sans: ['Titan One', 'Fredoka', 'system-ui', 'sans-serif'],
-        cartoon: ['Luckiest Guy', 'cursive'],
+        sans: ['Luckiest Guy', 'Fredoka', 'system-ui', 'sans-serif'],
+        luckiest: ['Luckiest Guy', 'cursive'],
       },
     },
   },

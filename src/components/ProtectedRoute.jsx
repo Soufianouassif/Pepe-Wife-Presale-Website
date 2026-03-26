@@ -16,8 +16,11 @@ const ProtectedRoute = ({ children }) => {
     return null; // Or a loading spinner
   }
 
+  // Double check with storage to prevent flickering
+  const isStoredConnected = sessionStorage.getItem('walletConnected') === 'true';
+
   // If the wallet is not connected, redirect to the connect page
-  if (!isConnected) {
+  if (!isConnected && !isStoredConnected) {
     return <Navigate to="/connect" replace />;
   }
 

@@ -5,7 +5,18 @@
 :root {
   background-color: #ffffff;
   color: #0a0a0a;
-  font-family: 'Titan One', 'Fredoka', sans-serif;
+  font-family: 'Luckiest Guy', 'Fredoka', sans-serif;
+}
+
+body {
+  font-family: 'Luckiest Guy', 'Fredoka', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, button, nav, a {
+  font-family: 'Luckiest Guy', cursive !important;
+  letter-spacing: 0.02em;
 }
 
 @layer base {

@@ -109,9 +109,9 @@ const ConnectPage = () => {
   const walletOptions = useMemo(() => [
     { id: 'Phantom', name: 'Phantom', icon: <Icons.Phantom />, color: 'bg-[#AB9FF2]/10', borderColor: 'border-[#AB9FF2]', recommended: true },
     { id: 'MetaMask', name: 'MetaMask', icon: <Icons.MetaMask />, color: 'bg-[#E2761B]/10', borderColor: 'border-[#E2761B]' },
-    { id: 'OKX', name: 'OKX Wallet', icon: <img src="https://static.okx.com/cdn/assets/imgs/247/1C0D98E9A3C7E3B2.png" className="w-full h-full" />, color: 'bg-black/10', borderColor: 'border-black' },
-    { id: 'Binance', name: 'Binance (QR Connect)', icon: <Icons.Binance />, color: 'bg-[#F3BA2F]/10', borderColor: 'border-[#F3BA2F]' },
-    { id: 'Trust Wallet', name: 'Trust Wallet', icon: <img src="https://trustwallet.com/assets/images/media/assets/trust_platform.svg" className="w-full h-full" />, color: 'bg-[#3375BB]/10', borderColor: 'border-[#3375BB]' },
+    { id: 'OKX', name: 'OKX Wallet', icon: <img src="https://static.okx.com/cdn/assets/imgs/247/1C0D98E9A3C7E3B2.png" alt="OKX" className="w-full h-full object-contain" />, color: 'bg-black/10', borderColor: 'border-black' },
+    { id: 'Binance', name: 'Binance', icon: <Icons.Binance />, color: 'bg-[#F3BA2F]/10', borderColor: 'border-[#F3BA2F]' },
+    { id: 'Trust Wallet', name: 'Trust Wallet', icon: <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust" className="w-full h-full object-contain" />, color: 'bg-[#3375BB]/10', borderColor: 'border-[#3375BB]' },
     { id: 'WalletConnect', name: 'WalletConnect', isWC: true, color: 'bg-[#3396FF]/10', borderColor: 'border-[#3396FF]' },
   ], []);
 
@@ -121,6 +121,8 @@ const ConnectPage = () => {
     { id: 'facebook', name: 'Facebook', icon: <Icons.Facebook />, color: 'bg-[#1877F2]/10', borderColor: 'border-[#1877F2]' },
     { id: 'discord', name: 'Discord', icon: <Icons.Discord />, color: 'bg-[#5865F2]/10', borderColor: 'border-[#5865F2]' },
     { id: 'apple', name: 'Apple', icon: <Icons.Apple />, color: 'bg-gray-100', borderColor: 'border-black' },
+    { id: 'line', name: 'LINE', icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" className="w-6 h-6" />, color: 'bg-[#00B900]/10', borderColor: 'border-[#00B900]' },
+    { id: 'github', name: 'GitHub', icon: <Github size={24} />, color: 'bg-gray-100', borderColor: 'border-black' },
     { id: 'email_passwordless', name: 'Email OTP', icon: <Mail className="text-pepe-pink" />, color: 'bg-pepe-pink/5', borderColor: 'border-pepe-pink' },
     { id: 'sms_passwordless', name: 'SMS OTP', icon: <Smartphone className="text-pepe-green" />, color: 'bg-pepe-green/5', borderColor: 'border-pepe-green' },
   ], []);
@@ -138,26 +140,33 @@ const ConnectPage = () => {
         }
         const response = await phantomProvider.connect();
         if (response?.publicKey) {
-          connect(response.publicKey.toString(), 'Phantom');
-          navigate('/loading');
+          const addr = response.publicKey.toString();
+          if (addr && typeof addr === 'string') {
+            connect(addr, 'Phantom');
+            navigate('/loading');
+          }
         }
       } else if (['MetaMask', 'Binance', 'OKX', 'Trust Wallet'].includes(walletId)) {
         const id = walletId === 'Trust Wallet' ? 'Trust' : walletId;
         const addr = await connectEVMWallet(id);
-        if (addr) navigate('/loading');
+        if (addr && typeof addr === 'string' && addr !== '') {
+          navigate('/loading');
+        }
       } else if (walletId === 'WalletConnect') {
         const addr = await connectWalletConnect();
-        if (addr) navigate('/loading');
+        if (addr && typeof addr === 'string' && addr !== '') {
+          navigate('/loading');
+        }
       }
     } catch (err) {
       console.error(`ConnectPage: ${walletId} error:`, err);
       setStatus('idle');
-      // Special message for Binance QR if no extension
-      const errMsg = err?.message || '';
+      
+      const errMsg = err?.message || 'Connection failed';
       if (walletId === 'Binance' && (errMsg.includes('not found') || errMsg.includes('provider'))) {
-        setError(i18n.language === 'ar' ? 'يتم الآن فتح QR Code للربط بتطبيق Binance...' : 'Opening QR Code to connect with Binance App...');
+        setError(i18n.language === 'ar' ? 'يرجى تثبيت إضافة بايننس أو استخدام QR Code.' : 'Please install Binance extension or use QR Code.');
       } else {
-        setError(errMsg || 'Connection failed');
+        setError(errMsg);
       }
     }
   }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language]);
@@ -203,7 +212,7 @@ const ConnectPage = () => {
   }, [phoneNumber, selectedCountry, handleSocialConnect]);
 
   const handleConnect = useCallback((walletId) => {
-    const socialProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'email_passwordless', 'sms_passwordless'];
+    const socialProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'line', 'github', 'email_passwordless', 'sms_passwordless'];
     if (socialProviders.includes(walletId)) {
       handleSocialConnect(walletId);
     } else {
