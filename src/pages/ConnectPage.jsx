@@ -188,10 +188,14 @@ const ConnectPage = () => {
     try {
       console.log(`ConnectPage: Initiating ${loginProvider} login...`, extraOptions);
       const addr = await loginWithSocial(loginProvider, extraOptions);
+
+      console.log(`ConnectPage: loginWithSocial returned: '${addr}'`);
+
       if (addr) {
         console.log("ConnectPage: Login successful, navigating to dashboard...");
-        navigate('/dashboard'); // Direct navigation to dashboard
+        navigate('/dashboard');
       } else {
+        console.warn("ConnectPage: loginWithSocial returned a null or empty value. This might be due to user cancellation. Not navigating.");
         setStatus('idle');
       }
     } catch (err) {

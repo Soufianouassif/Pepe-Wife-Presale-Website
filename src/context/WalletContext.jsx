@@ -75,50 +75,94 @@ export const WalletProvider = ({ children }) => {
   };
 
   const loginWithSocial = async (loginProvider, extraOptions = {}) => {
+    console.log(`WalletProvider: Attempting social login with ${loginProvider}.`);
     try {
-      const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, { loginProvider, extraLoginOptions: extraOptions.login_hint ? { login_hint: extraOptions.login_hint } : {} });
-      if (!web3authProvider) throw new Error("Provider not returned from Web3Auth");
-      
-      // Multi-stage account retrieval
-      let account = "";
-      try {
-        const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
-        if (Array.isArray(accounts) && accounts.length > 0) account = accounts[0];
-      } catch (e) {
-        console.warn("solana_getAccounts failed, trying generic getAccounts");
-        try {
-          const accounts = await web3authProvider.request({ method: "getAccounts" });
-          if (Array.isArray(accounts) && accounts.length > 0) account = accounts[0];
-        } catch (e2) {
-          console.error("All account retrieval methods failed");
-        }
+      // If already connected, it can cause issues. Best to logout first.
+      if (web3auth.status === "connected") {
+        console.log("WalletProvider: Already connected, logging out before new social login.");
+        await web3auth.logout();
       }
 
-      if (!account) throw new Error("No accounts returned");
-      connect(accounts[0], 'Social', web3authProvider);
-      return accounts[0];
+      // connectTo will open the popup
+      const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
+        loginProvider,
+        extraLoginOptions: extraOptions.login_hint ? { login_hint: extraOptions.login_hint } : {},
+      });
+
+      if (!web3authProvider) {
+        throw new Error("Web3Auth `connectTo` did not return a provider.");
+      }
+
+      // After a successful connection, the main web3auth instance has the provider.
+      // It's often more reliable to use this instance's provider.
+      const provider = web3auth.provider;
+      if (!provider) {
+        throw new Error("web3auth.provider is null after a successful connection.");
+      }
+
+      console.log("WalletProvider: Provider obtained. Requesting accounts...");
+      const accounts = await provider.request({ method: "solana_getAccounts" });
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("Could not retrieve Solana accounts from the provider.");
+      }
+
+      const account = accounts[0];
+      console.log(`WalletProvider: Social login successful! Account: ${account}`);
+      
+      // Set the state of the application
+      connect(account, 'Social', provider);
+      
+      return account;
+
     } catch (error) {
-      console.error(`Social login error (${loginProvider}):`, error);
+      console.error(`WalletProvider: Social login failed for ${loginProvider}.`, error);
+      
+      // Web3Auth specific error code for user closing the modal.
+      if (error.code === 4011) {
+        console.log("User cancelled the login process.");
+        // Return null to indicate a non-error cancellation.
+        return null;
+      }
+      
+      // Re-throw other errors to be caught by the UI.
       throw error;
     }
   };
 
   const connectEVMWallet = async (walletName) => {
     let targetProvider = null;
+    console.log(`WalletProvider: Connecting to ${walletName}...`);
+
     if (walletName === 'Binance') {
-      targetProvider = window.BinanceChain || window.ethereum?.providers?.find(p => p.isBinance) || (window.ethereum?.isBinance && window.ethereum);
+      // 1. Check for Binance Extension
+      targetProvider = window.BinanceChain;
+      
+      // 2. Check for Binance in multi-provider ethereum object
+      if (!targetProvider && window.ethereum?.providers) {
+        targetProvider = window.ethereum.providers.find(p => p.isBinance);
+      }
+      
+      // 3. Check if current window.ethereum is Binance
+      if (!targetProvider && window.ethereum?.isBinance) {
+        targetProvider = window.ethereum;
+      }
+
       if (!targetProvider) {
         console.log("Binance extension not found, falling back to WalletConnect.");
         return await connectWalletConnect('Binance');
       }
-    } else {
-      // Simplified logic for other EVM wallets
+    } else if (walletName === 'MetaMask') {
+      targetProvider = window.ethereum?.isMetaMask ? window.ethereum : window.ethereum?.providers?.find(p => p.isMetaMask);
+      if (!targetProvider) {
+        window.open('https://metamask.io/download/', '_blank');
+        throw new Error("MetaMask not found");
+      }
     }
     
     try {
       const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
       
-      // Pre-emptive validation to prevent slice errors downstream
       if (Array.isArray(accounts) && typeof accounts[0] === 'string' && accounts[0].length > 0) {
         connect(accounts[0], walletName, targetProvider);
         return accounts[0];
@@ -132,7 +176,39 @@ export const WalletProvider = ({ children }) => {
   };
 
   const connectWalletConnect = async (preferredWallet) => {
-    // WalletConnect logic remains largely the same
+    try {
+      console.log("WalletProvider: Initializing WalletConnect for", preferredWallet);
+      
+      const wcProvider = await EthereumProvider.init({
+        projectId: WALLETCONNECT_PROJECT_ID,
+        showQrModal: true,
+        qrModalOptions: {
+          themeMode: "light",
+          // If Binance is preferred, we can try to hint it, though WC modal usually handles this
+        },
+        chains: [56], // BSC Mainnet
+        methods: ["eth_sendTransaction", "personal_sign", "eth_accounts", "eth_requestAccounts"],
+        events: ["chainChanged", "accountsChanged"],
+        metadata: {
+          name: "Pepe Wife",
+          description: "Pepe Wife Presale",
+          url: window.location.origin,
+          icons: [window.location.origin + "/logo.png"],
+        },
+      });
+
+      await wcProvider.connect();
+      const accounts = await wcProvider.request({ method: 'eth_accounts' });
+      
+      if (accounts && accounts.length > 0) {
+        connect(accounts[0], preferredWallet || 'WalletConnect', wcProvider);
+        return accounts[0];
+      }
+      throw new Error("No accounts found via WalletConnect");
+    } catch (error) {
+      console.error("WalletConnect error:", error);
+      throw error;
+    }
   };
 
   return (
