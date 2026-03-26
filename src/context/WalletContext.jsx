@@ -158,6 +158,14 @@ export const WalletProvider = ({ children }) => {
         window.open('https://metamask.io/download/', '_blank');
         throw new Error("MetaMask not found");
       }
+    } else if (walletName === 'Coinbase') {
+      // Coinbase Wallet usually injects itself as window.ethereum or window.coinbaseWalletExtension
+      targetProvider = window.coinbaseWalletExtension || 
+                       (window.ethereum?.isCoinbaseWallet ? window.ethereum : window.ethereum?.providers?.find(p => p.isCoinbaseWallet));
+      if (!targetProvider) {
+        window.open('https://www.coinbase.com/wallet', '_blank');
+        throw new Error("Coinbase Wallet not found");
+      }
     }
     
     try {

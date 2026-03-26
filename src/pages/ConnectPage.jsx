@@ -29,6 +29,23 @@ const Icons = {
       <path d="M64 0C28.656 0 0 28.656 0 64s28.656 64 64 64 64-28.656 64-64S99.344 0 64 0zm0 112c-26.51 0-48-21.49-48-48S37.49 16 64 16s48 21.49 48 48-21.49 48-48 48z" fill="#AB9FF2"/><path d="M84 44c-11.046 0-20 8.954-20 20s8.954 20 20 20 20-8.954 20-20-8.954-20-20-20zm0 28c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zM44 44c-11.046 0-20 8.954-20 20s8.954 20 20 20 20-8.954 20-20-8.954-20-20-20zm0 28c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z" fill="#AB9FF2"/>
     </svg>
   ),
+  Solflare: () => (
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <circle cx="50" cy="50" r="50" fill="#FCE87F"/>
+      <path d="M50 15C30.67 15 15 30.67 15 50s15.67 35 35 35 35-15.67 35-35S69.33 15 50 15zm0 62c-14.91 0-27-12.09-27-27s12.09-27 27-27 27 12.09 27 27-12.09 27-27 27z" fill="#1E1E1E"/>
+      <path d="M50 28c-12.15 0-22 9.85-22 22s9.85 22 22 22 22-9.85 22-22-9.85-22-22-22zm0 36c-7.73 0-14-6.27-14-14s6.27-14 14-14 14 6.27 14 14-6.27 14-14 14z" fill="#1E1E1E"/>
+    </svg>
+  ),
+  Backpack: () => (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <path d="M18.333 2H5.667C3.642 2 2 3.642 2 5.667v12.667C2 20.358 3.642 22 5.667 22h12.667C20.358 22 22 20.358 22 18.333V5.667C22 3.642 20.358 2 18.333 2zM12 12.833c-2.342 0-4.25-1.908-4.25-4.25S9.658 4.333 12 4.333s4.25 1.908 4.25 4.25-1.908 4.25-4.25 4.25z" fill="#242B48"/>
+    </svg>
+  ),
+  Coinbase: () => (
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v8h-2v-8zm0-4h2v2h-2v-2z" fill="#0052FF"/>
+    </svg>
+  ),
   X: () => (
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.292 19.49h2.039L6.486 3.24H4.298l13.311 17.403z" fill="currentColor"/>
@@ -116,6 +133,9 @@ const ConnectPage = () => {
   ], []);
 
   const socialOptions = useMemo(() => [
+    // Social login is temporarily disabled as per user request.
+    // To re-enable, uncomment the following array.
+    /*
     { id: 'google', name: 'Google', icon: <Icons.Google />, color: 'bg-white', borderColor: 'border-gray-200' },
     { id: 'twitter', name: 'X (Twitter)', icon: <Icons.X />, color: 'bg-black', borderColor: 'border-black' },
     { id: 'facebook', name: 'Facebook', icon: <Icons.Facebook />, color: 'bg-[#1877F2]/10', borderColor: 'border-[#1877F2]' },
@@ -125,6 +145,7 @@ const ConnectPage = () => {
     { id: 'github', name: 'GitHub', icon: <Github size={24} />, color: 'bg-gray-100', borderColor: 'border-black' },
     { id: 'email_passwordless', name: 'Email OTP', icon: <Mail className="text-pepe-pink" />, color: 'bg-pepe-pink/5', borderColor: 'border-pepe-pink' },
     { id: 'sms_passwordless', name: 'SMS OTP', icon: <Smartphone className="text-pepe-green" />, color: 'bg-pepe-green/5', borderColor: 'border-pepe-green' },
+    */
   ], []);
 
   const handleWalletConnect = useCallback(async (walletId) => {
@@ -132,30 +153,51 @@ const ConnectPage = () => {
     setError(null);
     try {
       console.log(`ConnectPage: Connecting to ${walletId}...`);
-      if (walletId === 'Phantom') {
-        const phantomProvider = window.phantom?.solana || window.solana;
-        if (!phantomProvider?.isPhantom) {
-          window.open('https://phantom.app/', '_blank');
-          throw new Error(i18n.language === 'ar' ? 'محفظة Phantom غير مثبتة.' : 'Phantom wallet is not installed.');
+      
+      // --- SOLANA WALLETS ---
+      if (['Phantom', 'Solflare', 'Backpack'].includes(walletId)) {
+        let provider = null;
+        let downloadUrl = '';
+
+        if (walletId === 'Phantom') {
+          provider = window.phantom?.solana || window.solana;
+          downloadUrl = 'https://phantom.app/';
+          if (!provider?.isPhantom) provider = null;
+        } else if (walletId === 'Solflare') {
+          provider = window.solflare;
+          downloadUrl = 'https://solflare.com/';
+          if (!provider?.isSolflare) provider = null;
+        } else if (walletId === 'Backpack') {
+          provider = window.backpack;
+          downloadUrl = 'https://backpack.app/';
         }
-        const response = await phantomProvider.connect();
+
+        if (!provider) {
+          window.open(downloadUrl, '_blank');
+          throw new Error(i18n.language === 'ar' ? `محفظة ${walletId} غير مثبتة.` : `${walletId} wallet is not installed.`);
+        }
+
+        const response = await provider.connect();
         if (response?.publicKey) {
           const addr = response.publicKey.toString();
           if (addr && typeof addr === 'string') {
-            connect(addr, 'Phantom');
-            navigate('/dashboard'); // Direct navigation
+            connect(addr, walletId);
+            navigate('/dashboard');
           }
         }
-      } else if (['MetaMask', 'Binance', 'OKX', 'Trust Wallet'].includes(walletId)) {
-        const id = walletId === 'Trust Wallet' ? 'Trust' : walletId;
-        const addr = await connectEVMWallet(id);
+      } 
+      // --- EVM WALLETS ---
+      else if (['MetaMask', 'Binance', 'Coinbase'].includes(walletId)) {
+        const addr = await connectEVMWallet(walletId);
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/dashboard'); // Direct navigation
+          navigate('/dashboard');
         }
-      } else if (walletId === 'WalletConnect') {
+      } 
+      // --- WALLETCONNECT ---
+      else if (walletId === 'WalletConnect') {
         const addr = await connectWalletConnect();
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/dashboard'); // Direct navigation
+          navigate('/dashboard');
         }
       }
     } catch (err) {
