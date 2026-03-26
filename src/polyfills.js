@@ -1,10 +1,6 @@
 import { Buffer } from 'buffer';
 
-/**
- * Polyfills for browser environment.
- * Handled with extreme care for SES (Secure ECMAScript) environments.
- */
-console.log("Polyfills: Starting initialization...");
+const IS_DEV = import.meta?.env?.DEV;
 
 if (typeof window !== 'undefined') {
   const safeDefine = (obj, prop, value) => {
@@ -17,10 +13,10 @@ if (typeof window !== 'undefined') {
           writable: true
         });
       } else {
-        console.log(`Polyfills: ${prop} already exists, skipping defineProperty`);
+        if (IS_DEV) console.log(`Polyfills: ${prop} already exists, skipping defineProperty`);
       }
     } catch (e) {
-      console.warn(`Polyfills: Failed to safely define ${prop}, falling back to direct assignment`, e);
+      if (IS_DEV) console.warn(`Polyfills: Failed to safely define ${prop}, falling back to direct assignment`, e);
       try {
         obj[prop] = value;
       } catch (assignError) {
@@ -38,7 +34,7 @@ if (typeof window !== 'undefined') {
     try {
       window.process.env = {};
     } catch (e) {
-      console.warn("Polyfills: Failed to set process.env", e);
+      if (IS_DEV) console.warn("Polyfills: Failed to set process.env", e);
     }
   }
 }
@@ -53,5 +49,3 @@ try {
 } catch (e) {
   console.error("Polyfills: Failed to set globalThis properties", e);
 }
-
-console.log("Polyfills: Initialization complete.");

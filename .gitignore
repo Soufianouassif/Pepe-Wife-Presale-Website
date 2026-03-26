@@ -6,3 +6,4 @@ dist-ssr
 .DS_Store
 .env
 .env.production
+vite.config.js.timestamp-*.mjs

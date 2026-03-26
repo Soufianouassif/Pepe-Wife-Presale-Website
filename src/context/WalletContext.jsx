@@ -1,24 +1,33 @@
-import React, { createContext, useState, useEffect, useContext, useRef, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
+import { WALLET_ADAPTERS } from "@web3auth/base";
 import { EthereumProvider } from "@walletconnect/ethereum-provider";
 import web3AuthService from '../services/web3authService';
 
 const WalletContext = createContext();
 const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
+const STORAGE_KEYS = {
+  connected: 'walletConnected',
+  address: 'walletAddress',
+  type: 'walletType',
+  explicitLogout: 'explicit_logout',
+};
+
+const SOLANA_WALLET_TYPES = new Set(['Social', 'Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet']);
+const EVM_WALLET_TYPES = new Set(['MetaMask', 'Binance', 'Coinbase', 'WalletConnect']);
 
 export const WalletProvider = ({ children }) => {
-  const { i18n } = useTranslation();
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState('');
   const [walletType, setWalletType] = useState('');
   const [provider, setProvider] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [web3auth, setWeb3auth] = useState(null);
+  const providerRef = useRef(null);
+  const walletTypeRef = useRef('');
+  const isConnectedRef = useRef(false);
 
   useEffect(() => {
     const init = async () => {
-      // Timeout fallback for initialization
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Initialization timeout")), 10000)
       );
@@ -28,16 +37,9 @@ export const WalletProvider = ({ children }) => {
         const instance = web3AuthService.getInstance();
         setWeb3auth(instance);
         
-        const wasLoggedOut = sessionStorage.getItem('explicit_logout') === 'true';
-        if (instance && instance.status === "connected" && !wasLoggedOut) {
-          const web3authProvider = instance.provider;
-          const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
-          if (accounts && accounts.length > 0) {
-            connect(accounts[0], 'Social', web3authProvider);
-          }
-        }
+        const wasLoggedOut = safeSessionGet(STORAGE_KEYS.explicitLogout) === 'true';
+        await attemptRehydrate(instance, wasLoggedOut);
       } catch (error) {
-        console.error("WalletProvider: Initialization error or timeout:", error);
       } finally {
         setIsInitializing(false);
       }
@@ -47,13 +49,12 @@ export const WalletProvider = ({ children }) => {
 
   const connect = (addr, type, customProvider = null) => {
     if (!addr || typeof addr !== 'string' || addr.length < 10) {
-      console.error("WalletProvider: Invalid address received:", addr);
       return;
     }
-    sessionStorage.setItem('walletConnected', 'true');
-    sessionStorage.setItem('walletAddress', addr);
-    sessionStorage.setItem('walletType', type);
-    sessionStorage.removeItem('explicit_logout');
+    safeSessionSet(STORAGE_KEYS.connected, 'true');
+    safeSessionSet(STORAGE_KEYS.address, addr);
+    safeSessionSet(STORAGE_KEYS.type, type);
+    safeSessionRemove(STORAGE_KEYS.explicitLogout);
     setAddress(addr);
     setWalletType(type);
     setProvider(customProvider);
@@ -61,27 +62,24 @@ export const WalletProvider = ({ children }) => {
   };
 
   const disconnect = async () => {
-    console.log("WalletProvider: Strict logout initiated...");
     try {
       if (web3auth && web3auth.status === "connected") {
         await web3auth.logout();
       }
-      if (provider && typeof provider.disconnect === 'function') {
-        await provider.disconnect();
+      const currentProvider = providerRef.current;
+      if (currentProvider && typeof currentProvider.disconnect === 'function') {
+        await currentProvider.disconnect();
       }
     } catch (error) {
-      console.error("WalletProvider: Web3Auth logout error:", error);
     } finally {
       setIsConnected(false);
       setAddress('');
       setWalletType('');
       setProvider(null);
-      sessionStorage.clear();
-      localStorage.clear();
-      sessionStorage.setItem('explicit_logout', 'true');
-      document.cookie.split(";").forEach(c => { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
-      console.log("WalletProvider: Logout complete. Forcing reload.");
-      window.location.replace('/connect');
+      safeSessionRemove(STORAGE_KEYS.connected);
+      safeSessionRemove(STORAGE_KEYS.address);
+      safeSessionRemove(STORAGE_KEYS.type);
+      safeSessionSet(STORAGE_KEYS.explicitLogout, 'true');
     }
   };
 
@@ -89,15 +87,11 @@ export const WalletProvider = ({ children }) => {
     if (!web3auth) {
       throw new Error("Web3Auth is not initialized yet. Please wait.");
     }
-    console.log(`WalletProvider: Attempting social login with ${loginProvider}.`);
     try {
-      // If already connected, it can cause issues. Best to logout first.
       if (web3auth.status === "connected") {
-        console.log("WalletProvider: Already connected, logging out before new social login.");
         await web3auth.logout();
       }
 
-      // connectTo will open the popup
       const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
         loginProvider,
         extraLoginOptions: extraOptions.login_hint ? { login_hint: extraOptions.login_hint } : {},
@@ -107,14 +101,11 @@ export const WalletProvider = ({ children }) => {
         throw new Error("Web3Auth `connectTo` did not return a provider.");
       }
 
-      // After a successful connection, the main web3auth instance has the provider.
-      // It's often more reliable to use this instance's provider.
       const provider = web3auth.provider;
       if (!provider) {
         throw new Error("web3auth.provider is null after a successful connection.");
       }
 
-      console.log("WalletProvider: Provider obtained. Requesting accounts...");
       const accounts = await provider.request({ method: "solana_getAccounts" });
 
       if (!accounts || accounts.length === 0) {
@@ -122,48 +113,38 @@ export const WalletProvider = ({ children }) => {
       }
 
       const account = accounts[0];
-      console.log(`WalletProvider: Social login successful! Account: ${account}`);
-      
-      // Set the state of the application
       connect(account, 'Social', provider);
       
       return account;
 
     } catch (error) {
-      console.error(`WalletProvider: Social login failed for ${loginProvider}.`, error);
-      
-      // Web3Auth specific error code for user closing the modal.
       if (error.code === 4011) {
-        console.log("User cancelled the login process.");
         // Return null to indicate a non-error cancellation.
         return null;
       }
       
-      // Re-throw other errors to be caught by the UI.
       throw error;
     }
   };
 
   const connectEVMWallet = async (walletName) => {
+    if (typeof window === 'undefined') {
+      throw new Error("Wallet connection is only available in the browser.");
+    }
     let targetProvider = null;
-    console.log(`WalletProvider: Connecting to ${walletName}...`);
 
     if (walletName === 'Binance') {
-      // 1. Check for Binance Extension
       targetProvider = window.BinanceChain;
       
-      // 2. Check for Binance in multi-provider ethereum object
       if (!targetProvider && window.ethereum?.providers) {
         targetProvider = window.ethereum.providers.find(p => p.isBinance);
       }
       
-      // 3. Check if current window.ethereum is Binance
       if (!targetProvider && window.ethereum?.isBinance) {
         targetProvider = window.ethereum;
       }
 
       if (!targetProvider) {
-        console.log("Binance extension not found, falling back to WalletConnect.");
         return await connectWalletConnect('Binance');
       }
     } else if (walletName === 'MetaMask') {
@@ -173,7 +154,6 @@ export const WalletProvider = ({ children }) => {
         throw new Error("MetaMask not found");
       }
     } else if (walletName === 'Coinbase') {
-      // Coinbase Wallet usually injects itself as window.ethereum or window.coinbaseWalletExtension
       targetProvider = window.coinbaseWalletExtension || 
                        (window.ethereum?.isCoinbaseWallet ? window.ethereum : window.ethereum?.providers?.find(p => p.isCoinbaseWallet));
       if (!targetProvider) {
@@ -192,21 +172,20 @@ export const WalletProvider = ({ children }) => {
         throw new Error("Wallet did not return a valid account string.");
       }
     } catch (error) {
-      console.error(`Error connecting to ${walletName}:`, error);
       throw error;
     }
   };
 
   const connectWalletConnect = async (preferredWallet) => {
+    if (typeof window === 'undefined') {
+      throw new Error("Wallet connection is only available in the browser.");
+    }
     try {
-      console.log("WalletProvider: Initializing WalletConnect for", preferredWallet);
-      
       const wcProvider = await EthereumProvider.init({
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
         qrModalOptions: {
           themeMode: "light",
-          // If Binance is preferred, we can try to hint it, though WC modal usually handles this
         },
         chains: [56], // BSC Mainnet
         methods: ["eth_sendTransaction", "personal_sign", "eth_accounts", "eth_requestAccounts"],
@@ -228,7 +207,6 @@ export const WalletProvider = ({ children }) => {
       }
       throw new Error("No accounts found via WalletConnect");
     } catch (error) {
-      console.error("WalletConnect error:", error);
       throw error;
     }
   };
@@ -237,19 +215,21 @@ export const WalletProvider = ({ children }) => {
     if (!isConnected || !provider) {
       throw new Error("Wallet not connected.");
     }
+    if (!transaction || typeof transaction !== 'object') {
+      throw new Error("Invalid transaction.");
+    }
 
     try {
-      console.log("WalletProvider: Sending transaction...");
-      // Handle both Solana and EVM transactions if needed
-      if (walletType === 'Social' || ['Phantom', 'Solflare', 'Backpack'].includes(walletType)) {
-        // Solana
+      if (SOLANA_WALLET_TYPES.has(walletType)) {
         const signature = await provider.request({
           method: 'solana_signAndSendTransaction',
           params: { transaction }
         });
         return signature;
       } else {
-        // EVM
+        if (typeof transaction.from === 'string' && transaction.from && transaction.from.toLowerCase() !== address.toLowerCase()) {
+          throw new Error("Transaction 'from' does not match connected address.");
+        }
         const txHash = await provider.request({
           method: 'eth_sendTransaction',
           params: [transaction]
@@ -257,13 +237,225 @@ export const WalletProvider = ({ children }) => {
         return txHash;
       }
     } catch (error) {
-      console.error("WalletProvider: Transaction failed:", error);
       throw error;
     }
   };
 
+  const signMessage = async (message) => {
+    if (!isConnected || !provider) {
+      throw new Error("Wallet not connected.");
+    }
+    if (!message || typeof message !== 'string') {
+      throw new Error("Invalid message.");
+    }
+
+    if (SOLANA_WALLET_TYPES.has(walletType)) {
+      const encoded = new TextEncoder().encode(message);
+      if (typeof provider.signMessage === 'function') {
+        const res = await provider.signMessage(encoded);
+        return res?.signature || res;
+      }
+      if (typeof provider.request === 'function') {
+        return await provider.request({
+          method: 'solana_signMessage',
+          params: { message: Array.from(encoded) }
+        });
+      }
+      throw new Error("Wallet does not support message signing.");
+    }
+
+    if (typeof provider.request === 'function') {
+      return await provider.request({
+        method: 'personal_sign',
+        params: [message, address]
+      });
+    }
+    throw new Error("Wallet does not support message signing.");
+  };
+
+  useEffect(() => {
+    providerRef.current = provider;
+    walletTypeRef.current = walletType;
+    isConnectedRef.current = isConnected;
+  }, [provider, walletType, isConnected]);
+
+  useEffect(() => {
+    if (!provider || !walletType) return;
+
+    const currentProvider = provider;
+    const currentType = walletType;
+
+    const cleanupFns = [];
+
+    if (EVM_WALLET_TYPES.has(currentType) && typeof currentProvider.on === 'function') {
+      const handleAccountsChanged = (accounts) => {
+        const next = Array.isArray(accounts) ? accounts[0] : null;
+        if (!next) {
+          disconnect();
+          return;
+        }
+        connect(next, currentType, currentProvider);
+      };
+      const handleDisconnect = () => disconnect();
+      currentProvider.on('accountsChanged', handleAccountsChanged);
+      currentProvider.on('disconnect', handleDisconnect);
+      cleanupFns.push(() => {
+        if (typeof currentProvider.removeListener === 'function') {
+          currentProvider.removeListener('accountsChanged', handleAccountsChanged);
+          currentProvider.removeListener('disconnect', handleDisconnect);
+        }
+      });
+    }
+
+    if (SOLANA_WALLET_TYPES.has(currentType) && typeof currentProvider.on === 'function') {
+      const handleDisconnect = () => disconnect();
+      const handleAccountChanged = (pubkey) => {
+        const next = pubkey?.toString?.();
+        if (!next) {
+          disconnect();
+          return;
+        }
+        connect(next, currentType, currentProvider);
+      };
+      currentProvider.on('disconnect', handleDisconnect);
+      currentProvider.on('accountChanged', handleAccountChanged);
+      cleanupFns.push(() => {
+        if (typeof currentProvider.removeListener === 'function') {
+          currentProvider.removeListener('disconnect', handleDisconnect);
+          currentProvider.removeListener('accountChanged', handleAccountChanged);
+        }
+      });
+    }
+
+    return () => cleanupFns.forEach((fn) => fn());
+  }, [provider, walletType]);
+
+  const safeSessionGet = (key) => {
+    try {
+      if (typeof window === 'undefined') return null;
+      return window.sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  const safeSessionSet = (key, value) => {
+    try {
+      if (typeof window === 'undefined') return;
+      window.sessionStorage.setItem(key, value);
+    } catch {}
+  };
+
+  const safeSessionRemove = (key) => {
+    try {
+      if (typeof window === 'undefined') return;
+      window.sessionStorage.removeItem(key);
+    } catch {}
+  };
+
+  const getSolanaExtensionProvider = (type) => {
+    if (typeof window === 'undefined') return null;
+    if (type === 'Phantom') return window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
+    if (type === 'Solflare') return window.solflare?.isSolflare ? window.solflare : null;
+    if (type === 'Backpack') return window.backpack || null;
+    if (type === 'OKX') return window.okxwallet?.solana || null;
+    if (type === 'Trust Wallet') return window.trustwallet?.solana || null;
+    return null;
+  };
+
+  const getEvmInjectedProvider = (type) => {
+    if (typeof window === 'undefined') return null;
+    if (type === 'MetaMask') {
+      return window.ethereum?.isMetaMask ? window.ethereum : window.ethereum?.providers?.find?.(p => p.isMetaMask) || null;
+    }
+    if (type === 'Binance') {
+      return window.BinanceChain ||
+        window.ethereum?.providers?.find?.(p => p.isBinance) ||
+        (window.ethereum?.isBinance ? window.ethereum : null) ||
+        null;
+    }
+    if (type === 'Coinbase') {
+      return window.coinbaseWalletExtension ||
+        (window.ethereum?.isCoinbaseWallet ? window.ethereum : window.ethereum?.providers?.find?.(p => p.isCoinbaseWallet)) ||
+        null;
+    }
+    return null;
+  };
+
+  const attemptRehydrate = async (instance, wasLoggedOut) => {
+    if (typeof window === 'undefined') return;
+
+    const storedConnected = safeSessionGet(STORAGE_KEYS.connected) === 'true';
+    const storedAddress = safeSessionGet(STORAGE_KEYS.address);
+    const storedType = safeSessionGet(STORAGE_KEYS.type);
+
+    if (wasLoggedOut || !storedConnected || !storedAddress || !storedType) return;
+
+    if (storedType === 'Social') {
+      if (instance && instance.status === "connected" && instance.provider) {
+        try {
+          const accounts = await instance.provider.request({ method: "solana_getAccounts" });
+          const account = accounts?.[0];
+          if (account && account.toLowerCase?.() === storedAddress.toLowerCase?.()) {
+            connect(account, 'Social', instance.provider);
+            return;
+          }
+        } catch {}
+      }
+      clearStoredWallet();
+      return;
+    }
+
+    if (SOLANA_WALLET_TYPES.has(storedType)) {
+      const solProvider = getSolanaExtensionProvider(storedType);
+      if (solProvider) {
+        const currentPk = solProvider.publicKey?.toString?.();
+        if (currentPk && currentPk.toLowerCase?.() === storedAddress.toLowerCase?.()) {
+          connect(storedAddress, storedType, solProvider);
+          return;
+        }
+        if (typeof solProvider.connect === 'function') {
+          try {
+            const res = await solProvider.connect({ onlyIfTrusted: true });
+            const next = res?.publicKey?.toString?.() || solProvider.publicKey?.toString?.();
+            if (next && next.toLowerCase?.() === storedAddress.toLowerCase?.()) {
+              connect(next, storedType, solProvider);
+              return;
+            }
+          } catch {}
+        }
+      }
+      clearStoredWallet();
+      return;
+    }
+
+    if (EVM_WALLET_TYPES.has(storedType) && storedType !== 'WalletConnect') {
+      const evmProvider = getEvmInjectedProvider(storedType);
+      if (evmProvider) {
+        try {
+          const accounts = await evmProvider.request({ method: 'eth_accounts' });
+          const normalized = accounts?.map?.((a) => (typeof a === 'string' ? a.toLowerCase() : a)) || [];
+          if (normalized.includes(storedAddress.toLowerCase())) {
+            connect(storedAddress, storedType, evmProvider);
+            return;
+          }
+        } catch {}
+      }
+      clearStoredWallet();
+      return;
+    }
+
+    clearStoredWallet();
+  };
+
+  const clearStoredWallet = () => {
+    safeSessionRemove(STORAGE_KEYS.connected);
+    safeSessionRemove(STORAGE_KEYS.address);
+    safeSessionRemove(STORAGE_KEYS.type);
+  };
+
   return (
-    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect, sendTransaction }}>
+    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect, sendTransaction, signMessage }}>
       {children}
     </WalletContext.Provider>
   );

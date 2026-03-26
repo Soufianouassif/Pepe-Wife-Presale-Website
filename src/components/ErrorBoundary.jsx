@@ -1,5 +1,7 @@
 import React from 'react';
 
+const IS_DEV = import.meta?.env?.DEV;
+
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -11,7 +13,9 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    if (IS_DEV) {
+      console.error("Uncaught error:", error, errorInfo);
+    }
   }
 
   render() {
@@ -37,7 +41,7 @@ class ErrorBoundary extends React.Component {
         }}>
           <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>CRITICAL ERROR CAUGHT</h1>
           <pre style={{ backgroundColor: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '10px', maxWidth: '90%', overflow: 'auto' }}>
-            {this.state.error?.stack || this.state.error?.message || "Unknown error"}
+            {IS_DEV ? (this.state.error?.stack || this.state.error?.message || "Unknown error") : "Something went wrong."}
           </pre>
           <button 
             onClick={() => window.location.reload()}

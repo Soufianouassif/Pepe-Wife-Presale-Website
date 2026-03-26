@@ -10,7 +10,6 @@ import AdminPage from './pages/AdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  console.log("App: Component rendering...");
   const { i18n, ready } = useTranslation();
   
   if (!ready) {
@@ -21,7 +20,6 @@ function App() {
     );
   }
 
-  console.log("App: i18n language is", i18n.language);
   const isRTL = i18n.language?.startsWith('ar');
   const [viewMode, setViewMode] = useState(() => {
     try {
@@ -30,7 +28,6 @@ function App() {
       return 'mobile';
     }
   });
-  console.log("App: viewMode is", viewMode);
 
   useEffect(() => {
     // ...

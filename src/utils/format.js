@@ -15,7 +15,6 @@ export const formatAddress = (addr, start = 4, end = 4) => {
   try {
     return `${addr.slice(0, safeStart)}...${addr.slice(-safeEnd)}`;
   } catch (e) {
-    console.error("formatAddress error:", e);
     return '...';
   }
 };

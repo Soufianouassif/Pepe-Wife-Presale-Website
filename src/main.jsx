@@ -6,8 +6,6 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './index.css'
 import './i18n/config'
 
-console.log("Main.jsx: All polyfills and configs loaded. Attempting render...");
-
 try {
   const rootElement = document.getElementById('root');
   if (!rootElement) {
@@ -15,15 +13,30 @@ try {
   }
   
   const root = ReactDOM.createRoot(rootElement);
-  console.log("Main.jsx: Root created. Rendering App...");
   
   root.render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
   )
-  console.log("Main.jsx: Initial render call completed.");
 } catch (e) {
   console.error("Main.jsx: CRITICAL RENDER FAILURE", e);
-  document.body.innerHTML = `<div style="padding: 20px; color: red; background: white;"><h1>CRITICAL LOAD ERROR</h1><pre>${e.stack || e.message}</pre></div>`;
+  try {
+    const container = document.createElement('div');
+    container.style.padding = '20px';
+    container.style.color = 'red';
+    container.style.background = 'white';
+
+    const title = document.createElement('h1');
+    title.textContent = 'CRITICAL LOAD ERROR';
+
+    const pre = document.createElement('pre');
+    pre.textContent = e?.stack || e?.message || String(e);
+
+    container.appendChild(title);
+    container.appendChild(pre);
+
+    document.body.innerHTML = '';
+    document.body.appendChild(container);
+  } catch {}
 }

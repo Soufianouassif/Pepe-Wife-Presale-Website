@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
-import { ethers } from 'ethers';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
-  Wallet, AlertCircle, X, ExternalLink, HelpCircle,
-  Mail, Zap, MessageSquare, Facebook, 
-  Github, Chrome, Smartphone, Ghost
+  AlertCircle, X, Zap, Smartphone
 } from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
@@ -71,10 +68,6 @@ const Icons = {
     </svg>
   ),
 };
-
-// --- CONFIGURATION ---
-const WALLETCONNECT_PROJECT_ID = '90be08cc5b7174d4051d2de451af0d9b'; 
-// ---------------------
 
 const BackgroundDecor = React.memo(() => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
