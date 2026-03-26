@@ -90,10 +90,10 @@ export const WalletProvider = ({ children }) => {
           useCoreKitKey: false,
         });
 
+        // Add Auth Adapter explicitly
         const authAdapter = new AuthAdapter({
           adapterSettings: {
-            uxMode: "popup",
-            network: "sapphire_mainnet",
+            uxMode: "popup", // Popup is generally preferred for a better UX if allowed
           },
         });
         web3authInstance.configureAdapter(authAdapter);
@@ -111,6 +111,9 @@ export const WalletProvider = ({ children }) => {
                 facebook: { name: "facebook", showOnModal: true },
                 twitter: { name: "twitter", showOnModal: true },
                 apple: { name: "apple", showOnModal: true },
+                discord: { name: "discord", showOnModal: true },
+                line: { name: "line", showOnModal: true },
+                github: { name: "github", showOnModal: true },
                 email_passwordless: { name: "email_passwordless", showOnModal: true },
                 sms_passwordless: { name: "sms_passwordless", showOnModal: true },
               },
@@ -294,7 +297,7 @@ export const WalletProvider = ({ children }) => {
     console.log("WalletProvider: Performing strict logout...");
     try {
       if (web3auth && web3auth.status === "connected") {
-        await web3auth.logout({ cleanup: true });
+        await web3auth.logout();
       }
       
       if (walletType === 'Phantom' && (window.phantom?.solana || window.solana)) {
@@ -306,25 +309,29 @@ export const WalletProvider = ({ children }) => {
     } catch (error) {
       console.error("WalletProvider: Logout error:", error);
     } finally {
-      // Clear all state and storage
+      // CLEAR EVERYTHING IMMEDIATELY
       setIsConnected(false);
       setAddress('');
       setWalletType('');
       setProvider(null);
       
       sessionStorage.clear();
-      localStorage.clear(); // Clear any persistent flags
+      localStorage.clear(); 
       
-      // Set explicit logout flag to prevent auto-restore on next load
+      // Set explicit logout flag
       sessionStorage.setItem('explicit_logout', 'true');
       
-      // Clear all cookies
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
+      // Clear all cookies manually
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      }
 
-      console.log("WalletProvider: Logout successful. Redirecting...");
-      window.location.href = '/connect';
+      console.log("WalletProvider: Logout complete. Forcing redirect.");
+      window.location.replace('/connect');
     }
   };
 
@@ -397,21 +404,26 @@ export const WalletProvider = ({ children }) => {
     
     try {
       console.log(`WalletProvider: Initiating ${loginProvider || 'modal'} login...`);
+      
+      // If already connected, disconnect first to ensure a fresh session if requested
+      if (web3auth.status === "connected") {
+        console.log("WalletProvider: Already connected, ensuring session is valid...");
+      }
+
       let web3authProvider;
       
       if (loginProvider) {
         // Direct OAuth login
         console.log(`WalletProvider: Connecting to ${loginProvider} via AUTH adapter...`, extraOptions);
         
-        // Correct parameter structure for connectTo in v9
         const connectOptions = {
           loginProvider,
         };
 
         if (extraOptions.login_hint) {
-          // Strict formatting for E.164 (ensure only digits and +)
+          // Strict formatting for E.164
           const cleanHint = extraOptions.login_hint.startsWith('+') 
-            ? `+${extraOptions.login_hint.replace(/\D/g, '')}`
+            ? `+${extraOptions.login_hint.replace(/[^\d]/g, '')}`
             : extraOptions.login_hint;
             
           connectOptions.extraLoginOptions = {
@@ -431,34 +443,21 @@ export const WalletProvider = ({ children }) => {
 
       setProvider(web3authProvider);
       
-      // Better Solana account retrieval
+      // Get account
       let account = "";
-      try {
-        const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
-        if (Array.isArray(accounts) && accounts.length > 0) {
-          account = accounts[0];
-        } else {
-          // Fallback to generic request if solana_getAccounts fails
-          const genAccounts = await web3authProvider.request({ method: "getAccounts" });
-          account = Array.isArray(genAccounts) ? genAccounts[0] : genAccounts;
-        }
-      } catch (reqError) {
-        console.warn("WalletProvider: Failed to get accounts via request, trying alternative...", reqError);
-        // If it's a social login, we might be able to get user info
-        const userInfo = await web3auth.getUserInfo();
-        console.log("WalletProvider: User info retrieved:", userInfo);
+      const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        account = accounts[0];
       }
 
       if (account && typeof account === 'string') {
         connect(account, 'Social', web3authProvider);
         return account;
       } else {
-        // One last try: if we have a provider, it should be able to give us the public key
-        // through the private key provider logic
-        throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم العثور على حسابات لهذا الدخول الاجتماعي. تأكد من إعدادات النطاق في لوحة تحكم Web3Auth." : "No accounts found. Please check your domain whitelist in Web3Auth Dashboard.");
+        throw new Error(typeof i18n !== 'undefined' && i18n.language === 'ar' ? "لم يتم العثور على حساب نشط. يرجى المحاولة مرة أخرى." : "No active account found. Please try again.");
       }
     } catch (error) {
-      console.error(`WalletProvider: Social login (${loginProvider || 'modal'}) failed:`, error);
+      console.error(`WalletProvider: Social login failed:`, error);
       throw error;
     }
   };
@@ -472,22 +471,10 @@ export const WalletProvider = ({ children }) => {
         targetProvider = window.ethereum?.providers?.find(p => p.isMetaMask) || (window.ethereum?.isMetaMask ? window.ethereum : null);
       } else if (walletName === 'Binance') {
         // Advanced Binance Wallet Detection
-        // 1. Check for dedicated Binance extension object
-        // 2. Check for ethereum.isBinance
-        // 3. Check for ethereum.providers array
         targetProvider = window.BinanceChain || 
                         window.ethereum?.isBinance || 
                         window.ethereum?.providers?.find(p => p.isBinance);
         
-        // If not found, it might be the new Binance Web3 Wallet (injected differently)
-        if (!targetProvider && window.ethereum) {
-          try {
-            // Check if current ethereum provider is Binance even if isBinance is not set
-            const info = await window.ethereum.request({ method: 'eth_accounts' }).catch(() => []);
-            console.log("WalletProvider: Binance detection check...", window.ethereum);
-          } catch (e) {}
-        }
-
         if (!targetProvider) {
           console.log("WalletProvider: Binance extension not found, trying WalletConnect fallback...");
           return await connectWalletConnect('Binance');

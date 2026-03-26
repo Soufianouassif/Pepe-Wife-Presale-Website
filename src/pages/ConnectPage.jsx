@@ -143,19 +143,19 @@ const ConnectPage = () => {
           const addr = response.publicKey.toString();
           if (addr && typeof addr === 'string') {
             connect(addr, 'Phantom');
-            navigate('/loading');
+            navigate('/dashboard'); // Direct navigation
           }
         }
       } else if (['MetaMask', 'Binance', 'OKX', 'Trust Wallet'].includes(walletId)) {
         const id = walletId === 'Trust Wallet' ? 'Trust' : walletId;
         const addr = await connectEVMWallet(id);
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/loading');
+          navigate('/dashboard'); // Direct navigation
         }
       } else if (walletId === 'WalletConnect') {
         const addr = await connectWalletConnect();
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/loading');
+          navigate('/dashboard'); // Direct navigation
         }
       }
     } catch (err) {
@@ -172,7 +172,10 @@ const ConnectPage = () => {
   }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language]);
 
   const handleSocialConnect = useCallback(async (loginProvider, extraOptions = {}) => {
-    if (isInitializing) return;
+    if (isInitializing) {
+      console.warn("ConnectPage: System still initializing...");
+      return;
+    }
     
     // If it's SMS and we haven't shown the input yet
     if (loginProvider === 'sms_passwordless' && !extraOptions.login_hint) {
@@ -183,10 +186,11 @@ const ConnectPage = () => {
     setStatus('connecting');
     setError(null);
     try {
-      console.log(`ConnectPage: Initiating ${loginProvider} login...`);
+      console.log(`ConnectPage: Initiating ${loginProvider} login...`, extraOptions);
       const addr = await loginWithSocial(loginProvider, extraOptions);
       if (addr) {
-        navigate('/loading');
+        console.log("ConnectPage: Login successful, navigating to dashboard...");
+        navigate('/dashboard'); // Direct navigation to dashboard
       } else {
         setStatus('idle');
       }
@@ -199,6 +203,7 @@ const ConnectPage = () => {
       if (friendlyMsg.includes('clientId')) friendlyMsg = "Web3Auth Client ID is invalid or for wrong network.";
       if (friendlyMsg.includes('whitelist')) friendlyMsg = "This domain is not whitelisted in Web3Auth Dashboard.";
       if (friendlyMsg.includes('origin')) friendlyMsg = "Domain mismatch. Check Web3Auth Dashboard settings.";
+      if (friendlyMsg.includes('Duplicate')) friendlyMsg = "An account already exists with this method.";
       
       setError(friendlyMsg);
     }
