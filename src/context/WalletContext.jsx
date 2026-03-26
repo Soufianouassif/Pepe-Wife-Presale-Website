@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { WALLET_ADAPTERS } from "@web3auth/base";
 import { EthereumProvider } from "@walletconnect/ethereum-provider";
-import web3AuthService from '../services/web3authService';
 
 const WalletContext = createContext();
 const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
@@ -22,23 +21,48 @@ export const WalletProvider = ({ children }) => {
   const [provider, setProvider] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [web3auth, setWeb3auth] = useState(null);
+  const web3authInitPromiseRef = useRef(null);
   const providerRef = useRef(null);
   const walletTypeRef = useRef('');
   const isConnectedRef = useRef(false);
 
+  const ensureWeb3AuthInitialized = async () => {
+    if (web3auth) return web3auth;
+    if (web3authInitPromiseRef.current) return await web3authInitPromiseRef.current;
+
+    web3authInitPromiseRef.current = (async () => {
+      try {
+        const mod = await import('../services/web3authService.js');
+        const svc = mod.default;
+        await svc.init();
+        const instance = svc.getInstance();
+        setWeb3auth(instance);
+        return instance;
+      } catch {
+        throw new Error("Social login is unavailable in this environment. Please use Phantom or MetaMask.");
+      }
+    })();
+
+    try {
+      return await web3authInitPromiseRef.current;
+    } finally {
+      web3authInitPromiseRef.current = null;
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Initialization timeout")), 10000)
-      );
-
       try {
-        await Promise.race([web3AuthService.init(), timeoutPromise]);
-        const instance = web3AuthService.getInstance();
-        setWeb3auth(instance);
-        
         const wasLoggedOut = safeSessionGet(STORAGE_KEYS.explicitLogout) === 'true';
-        await attemptRehydrate(instance, wasLoggedOut);
+        const storedType = safeSessionGet(STORAGE_KEYS.type);
+        const storedConnected = safeSessionGet(STORAGE_KEYS.connected) === 'true';
+
+        if (!wasLoggedOut && storedConnected && storedType === 'Social') {
+          const instance = await ensureWeb3AuthInitialized();
+          await attemptRehydrate(instance, wasLoggedOut);
+        } else {
+          await attemptRehydrate(null, wasLoggedOut);
+        }
       } catch (error) {
       } finally {
         setIsInitializing(false);
@@ -84,15 +108,13 @@ export const WalletProvider = ({ children }) => {
   };
 
   const loginWithSocial = async (loginProvider, extraOptions = {}) => {
-    if (!web3auth) {
-      throw new Error("Web3Auth is not initialized yet. Please wait.");
-    }
+    const web3authInstance = await ensureWeb3AuthInitialized();
     try {
-      if (web3auth.status === "connected") {
-        await web3auth.logout();
+      if (web3authInstance.status === "connected") {
+        await web3authInstance.logout();
       }
 
-      const web3authProvider = await web3auth.connectTo(WALLET_ADAPTERS.AUTH, {
+      const web3authProvider = await web3authInstance.connectTo(WALLET_ADAPTERS.AUTH, {
         loginProvider,
         extraLoginOptions: extraOptions.login_hint ? { login_hint: extraOptions.login_hint } : {},
       });
@@ -101,7 +123,7 @@ export const WalletProvider = ({ children }) => {
         throw new Error("Web3Auth `connectTo` did not return a provider.");
       }
 
-      const provider = web3auth.provider;
+      const provider = web3authInstance.provider;
       if (!provider) {
         throw new Error("web3auth.provider is null after a successful connection.");
       }
