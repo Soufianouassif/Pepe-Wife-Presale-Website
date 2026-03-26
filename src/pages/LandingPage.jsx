@@ -806,138 +806,143 @@ const BuyModal = ({ isOpen, onClose, t }) => {
 };
 
 const LandingPage = () => {
-  console.log("LandingPage: Component rendering...");
-  const { t, i18n } = useTranslation();
-  console.log("LandingPage: t is ready, language:", i18n.language);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null);
-  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const isRTL = i18n.language === 'ar';
-  console.log("LandingPage: isRTL is", isRTL);
+  try {
+    console.log("LandingPage: Component rendering...");
+    const { t, i18n } = useTranslation();
+    console.log("LandingPage: t is ready, language:", i18n.language);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeModal, setActiveModal] = useState(null);
+    const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+    const isRTL = i18n.language?.startsWith('ar');
+    console.log("LandingPage: isRTL is", isRTL);
 
-  useEffect(() => {
-    document.body.dir = isRTL ? 'rtl' : 'ltr';
-  }, [isRTL]);
+    useEffect(() => {
+      document.body.dir = isRTL ? 'rtl' : 'ltr';
+    }, [isRTL]);
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    setIsMobileMenuOpen(false);
-  };
+    const changeLanguage = (lng) => {
+      i18n.changeLanguage(lng);
+      setIsMobileMenuOpen(false);
+    };
 
-  const copyAddress = () => {
-    navigator.clipboard.writeText('0x1234567890abcdef1234567890abcdef12345678');
-  };
+    const copyAddress = () => {
+      navigator.clipboard.writeText('0x1234567890abcdef1234567890abcdef12345678');
+    };
 
-  return (
-    <div className={`min-h-screen bg-white text-pepe-black selection:bg-pepe-pink selection:text-white ${isRTL ? 'rtl' : 'ltr'}`}>
-      <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} changeLanguage={changeLanguage} t={t} currentLng={i18n.language} openModal={setActiveModal} />
-      
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed inset-0 z-[60] bg-pepe-yellow flex flex-col items-center justify-center p-10 space-y-10">
-            <button className="absolute top-10 right-10 text-pepe-black hover:scale-110 transition-transform" onClick={() => setIsMobileMenuOpen(false)}><X size={48} strokeWidth={3} /></button>
-            <nav className="flex flex-col items-center space-y-6">
-              {[{ id: 'home', label: t('nav.home') }, { id: 'about', label: t('nav.about') }, { id: 'tokenomics', label: t('nav.tokenomics') }, { id: 'roadmap', label: t('nav.roadmap') }, { id: 'faq', label: t('nav.faq') }].map((item) => (
-                <button key={item.id} className="text-3xl font-black uppercase hover:text-pepe-pink transition-colors" onClick={() => { setActiveModal(item.id); setIsMobileMenuOpen(false); }}>{item.label}</button>
-              ))}
-            </nav>
-            <div className="flex flex-col space-y-4 w-full px-12">
-              <WalletButton t={t} openModal={setActiveModal} />
+    return (
+      <div className={`min-h-screen bg-white text-pepe-black selection:bg-pepe-pink selection:text-white ${isRTL ? 'rtl' : 'ltr'}`}>
+        <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} changeLanguage={changeLanguage} t={t} currentLng={i18n.language} openModal={setActiveModal} />
+        
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed inset-0 z-[60] bg-pepe-yellow flex flex-col items-center justify-center p-10 space-y-10">
+              <button className="absolute top-10 right-10 text-pepe-black hover:scale-110 transition-transform" onClick={() => setIsMobileMenuOpen(false)}><X size={48} strokeWidth={3} /></button>
+              <nav className="flex flex-col items-center space-y-6">
+                {[{ id: 'home', label: t('nav.home') }, { id: 'about', label: t('nav.about') }, { id: 'tokenomics', label: t('nav.tokenomics') }, { id: 'roadmap', label: t('nav.roadmap') }, { id: 'faq', label: t('nav.faq') }].map((item) => (
+                  <button key={item.id} className="text-3xl font-black uppercase hover:text-pepe-pink transition-colors" onClick={() => { setActiveModal(item.id); setIsMobileMenuOpen(false); }}>{item.label}</button>
+                ))}
+              </nav>
+              <div className="flex flex-col space-y-4 w-full px-12">
+                <WalletButton t={t} openModal={setActiveModal} />
+              </div>
+              <div className="flex space-x-4 space-x-reverse">
+                {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-4 py-2 rounded-xl font-black uppercase border-2 border-pepe-black ${i18n.language === lang ? 'bg-pepe-pink text-white' : 'bg-white'}`}>{lang}</button>)}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <main>
+          <HeroSection t={t} openBuyModal={() => setIsBuyModalOpen(true)} />
+          <Ticker t={t} />
+          <BuyBoxSection t={t} openModal={setActiveModal} openBuyModal={() => setIsBuyModalOpen(true)} />
+          <FeaturedIn t={t} />
+          <TokenomicsSection t={t} openModal={setActiveModal} />
+          <WhyBuySection t={t} />
+          <PartnersTicker t={t} />
+          <WhitepaperSection t={t} openModal={setActiveModal} />
+          <RiskWarningSection t={t} />
+        </main>
+
+        {/* BUY MODAL */}
+        <BuyModal isOpen={isBuyModalOpen} onClose={() => setIsBuyModalOpen(false)} t={t} />
+
+        {/* MODALS */}
+        <Modal isOpen={activeModal === 'home'} onClose={() => setActiveModal(null)} title={t('nav.home')} headerColor="bg-pepe-yellow">
+          <div className="text-center space-y-8 py-10">
+            <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 4, repeat: Infinity }} className="w-48 h-48 mx-auto"><img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Welcome" className="w-full h-full object-contain" /></motion.div>
+            <div className="space-y-4">
+              <h4 className="text-4xl font-black uppercase italic animate-title-gradient">{t('hero.title_meet')} {t('hero.title_pepe')} {t('hero.title_wife')}</h4>
+              <p className="text-2xl font-bold text-gray-700 leading-relaxed max-w-2xl mx-auto">{t('hero.desc')}</p>
             </div>
-            <div className="flex space-x-4 space-x-reverse">
-              {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-4 py-2 rounded-xl font-black uppercase border-2 border-pepe-black ${i18n.language === lang ? 'bg-pepe-pink text-white' : 'bg-white'}`}>{lang}</button>)}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <main>
-        <HeroSection t={t} openBuyModal={() => setIsBuyModalOpen(true)} />
-        <Ticker t={t} />
-        <BuyBoxSection t={t} openModal={setActiveModal} openBuyModal={() => setIsBuyModalOpen(true)} />
-        <FeaturedIn t={t} />
-        <TokenomicsSection t={t} openModal={setActiveModal} />
-        <WhyBuySection t={t} />
-        <PartnersTicker t={t} />
-        <WhitepaperSection t={t} openModal={setActiveModal} />
-        <RiskWarningSection t={t} />
-      </main>
-
-      {/* BUY MODAL */}
-      <BuyModal isOpen={isBuyModalOpen} onClose={() => setIsBuyModalOpen(false)} t={t} />
-
-      {/* MODALS */}
-      <Modal isOpen={activeModal === 'home'} onClose={() => setActiveModal(null)} title={t('nav.home')} headerColor="bg-pepe-yellow">
-        <div className="text-center space-y-8 py-10">
-          <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 4, repeat: Infinity }} className="w-48 h-48 mx-auto"><img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Welcome" className="w-full h-full object-contain" /></motion.div>
-          <div className="space-y-4">
-            <h4 className="text-4xl font-black uppercase italic animate-title-gradient">{t('hero.title_meet')} {t('hero.title_pepe')} {t('hero.title_wife')}</h4>
-            <p className="text-2xl font-bold text-gray-700 leading-relaxed max-w-2xl mx-auto">{t('hero.desc')}</p>
+            <div className="flex justify-center gap-4 pt-6"><Button variant="primary" className="px-10 py-4 text-xl shadow-[6px_6px_0_0_#000]" onClick={() => setActiveModal(null)}>{t('hero.join_presale')}</Button></div>
           </div>
-          <div className="flex justify-center gap-4 pt-6"><Button variant="primary" className="px-10 py-4 text-xl shadow-[6px_6px_0_0_#000]" onClick={() => setActiveModal(null)}>{t('hero.join_presale')}</Button></div>
-        </div>
-      </Modal>
+        </Modal>
 
-      <Modal isOpen={activeModal === 'contract'} onClose={() => setActiveModal(null)} title={t('contract.title')} headerColor="bg-pepe-yellow">
-        <div className="space-y-8">
-          <div className="bg-pepe-yellow/10 border-4 border-pepe-black rounded-[2rem] p-8 text-center relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pepe-yellow opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
-            <h4 className="text-xl font-black mb-4 uppercase text-gray-500">{t('contract.copy_address')}</h4>
-            <div className="flex items-center justify-between bg-white border-4 border-pepe-black rounded-2xl p-4 shadow-[6px_6px_0_0_rgba(10,10,10,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-              <code className="text-lg font-black truncate mr-4">0x1234...5678</code>
-              <button onClick={copyAddress} className="p-3 bg-pepe-pink text-white rounded-xl hover:scale-110 transition-transform"><Copy size={24} strokeWidth={3} /></button>
+        <Modal isOpen={activeModal === 'contract'} onClose={() => setActiveModal(null)} title={t('contract.title')} headerColor="bg-pepe-yellow">
+          <div className="space-y-8">
+            <div className="bg-pepe-yellow/10 border-4 border-pepe-black rounded-[2rem] p-8 text-center relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pepe-yellow opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+              <h4 className="text-xl font-black mb-4 uppercase text-gray-500">{t('contract.copy_address')}</h4>
+              <div className="flex items-center justify-between bg-white border-4 border-pepe-black rounded-2xl p-4 shadow-[6px_6px_0_0_rgba(10,10,10,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                <code className="text-lg font-black truncate mr-4">0x1234...5678</code>
+                <button onClick={copyAddress} className="p-3 bg-pepe-pink text-white rounded-xl hover:scale-110 transition-transform"><Copy size={24} strokeWidth={3} /></button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-pepe-pink/5 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_rgba(10,10,10,1)] hover:-translate-y-1 transition-all"><Lock className="mx-auto mb-4 text-pepe-pink" size={40} strokeWidth={3} /><h5 className="text-lg font-black uppercase mb-1">{t('contract.locked_liquidity')}</h5><p className="text-2xl font-black text-pepe-pink italic">{t('contract.duration')}</p></div>
+              <div className="bg-pepe-green/5 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_rgba(10,10,10,1)] hover:-translate-y-1 transition-all"><Shield className="mx-auto mb-4 text-pepe-green" size={40} strokeWidth={3} /><h5 className="text-lg font-black uppercase mb-1">{t('contract.locked_team')}</h5><p className="text-2xl font-black text-pepe-green italic">{t('contract.duration')}</p></div>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-pepe-pink/5 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_rgba(10,10,10,1)] hover:-translate-y-1 transition-all"><Lock className="mx-auto mb-4 text-pepe-pink" size={40} strokeWidth={3} /><h5 className="text-lg font-black uppercase mb-1">{t('contract.locked_liquidity')}</h5><p className="text-2xl font-black text-pepe-pink italic">{t('contract.duration')}</p></div>
-            <div className="bg-pepe-green/5 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_rgba(10,10,10,1)] hover:-translate-y-1 transition-all"><Shield className="mx-auto mb-4 text-pepe-green" size={40} strokeWidth={3} /><h5 className="text-lg font-black uppercase mb-1">{t('contract.locked_team')}</h5><p className="text-2xl font-black text-pepe-green italic">{t('contract.duration')}</p></div>
+        </Modal>
+
+        <Modal isOpen={activeModal === 'audit'} onClose={() => setActiveModal(null)} title={t('audit.title')} headerColor="bg-pepe-yellow">
+          <div className="text-center space-y-8">
+            <div className="w-32 h-32 bg-pepe-green rounded-full border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[8px_8px_0_0_rgba(10,10,10,1)]"><Shield size={60} strokeWidth={3} className="text-white" /></div>
+            <div className="space-y-4"><span className="bg-pepe-green text-white px-6 py-2 rounded-full font-black uppercase text-sm border-2 border-pepe-black">{t('audit.status')}</span><p className="text-xl font-bold text-gray-700 leading-relaxed">{t('audit.desc')}</p></div>
+            <Button variant="primary" className="w-full py-6 text-2xl group shadow-[8px_8px_0_0_rgba(10,10,10,1)]">{t('audit.button')}<ExternalLink className="ml-3 group-hover:rotate-12 transition-transform" size={24} strokeWidth={3} /></Button>
           </div>
-        </div>
-      </Modal>
+        </Modal>
 
-      <Modal isOpen={activeModal === 'audit'} onClose={() => setActiveModal(null)} title={t('audit.title')} headerColor="bg-pepe-yellow">
-        <div className="text-center space-y-8">
-          <div className="w-32 h-32 bg-pepe-green rounded-full border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[8px_8px_0_0_rgba(10,10,10,1)]"><Shield size={60} strokeWidth={3} className="text-white" /></div>
-          <div className="space-y-4"><span className="bg-pepe-green text-white px-6 py-2 rounded-full font-black uppercase text-sm border-2 border-pepe-black">{t('audit.status')}</span><p className="text-xl font-bold text-gray-700 leading-relaxed">{t('audit.desc')}</p></div>
-          <Button variant="primary" className="w-full py-6 text-2xl group shadow-[8px_8px_0_0_rgba(10,10,10,1)]">{t('audit.button')}<ExternalLink className="ml-3 group-hover:rotate-12 transition-transform" size={24} strokeWidth={3} /></Button>
-        </div>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'tokenomics'} onClose={() => setActiveModal(null)} title={t('tokenomics.distribution_title', 'Detailed Tokenomics')} headerColor="bg-pepe-green">
-        <div className="space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div className="relative rounded-3xl border-4 border-pepe-black overflow-hidden shadow-[8px_8px_0_0_#000]"><img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Tokenomics" className="w-full h-full object-cover" /></div>
-            <div className="space-y-6"><h4 className="text-3xl font-black uppercase italic text-pepe-green">{t('tokenomics.title')}</h4><p className="text-lg font-bold text-gray-700 leading-relaxed">{t('tokenomics.desc_detailed', 'Pepe Wife features a sustainable economic model designed for long-term growth and community rewards. Our zero-tax policy ensures maximum efficiency for traders.')}</p><div className="grid grid-cols-2 gap-4"><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.zero_tax')}</div><div className="text-xl font-black text-pepe-green">0% BUY / 0% SELL</div></div><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.total_supply_label', 'Total Supply')}</div><div className="text-xl font-black text-pepe-pink">1 BILLION</div></div></div></div>
+        <Modal isOpen={activeModal === 'tokenomics'} onClose={() => setActiveModal(null)} title={t('tokenomics.distribution_title', 'Detailed Tokenomics')} headerColor="bg-pepe-green">
+          <div className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              <div className="relative rounded-3xl border-4 border-pepe-black overflow-hidden shadow-[8px_8px_0_0_#000]"><img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Tokenomics" className="w-full h-full object-cover" /></div>
+              <div className="space-y-6"><h4 className="text-3xl font-black uppercase italic text-pepe-green">{t('tokenomics.title')}</h4><p className="text-lg font-bold text-gray-700 leading-relaxed">{t('tokenomics.desc_detailed', 'Pepe Wife features a sustainable economic model designed for long-term growth and community rewards. Our zero-tax policy ensures maximum efficiency for traders.')}</p><div className="grid grid-cols-2 gap-4"><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.zero_tax')}</div><div className="text-xl font-black text-pepe-green">0% BUY / 0% SELL</div></div><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.total_supply_label', 'Total Supply')}</div><div className="text-xl font-black text-pepe-pink">1 BILLION</div></div></div></div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left rtl:text-right border-collapse">
+                <thead><tr className="bg-pepe-green/20"><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_category', 'Category')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_percentage', 'Percentage')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_amount', 'Amount')}</th></tr></thead>
+                <tbody>{[{ cat: t('tokenomics.category_presale', 'Presale'), pct: '40%', amt: '400,000,000' }, { cat: t('tokenomics.category_liquidity', 'Liquidity'), pct: '30%', amt: '300,000,000' }, { cat: t('tokenomics.category_staking', 'Staking'), pct: '15%', amt: '150,000,000' }, { cat: t('tokenomics.category_team', 'Team'), pct: '10%', amt: '100,000,000' }, { cat: t('tokenomics.category_marketing', 'Marketing'), pct: '5%', amt: '50,000,000' }].map((row, i) => (<tr key={i} className="border-4 border-pepe-black font-bold"><td className="p-4 border-4 border-pepe-black uppercase">{row.cat}</td><td className="p-4 border-4 border-pepe-black text-pepe-pink">{row.pct}</td><td className="p-4 border-4 border-pepe-black">{row.amt}</td></tr>))}</tbody>
+              </table>
+            </div>
+            <div className="text-center text-xl font-black uppercase italic py-4 bg-pepe-yellow/10 border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">{t('tokenomics.total_supply', 'Total Supply: 1,000,000,000 $PWIFE')}</div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left rtl:text-right border-collapse">
-              <thead><tr className="bg-pepe-green/20"><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_category', 'Category')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_percentage', 'Percentage')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_amount', 'Amount')}</th></tr></thead>
-              <tbody>{[{ cat: t('tokenomics.category_presale', 'Presale'), pct: '40%', amt: '400,000,000' }, { cat: t('tokenomics.category_liquidity', 'Liquidity'), pct: '30%', amt: '300,000,000' }, { cat: t('tokenomics.category_staking', 'Staking'), pct: '15%', amt: '150,000,000' }, { cat: t('tokenomics.category_team', 'Team'), pct: '10%', amt: '100,000,000' }, { cat: t('tokenomics.category_marketing', 'Marketing'), pct: '5%', amt: '50,000,000' }].map((row, i) => (<tr key={i} className="border-4 border-pepe-black font-bold"><td className="p-4 border-4 border-pepe-black uppercase">{row.cat}</td><td className="p-4 border-4 border-pepe-black text-pepe-pink">{row.pct}</td><td className="p-4 border-4 border-pepe-black">{row.amt}</td></tr>))}</tbody>
-            </table>
+        </Modal>
+
+        <Modal isOpen={activeModal === 'roadmap'} onClose={() => setActiveModal(null)} title={t('roadmap.title_roadmap')} headerColor="bg-pepe-pink">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{[1, 2, 3, 4].map(phase => (<div key={phase} className="bg-white p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] hover:shadow-[12px_12px_0_0_#000] transition-all hover:-translate-y-1"><div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center text-white font-black text-xl mb-6 shadow-[4px_4px_0_0_#000]">{phase}</div><h3 className="text-2xl font-black uppercase italic mb-6 text-pepe-black">{t(`roadmap.phase${phase}_title`)}</h3><ul className="space-y-4">{[1, 2, 3, 4].map(item => (<li key={item} className="flex items-start space-x-3 space-x-reverse group"><div className="mt-1.5 w-3 h-3 bg-pepe-green rounded-full border-2 border-pepe-black shrink-0 group-hover:scale-125 transition-transform" /><span className="text-gray-700 font-bold text-base leading-tight">{t(`roadmap.phase${phase}_item${item}`)}</span></li>))}</ul></div>))}</div>
+        </Modal>
+
+        <Modal isOpen={activeModal === 'faq'} onClose={() => setActiveModal(null)} title={t('nav.faq')} headerColor="bg-pepe-yellow">
+          <div className="space-y-6">{[1, 2, 3, 4].map((i) => (<div key={i} className="bg-white rounded-[2rem] border-4 border-pepe-black shadow-[6px_6px_0_0_#000] p-8"><h4 className="text-2xl font-black uppercase italic text-pepe-black mb-4">{t(`faq.q${i}`)}</h4><p className="text-gray-700 font-bold text-lg leading-relaxed border-t-4 border-pepe-black/5 pt-4">{t(`faq.a${i}`)}</p></div>))}</div>
+        </Modal>
+
+        <Modal isOpen={activeModal === 'about'} onClose={() => setActiveModal(null)} title={t('nav.about')} headerColor="bg-pepe-yellow">
+          <div className="space-y-10">
+            <div className="text-center space-y-6"><h4 className="text-4xl font-black uppercase italic animate-title-gradient">{t('whybuy.title_why')} {t('whybuy.title_pepewife')}</h4><p className="text-xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">{t('whybuy.desc')}</p></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1, 2, 3].map(i => (<div key={i} className="bg-white p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] text-center space-y-4"><div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#000]">{i === 1 ? <Rocket size={32} /> : i === 2 ? <Globe size={32} /> : <Shield size={32} />}</div><h5 className="text-xl font-black uppercase italic">{t(`whybuy.reason${i}_title`)}</h5><p className="text-sm font-bold text-gray-600">{t(`whybuy.reason${i}_desc`)}</p></div>))}</div>
           </div>
-          <div className="text-center text-xl font-black uppercase italic py-4 bg-pepe-yellow/10 border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">{t('tokenomics.total_supply', 'Total Supply: 1,000,000,000 $PWIFE')}</div>
-        </div>
-      </Modal>
+        </Modal>
 
-      <Modal isOpen={activeModal === 'roadmap'} onClose={() => setActiveModal(null)} title={t('roadmap.title_roadmap')} headerColor="bg-pepe-pink">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{[1, 2, 3, 4].map(phase => (<div key={phase} className="bg-white p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] hover:shadow-[12px_12px_0_0_#000] transition-all hover:-translate-y-1"><div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center text-white font-black text-xl mb-6 shadow-[4px_4px_0_0_#000]">{phase}</div><h3 className="text-2xl font-black uppercase italic mb-6 text-pepe-black">{t(`roadmap.phase${phase}_title`)}</h3><ul className="space-y-4">{[1, 2, 3, 4].map(item => (<li key={item} className="flex items-start space-x-3 space-x-reverse group"><div className="mt-1.5 w-3 h-3 bg-pepe-green rounded-full border-2 border-pepe-black shrink-0 group-hover:scale-125 transition-transform" /><span className="text-gray-700 font-bold text-base leading-tight">{t(`roadmap.phase${phase}_item${item}`)}</span></li>))}</ul></div>))}</div>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'faq'} onClose={() => setActiveModal(null)} title={t('nav.faq')} headerColor="bg-pepe-yellow">
-        <div className="space-y-6">{[1, 2, 3, 4].map((i) => (<div key={i} className="bg-white rounded-[2rem] border-4 border-pepe-black shadow-[6px_6px_0_0_#000] p-8"><h4 className="text-2xl font-black uppercase italic text-pepe-black mb-4">{t(`faq.q${i}`)}</h4><p className="text-gray-700 font-bold text-lg leading-relaxed border-t-4 border-pepe-black/5 pt-4">{t(`faq.a${i}`)}</p></div>))}</div>
-      </Modal>
-
-      <Modal isOpen={activeModal === 'about'} onClose={() => setActiveModal(null)} title={t('nav.about')} headerColor="bg-pepe-yellow">
-        <div className="space-y-10">
-          <div className="text-center space-y-6"><h4 className="text-4xl font-black uppercase italic animate-title-gradient">{t('whybuy.title_why')} {t('whybuy.title_pepewife')}</h4><p className="text-xl font-bold text-gray-700 leading-relaxed max-w-3xl mx-auto">{t('whybuy.desc')}</p></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1, 2, 3].map(i => (<div key={i} className="bg-white p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] text-center space-y-4"><div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#000]">{i === 1 ? <Rocket size={32} /> : i === 2 ? <Globe size={32} /> : <Shield size={32} />}</div><h5 className="text-xl font-black uppercase italic">{t(`whybuy.reason${i}_title`)}</h5><p className="text-sm font-bold text-gray-600">{t(`whybuy.reason${i}_desc`)}</p></div>))}</div>
-        </div>
-      </Modal>
-
-      <Footer t={t} />
-      <ViewModeToggle />
-    </div>
-  );
+        <Footer t={t} />
+        <ViewModeToggle />
+      </div>
+    );
+  } catch (error) {
+    console.error("LandingPage CRITICAL RENDER ERROR:", error);
+    return <div style={{ padding: 50, color: 'red' }}>LandingPage Error: {error.message}</div>;
+  }
 };
 
 export default LandingPage;

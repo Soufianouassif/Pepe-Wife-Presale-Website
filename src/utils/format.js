@@ -1,7 +1,21 @@
 export const formatAddress = (addr, start = 4, end = 4) => {
-  // Critical safety check: if addr is not a string or is too short, return a safe value.
-  if (typeof addr !== 'string' || addr.length < (start + end)) {
-    return '...'; // Return a placeholder instead of crashing
+  // Ultra-strict safety check for any non-string or null/undefined
+  if (!addr || typeof addr !== 'string') {
+    return '...';
   }
-  return `${addr.slice(0, start)}...${addr.slice(-end)}`;
+  
+  // Ensure we have enough length to slice
+  const safeStart = Math.min(start, addr.length);
+  const safeEnd = Math.min(end, addr.length);
+  
+  if (addr.length < (safeStart + safeEnd)) {
+    return addr; // If too short, just return the address as is
+  }
+  
+  try {
+    return `${addr.slice(0, safeStart)}...${addr.slice(-safeEnd)}`;
+  } catch (e) {
+    console.error("formatAddress error:", e);
+    return '...';
+  }
 };
