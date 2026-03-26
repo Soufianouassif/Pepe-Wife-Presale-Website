@@ -32,8 +32,9 @@
       (function() {
         window.global = window;
         if (typeof window.process === 'undefined') {
-          window.process = { env: {} };
+          window.process = { env: { NODE_ENV: 'development' } };
         }
+        // Buffer will be loaded by main.jsx -> polyfills.js
       })();
     </script>
     <script type="module" src="/src/main.jsx"></script>

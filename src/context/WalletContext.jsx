@@ -14,28 +14,36 @@ export const WalletProvider = ({ children }) => {
   const [walletType, setWalletType] = useState('');
   const [provider, setProvider] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
-  const web3auth = web3AuthService.getInstance();
+  const [web3auth, setWeb3auth] = useState(null);
 
   useEffect(() => {
     const init = async () => {
+      // Timeout fallback for initialization
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Initialization timeout")), 10000)
+      );
+
       try {
-        await web3AuthService.init();
+        await Promise.race([web3AuthService.init(), timeoutPromise]);
+        const instance = web3AuthService.getInstance();
+        setWeb3auth(instance);
+        
         const wasLoggedOut = sessionStorage.getItem('explicit_logout') === 'true';
-        if (web3auth.status === "connected" && !wasLoggedOut) {
-          const web3authProvider = web3auth.provider;
+        if (instance && instance.status === "connected" && !wasLoggedOut) {
+          const web3authProvider = instance.provider;
           const accounts = await web3authProvider.request({ method: "solana_getAccounts" });
           if (accounts && accounts.length > 0) {
             connect(accounts[0], 'Social', web3authProvider);
           }
         }
       } catch (error) {
-        console.error("WalletProvider: Critical initialization error:", error);
+        console.error("WalletProvider: Initialization error or timeout:", error);
       } finally {
         setIsInitializing(false);
       }
     };
     init();
-  }, [web3auth]);
+  }, []);
 
   const connect = (addr, type, customProvider = null) => {
     if (!addr || typeof addr !== 'string' || addr.length < 10) {
@@ -56,7 +64,10 @@ export const WalletProvider = ({ children }) => {
     console.log("WalletProvider: Strict logout initiated...");
     try {
       if (web3auth && web3auth.status === "connected") {
-        await web3auth.logout({ cleanup: true });
+        await web3auth.logout();
+      }
+      if (provider && typeof provider.disconnect === 'function') {
+        await provider.disconnect();
       }
     } catch (error) {
       console.error("WalletProvider: Web3Auth logout error:", error);
@@ -75,6 +86,9 @@ export const WalletProvider = ({ children }) => {
   };
 
   const loginWithSocial = async (loginProvider, extraOptions = {}) => {
+    if (!web3auth) {
+      throw new Error("Web3Auth is not initialized yet. Please wait.");
+    }
     console.log(`WalletProvider: Attempting social login with ${loginProvider}.`);
     try {
       // If already connected, it can cause issues. Best to logout first.
@@ -219,8 +233,37 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
+  const sendTransaction = async (transaction) => {
+    if (!isConnected || !provider) {
+      throw new Error("Wallet not connected.");
+    }
+
+    try {
+      console.log("WalletProvider: Sending transaction...");
+      // Handle both Solana and EVM transactions if needed
+      if (walletType === 'Social' || ['Phantom', 'Solflare', 'Backpack'].includes(walletType)) {
+        // Solana
+        const signature = await provider.request({
+          method: 'solana_signAndSendTransaction',
+          params: { transaction }
+        });
+        return signature;
+      } else {
+        // EVM
+        const txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [transaction]
+        });
+        return txHash;
+      }
+    } catch (error) {
+      console.error("WalletProvider: Transaction failed:", error);
+      throw error;
+    }
+  };
+
   return (
-    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect }}>
+    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect, sendTransaction }}>
       {children}
     </WalletContext.Provider>
   );

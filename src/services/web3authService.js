@@ -17,25 +17,29 @@ const chainConfig = {
 
 class Web3AuthService {
   constructor() {
-    this.web3auth = new Web3Auth({
-      clientId: WEB3AUTH_CLIENT_ID,
-      web3AuthNetwork: "sapphire_mainnet",
-      chainConfig,
-      privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig } }),
-      sessionTime: 86400, // 24 hours
-      useCoreKitKey: false,
-    });
-
-    const authAdapter = new AuthAdapter({
-      adapterSettings: {
-        uxMode: "popup",
-      },
-    });
-    this.web3auth.configureAdapter(authAdapter);
+    this.web3auth = null;
   }
 
   async init() {
+    if (this.web3auth) return;
+    
     try {
+      this.web3auth = new Web3Auth({
+        clientId: WEB3AUTH_CLIENT_ID,
+        web3AuthNetwork: "sapphire_mainnet",
+        chainConfig,
+        privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig } }),
+        sessionTime: 86400, // 24 hours
+        useCoreKitKey: false,
+      });
+
+      const authAdapter = new AuthAdapter({
+        adapterSettings: {
+          uxMode: "popup",
+        },
+      });
+      this.web3auth.configureAdapter(authAdapter);
+
       await this.web3auth.initModal({
         modalConfig: {
           [WALLET_ADAPTERS.AUTH]: {

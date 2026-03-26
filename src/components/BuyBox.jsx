@@ -25,8 +25,8 @@ const BuyBox = ({ t, onSuccess }) => {
   const [txStatus, setTxStatus] = useState('idle'); // idle, pending, success, error
 
   const calculatedTokensNum = useMemo(() => {
-    if (!amount || isNaN(amount)) return 0;
-    const usdValue = parseFloat(amount) * fromToken.price;
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) return 0;
+    const usdValue = parseFloat(amount) * (fromToken.price || 0);
     return Math.floor(usdValue / PWIFE_PRICE);
   }, [amount, fromToken]);
 

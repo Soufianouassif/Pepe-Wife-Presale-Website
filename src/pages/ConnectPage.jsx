@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
-import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import { ethers } from 'ethers';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
@@ -155,7 +154,7 @@ const ConnectPage = () => {
       console.log(`ConnectPage: Connecting to ${walletId}...`);
       
       // --- SOLANA WALLETS ---
-      if (['Phantom', 'Solflare', 'Backpack'].includes(walletId)) {
+      if (['Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet'].includes(walletId)) {
         let provider = null;
         let downloadUrl = '';
 
@@ -170,6 +169,12 @@ const ConnectPage = () => {
         } else if (walletId === 'Backpack') {
           provider = window.backpack;
           downloadUrl = 'https://backpack.app/';
+        } else if (walletId === 'OKX') {
+          provider = window.okxwallet?.solana;
+          downloadUrl = 'https://www.okx.com/web3';
+        } else if (walletId === 'Trust Wallet') {
+          provider = window.trustwallet?.solana;
+          downloadUrl = 'https://trustwallet.com/';
         }
 
         if (!provider) {
@@ -181,7 +186,7 @@ const ConnectPage = () => {
         if (response?.publicKey) {
           const addr = response.publicKey.toString();
           if (addr && typeof addr === 'string') {
-            connect(addr, walletId);
+            connect(addr, walletId, provider);
             navigate('/dashboard');
           }
         }

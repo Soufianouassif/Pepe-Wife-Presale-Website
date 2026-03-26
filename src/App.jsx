@@ -11,10 +11,18 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   console.log("App: Component rendering...");
-  const { i18n } = useTranslation();
+  const { i18n, ready } = useTranslation();
+  
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-pepe-black border-t-pepe-yellow rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   console.log("App: i18n language is", i18n.language);
-  const isRTL = i18n.language === 'ar';
-  const isFrench = i18n.language === 'fr';
+  const isRTL = i18n.language?.startsWith('ar');
   const [viewMode, setViewMode] = useState(() => {
     try {
       return localStorage.getItem('viewMode') || 'mobile';
@@ -33,16 +41,17 @@ function App() {
   }, [i18n.language, isRTL]);
 
   useEffect(() => {
-    // ...
     try {
-      localStorage.setItem('viewMode', viewMode);
+      const storedMode = localStorage.getItem('viewMode');
+      if (storedMode !== viewMode) {
+        localStorage.setItem('viewMode', viewMode);
+        // Only dispatch if it's actually changing to inform OTHER tabs/components
+        window.dispatchEvent(new Event('viewModeChanged'));
+      }
     } catch (e) {}
-    
-    // Dispatch a custom event so other components know the view mode changed
-    window.dispatchEvent(new Event('viewModeChanged'));
   }, [viewMode]);
 
-  // Listen for view mode changes from other components
+  // Listen for view mode changes from other components/tabs
   useEffect(() => {
     const handleViewChange = () => {
       try {
@@ -53,7 +62,11 @@ function App() {
       } catch (e) {}
     };
     window.addEventListener('viewModeChanged', handleViewChange);
-    return () => window.removeEventListener('viewModeChanged', handleViewChange);
+    window.addEventListener('storage', handleViewChange); // Also handle storage changes from other tabs
+    return () => {
+      window.removeEventListener('viewModeChanged', handleViewChange);
+      window.removeEventListener('storage', handleViewChange);
+    };
   }, [viewMode]);
 
   return (
