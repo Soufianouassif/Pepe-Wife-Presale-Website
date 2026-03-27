@@ -48,6 +48,44 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
+  const getSessionChallengeMessage = (addr, type) => {
+    const ts = new Date().toISOString();
+    return `Pepe Wife Session Approval\nWallet: ${type}\nAddress: ${addr}\nTimestamp: ${ts}\nAction: Reconnect session`;
+  };
+
+  const authorizeSessionWithProvider = async ({ address: addr, walletType: type, providerOverride = null }) => {
+    const activeProvider = providerOverride || provider;
+    const activeAddress = typeof addr === 'string' ? addr : address;
+    const activeType = type || walletType;
+    if (!activeProvider || !activeAddress || !activeType) {
+      throw new Error("Missing wallet session authorization context.");
+    }
+    const challenge = getSessionChallengeMessage(activeAddress, activeType);
+    if (SOLANA_WALLET_TYPES.has(activeType)) {
+      const encoded = new TextEncoder().encode(challenge);
+      if (typeof activeProvider.signMessage === 'function') {
+        await activeProvider.signMessage(encoded);
+        return true;
+      }
+      if (typeof activeProvider.request === 'function') {
+        await activeProvider.request({
+          method: 'solana_signMessage',
+          params: { message: Array.from(encoded) }
+        });
+        return true;
+      }
+      throw new Error("Wallet does not support Solana message signing.");
+    }
+    if (typeof activeProvider.request === 'function') {
+      await activeProvider.request({
+        method: 'personal_sign',
+        params: [challenge, activeAddress]
+      });
+      return true;
+    }
+    throw new Error("Wallet does not support EVM message signing.");
+  };
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -135,6 +173,7 @@ export const WalletProvider = ({ children }) => {
       }
 
       const account = accounts[0];
+      await authorizeSessionWithProvider({ address: account, walletType: 'Social', providerOverride: provider });
       connect(account, 'Social', provider);
       
       return account;
@@ -188,8 +227,10 @@ export const WalletProvider = ({ children }) => {
       const accounts = await targetProvider.request({ method: 'eth_requestAccounts' });
       
       if (Array.isArray(accounts) && typeof accounts[0] === 'string' && accounts[0].length > 0) {
-        connect(accounts[0], walletName, targetProvider);
-        return accounts[0];
+        const nextAddress = accounts[0];
+        await authorizeSessionWithProvider({ address: nextAddress, walletType: walletName, providerOverride: targetProvider });
+        connect(nextAddress, walletName, targetProvider);
+        return nextAddress;
       } else {
         throw new Error("Wallet did not return a valid account string.");
       }
@@ -225,8 +266,11 @@ export const WalletProvider = ({ children }) => {
       const accounts = await wcProvider.request({ method: 'eth_accounts' });
       
       if (accounts && accounts.length > 0) {
-        connect(accounts[0], preferredWallet || 'WalletConnect', wcProvider);
-        return accounts[0];
+        const walletName = preferredWallet || 'WalletConnect';
+        const nextAddress = accounts[0];
+        await authorizeSessionWithProvider({ address: nextAddress, walletType: walletName, providerOverride: wcProvider });
+        connect(nextAddress, walletName, wcProvider);
+        return nextAddress;
       }
       throw new Error("No accounts found via WalletConnect");
     } catch (error) {
@@ -478,7 +522,7 @@ export const WalletProvider = ({ children }) => {
   };
 
   return (
-    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect, sendTransaction, signMessage }}>
+    <WalletContext.Provider value={{ isConnected, address, walletType, isInitializing, connect, disconnect, loginWithSocial, connectEVMWallet, connectWalletConnect, sendTransaction, signMessage, authorizeSessionWithProvider }}>
       {children}
     </WalletContext.Provider>
   );

@@ -104,7 +104,7 @@ const countries = [
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
-  const { connect, loginWithSocial, connectEVMWallet, connectWalletConnect, isInitializing } = useWallet();
+  const { connect, loginWithSocial, connectEVMWallet, connectWalletConnect, isInitializing, authorizeSessionWithProvider } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); 
@@ -179,8 +179,9 @@ const ConnectPage = () => {
         if (response?.publicKey) {
           const addr = response.publicKey.toString();
           if (addr && typeof addr === 'string') {
+            await authorizeSessionWithProvider({ address: addr, walletType: walletId, providerOverride: provider });
             connect(addr, walletId, provider);
-            navigate('/dashboard');
+            navigate('/loading', { replace: true, state: { fromConnect: true, walletId } });
           }
         }
       } 
@@ -188,14 +189,14 @@ const ConnectPage = () => {
       else if (['MetaMask', 'Binance', 'Coinbase'].includes(walletId)) {
         const addr = await connectEVMWallet(walletId);
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/dashboard');
+          navigate('/loading', { replace: true, state: { fromConnect: true, walletId } });
         }
       } 
       // --- WALLETCONNECT ---
       else if (walletId === 'WalletConnect') {
         const addr = await connectWalletConnect();
         if (addr && typeof addr === 'string' && addr !== '') {
-          navigate('/dashboard');
+          navigate('/loading', { replace: true, state: { fromConnect: true, walletId } });
         }
       }
     } catch (err) {
@@ -209,7 +210,7 @@ const ConnectPage = () => {
         setError(errMsg);
       }
     }
-  }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language]);
+  }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language, authorizeSessionWithProvider]);
 
   const handleSocialConnect = useCallback(async (loginProvider, extraOptions = {}) => {
     if (isInitializing) {
@@ -233,7 +234,7 @@ const ConnectPage = () => {
 
       if (addr) {
         console.log("ConnectPage: Login successful, navigating to dashboard...");
-        navigate('/dashboard');
+        navigate('/loading', { replace: true, state: { fromConnect: true, walletId: loginProvider } });
       } else {
         console.warn("ConnectPage: loginWithSocial returned a null or empty value. This might be due to user cancellation. Not navigating.");
         setStatus('idle');

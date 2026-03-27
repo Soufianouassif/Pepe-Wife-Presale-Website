@@ -72,8 +72,8 @@ const DashboardPage = () => {
     }, ...prev]);
   };
 
-  const handleDisconnect = () => {
-    disconnect();
+  const handleDisconnect = async () => {
+    await disconnect();
     navigate('/');
   };
 

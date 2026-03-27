@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Rocket, ShieldCheck, CheckCircle2, Globe, Lock, Loader2 } from 'lucide-react';
+import { useWallet } from '../context/WalletContext';
 
 const LoadingPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { isConnected, isInitializing } = useWallet();
   const isRTL = i18n.language === 'ar';
   const [step, setStep] = useState(0);
+  const [minDelayPassed, setMinDelayPassed] = useState(false);
 
   const steps = [
     { icon: <Globe className="text-blue-400" />, text: 'Initializing secure connection...' },
@@ -18,20 +21,28 @@ const LoadingPage = () => {
   ];
 
   useEffect(() => {
-    // Advanced redirect logic with step progression
     const stepInterval = setInterval(() => {
       setStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
     }, 1000);
-
-    const redirectTimer = setTimeout(() => {
-      navigate('/dashboard');
-    }, 4500);
+    const minDelayTimer = setTimeout(() => {
+      setMinDelayPassed(true);
+    }, 1800);
 
     return () => {
       clearInterval(stepInterval);
-      clearTimeout(redirectTimer);
+      clearTimeout(minDelayTimer);
     };
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (!isConnected) {
+      navigate('/connect', { replace: true });
+      return;
+    }
+    if (minDelayPassed && !isInitializing) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isConnected, isInitializing, minDelayPassed, navigate]);
 
   return (
     <div className={`min-h-screen bg-white text-pepe-black flex flex-col items-center justify-center p-6 relative overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
