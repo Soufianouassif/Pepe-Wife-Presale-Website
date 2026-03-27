@@ -28,14 +28,10 @@
   <body>
     <div id="root"></div>
     <script>
-      // Early polyfills to prevent "Buffer is not defined"
       (function() {
-        window.global = window;
-        if (typeof window.process === 'undefined') {
-          window.process = { env: { NODE_ENV: 'development' } };
+        if (typeof window.global === 'undefined') {
+          window.global = window;
         }
-        // SES fix: if lockdown is loaded, we might need to prevent it or fix it
-        // Web3Auth uses SES, which can break some libraries if not handled carefully
       })();
     </script>
     <script type="module" src="/src/main.jsx"></script>

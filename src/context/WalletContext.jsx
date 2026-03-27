@@ -1,6 +1,4 @@
 import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
-import { WALLET_ADAPTERS } from "@web3auth/base";
-import { EthereumProvider } from "@walletconnect/ethereum-provider";
 
 const WalletContext = createContext();
 const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
@@ -58,8 +56,9 @@ export const WalletProvider = ({ children }) => {
         const storedConnected = safeSessionGet(STORAGE_KEYS.connected) === 'true';
 
         if (!wasLoggedOut && storedConnected && storedType === 'Social') {
-          const instance = await ensureWeb3AuthInitialized();
-          await attemptRehydrate(instance, wasLoggedOut);
+          clearStoredWallet();
+          safeSessionSet(STORAGE_KEYS.explicitLogout, 'true');
+          await attemptRehydrate(null, true);
         } else {
           await attemptRehydrate(null, wasLoggedOut);
         }
@@ -109,6 +108,7 @@ export const WalletProvider = ({ children }) => {
 
   const loginWithSocial = async (loginProvider, extraOptions = {}) => {
     const web3authInstance = await ensureWeb3AuthInitialized();
+    const { WALLET_ADAPTERS } = await import("@web3auth/base");
     try {
       if (web3authInstance.status === "connected") {
         await web3authInstance.logout();
@@ -203,6 +203,7 @@ export const WalletProvider = ({ children }) => {
       throw new Error("Wallet connection is only available in the browser.");
     }
     try {
+      const { EthereumProvider } = await import("@walletconnect/ethereum-provider");
       const wcProvider = await EthereumProvider.init({
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
