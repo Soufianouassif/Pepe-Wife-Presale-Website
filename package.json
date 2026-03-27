@@ -6,19 +6,23 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "token:create:solana": "node scripts/solana/create-spl-token.mjs",
+    "token:create:solana:check": "node scripts/solana/create-spl-token.mjs --check"
   },
   "dependencies": {
+    "@solana/spl-token": "^0.4.8",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.34",
     "@solana/wallet-adapter-wallets": "^0.19.25",
     "@solana/web3.js": "^1.91.1",
     "@walletconnect/ethereum-provider": "^2.13.1",
+    "@web3auth/auth-adapter": "^9.4.0",
     "@web3auth/base": "^9.4.0",
     "@web3auth/ethereum-provider": "^9.4.0",
     "@web3auth/modal": "^9.4.0",
-    "@web3auth/auth-adapter": "^9.4.0",
     "@web3auth/solana-provider": "^9.4.0",
     "buffer": "^6.0.3",
     "clsx": "^2.1.0",
@@ -49,6 +53,7 @@
     "autoprefixer": "^10.4.18",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "vite": "^5.1.6"
+    "vite": "^5.1.6",
+    "vitest": "^2.1.9"
   }
 }

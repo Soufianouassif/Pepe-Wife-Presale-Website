@@ -104,7 +104,7 @@ const countries = [
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
-  const { connect, loginWithSocial, connectEVMWallet, connectWalletConnect, isInitializing, authorizeSessionWithProvider } = useWallet();
+  const { loginWithSocial, connectEVMWallet, connectSolanaWallet, connectWalletConnect, isInitializing } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); 
@@ -146,43 +146,10 @@ const ConnectPage = () => {
     try {
       console.log(`ConnectPage: Connecting to ${walletId}...`);
       
-      // --- SOLANA WALLETS ---
       if (['Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet'].includes(walletId)) {
-        let provider = null;
-        let downloadUrl = '';
-
-        if (walletId === 'Phantom') {
-          provider = window.phantom?.solana || window.solana;
-          downloadUrl = 'https://phantom.app/';
-          if (!provider?.isPhantom) provider = null;
-        } else if (walletId === 'Solflare') {
-          provider = window.solflare;
-          downloadUrl = 'https://solflare.com/';
-          if (!provider?.isSolflare) provider = null;
-        } else if (walletId === 'Backpack') {
-          provider = window.backpack;
-          downloadUrl = 'https://backpack.app/';
-        } else if (walletId === 'OKX') {
-          provider = window.okxwallet?.solana;
-          downloadUrl = 'https://www.okx.com/web3';
-        } else if (walletId === 'Trust Wallet') {
-          provider = window.trustwallet?.solana;
-          downloadUrl = 'https://trustwallet.com/';
-        }
-
-        if (!provider) {
-          window.open(downloadUrl, '_blank');
-          throw new Error(i18n.language === 'ar' ? `محفظة ${walletId} غير مثبتة.` : `${walletId} wallet is not installed.`);
-        }
-
-        const response = await provider.connect();
-        if (response?.publicKey) {
-          const addr = response.publicKey.toString();
-          if (addr && typeof addr === 'string') {
-            await authorizeSessionWithProvider({ address: addr, walletType: walletId, providerOverride: provider });
-            connect(addr, walletId, provider);
-            navigate('/loading', { replace: true, state: { fromConnect: true, walletId } });
-          }
+        const addr = await connectSolanaWallet(walletId);
+        if (addr && typeof addr === 'string') {
+          navigate('/loading', { replace: true, state: { fromConnect: true, walletId } });
         }
       } 
       // --- EVM WALLETS ---
@@ -203,14 +170,14 @@ const ConnectPage = () => {
       console.error(`ConnectPage: ${walletId} error:`, err);
       setStatus('idle');
       
-      const errMsg = err?.message || 'Connection failed';
+      const errMsg = err?.userMessage || err?.message || 'Connection failed';
       if (walletId === 'Binance' && (errMsg.includes('not found') || errMsg.includes('provider'))) {
         setError(i18n.language === 'ar' ? 'يرجى تثبيت إضافة بايننس أو استخدام QR Code.' : 'Please install Binance extension or use QR Code.');
       } else {
         setError(errMsg);
       }
     }
-  }, [connect, connectEVMWallet, connectWalletConnect, navigate, i18n.language, authorizeSessionWithProvider]);
+  }, [connectEVMWallet, connectSolanaWallet, connectWalletConnect, navigate, i18n.language]);
 
   const handleSocialConnect = useCallback(async (loginProvider, extraOptions = {}) => {
     if (isInitializing) {
