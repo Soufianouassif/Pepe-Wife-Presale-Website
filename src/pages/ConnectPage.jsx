@@ -83,6 +83,8 @@ const ConnectPage = () => {
   const isRTL = i18n.language === 'ar';
   const [status, setStatus] = useState('idle'); 
   const [error, setError] = useState(null);
+  const [showEmailOtpDialog, setShowEmailOtpDialog] = useState(false);
+  const [emailOtpInput, setEmailOtpInput] = useState('');
 
 
   const walletOptions = useMemo(() => [
@@ -172,16 +174,34 @@ const ConnectPage = () => {
       if (friendlyMsg.includes('origin')) friendlyMsg = "Domain mismatch. Check Web3Auth Dashboard settings.";
       if (friendlyMsg.toLowerCase().includes('timeout')) friendlyMsg = "Login timed out. Verify Web3Auth Allowed Origins and social Connection IDs in dashboard.";
       if (friendlyMsg.toLowerCase().includes('connection id')) friendlyMsg = "Missing social Connection ID in Web3Auth dashboard/env settings.";
+      if (friendlyMsg.toLowerCase().includes('invalid auth connection')) friendlyMsg = "Invalid social connection config. Verify provider type and Connection ID for Google/X/Telegram/Email in Web3Auth dashboard.";
       if (friendlyMsg.includes('Duplicate')) friendlyMsg = "An account already exists with this method.";
       
       setError(friendlyMsg);
     }
   }, [loginWithSocial, navigate, isInitializing]);
 
+  const handleEmailOtpStart = useCallback(() => {
+    const normalized = emailOtpInput.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalized)) {
+      setError(i18n.language === 'ar' ? 'أدخل بريدًا إلكترونيًا صالحًا قبل المتابعة.' : 'Enter a valid email address before continue.');
+      return;
+    }
+    setShowEmailOtpDialog(false);
+    setError(null);
+    handleSocialConnect('email_passwordless', { login_hint: normalized });
+  }, [emailOtpInput, handleSocialConnect, i18n.language]);
+
   const handleConnect = useCallback((walletId) => {
     const socialProviders = ['google', 'twitter', 'telegram', 'email_passwordless'];
     if (socialProviders.includes(walletId)) {
-      handleSocialConnect(walletId);
+      if (walletId === 'email_passwordless') {
+        setShowEmailOtpDialog(true);
+        setError(null);
+      } else {
+        handleSocialConnect(walletId);
+      }
     } else {
       handleWalletConnect(walletId);
     }
@@ -296,6 +316,44 @@ const ConnectPage = () => {
             </div>
 
             <AnimatePresence>
+              {showEmailOtpDialog && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                  className="bg-pepe-pink/5 border-2 border-pepe-pink p-4 sm:p-5 rounded-2xl space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-black text-xs sm:text-sm uppercase tracking-wide text-pepe-black">
+                      {i18n.language === 'ar' ? 'أدخل بريدك لاستلام رمز OTP' : 'Enter your email to receive OTP'}
+                    </p>
+                    <button
+                      onClick={() => setShowEmailOtpDialog(false)}
+                      className="p-1 rounded-lg hover:bg-pepe-pink/10"
+                      disabled={status === 'connecting'}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      value={emailOtpInput}
+                      onChange={(e) => setEmailOtpInput(e.target.value)}
+                      placeholder="name@email.com"
+                      className="flex-1 px-4 py-3 rounded-xl border-2 border-pepe-black bg-white font-bold outline-none focus:ring-2 focus:ring-pepe-pink/40"
+                      disabled={status === 'connecting'}
+                    />
+                    <button
+                      onClick={handleEmailOtpStart}
+                      disabled={status === 'connecting'}
+                      className="px-5 py-3 rounded-xl border-2 border-pepe-black bg-pepe-yellow font-black uppercase text-xs hover:translate-y-[-1px] transition-transform disabled:opacity-60"
+                    >
+                      {i18n.language === 'ar' ? 'إرسال OTP' : 'Send OTP'}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
               {error && (
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-red-50 border-2 border-red-200 p-4 rounded-2xl flex items-center gap-3 text-red-500 font-bold text-sm">
                   <AlertCircle size={18} />

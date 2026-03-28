@@ -96,6 +96,83 @@ export const WalletProvider = ({ children }) => {
     }
   }, []);
 
+  const normalizeSocialAccount = useCallback((value) => {
+    if (!value) return null;
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed || null;
+    }
+    if (typeof value === 'object') {
+      const fromAddress = typeof value.address === 'string' ? value.address.trim() : '';
+      if (fromAddress) return fromAddress;
+      const fromPublicKeyString = typeof value.publicKey === 'string' ? value.publicKey.trim() : '';
+      if (fromPublicKeyString) return fromPublicKeyString;
+      if (value.publicKey?.toBase58) {
+        const base58 = value.publicKey.toBase58();
+        if (typeof base58 === 'string' && base58.trim()) return base58.trim();
+      }
+      if (value.publicKey?.toString) {
+        const key = value.publicKey.toString();
+        if (typeof key === 'string' && key.trim() && key !== '[object Object]') return key.trim();
+      }
+      if (value.toBase58) {
+        const base58 = value.toBase58();
+        if (typeof base58 === 'string' && base58.trim()) return base58.trim();
+      }
+      if (value.toString) {
+        const asString = value.toString();
+        if (typeof asString === 'string' && asString.trim() && asString !== '[object Object]') return asString.trim();
+      }
+    }
+    return null;
+  }, []);
+
+  const resolveSocialAccount = useCallback(async (socialProvider) => {
+    if (!socialProvider) return null;
+    const requestMethods = ['solana_getAccounts', 'solana_accounts', 'solana_requestAccounts'];
+    for (const method of requestMethods) {
+      try {
+        const response = await withTimeout(
+          socialProvider.request({ method }),
+          12000,
+          'تعذر قراءة حسابات المحفظة الاجتماعية.'
+        );
+        const items = Array.isArray(response) ? response : [response];
+        for (const item of items) {
+          const candidate = normalizeSocialAccount(item);
+          if (candidate && isValidSolAddress(candidate)) return candidate;
+        }
+      } catch {}
+    }
+    const directCandidates = [
+      normalizeSocialAccount(socialProvider.publicKey),
+      normalizeSocialAccount(socialProvider.address),
+      normalizeSocialAccount(socialProvider.selectedAddress),
+    ];
+    for (const candidate of directCandidates) {
+      if (candidate && isValidSolAddress(candidate)) return candidate;
+    }
+    try {
+      const evmAccounts = await withTimeout(
+        socialProvider.request({ method: 'eth_accounts' }),
+        7000,
+        'تعذر قراءة حسابات EVM من المزود الاجتماعي.'
+      );
+      const firstEvm = Array.isArray(evmAccounts) ? evmAccounts[0] : evmAccounts;
+      const normalizedEvm = normalizeSocialAccount(firstEvm);
+      if (normalizedEvm && isValidEvmAddress(normalizedEvm)) {
+        throw new WalletOperationError('Social provider returned EVM account on Solana flow.', {
+          code: 'SOCIAL_CHAIN_MISMATCH',
+          userMessage: 'تمت مصادقة اجتماعية لكن الاتصال مُعدّ على EVM بدل Solana. راجع إعداد Social Connection في Web3Auth Dashboard.',
+          retriable: false
+        });
+      }
+    } catch (error) {
+      if (error instanceof WalletOperationError) throw error;
+    }
+    return null;
+  }, [isValidEvmAddress, isValidSolAddress, normalizeSocialAccount, withTimeout]);
+
   const normalizeChainId = useCallback((chainId) => {
     if (typeof chainId !== 'string') return '';
     const lower = chainId.trim().toLowerCase();
@@ -450,28 +527,7 @@ export const WalletProvider = ({ children }) => {
           retriable: true
         });
       }
-      let account = null;
-      try {
-        const accounts = await withTimeout(
-          socialProvider.request({ method: "solana_getAccounts" }),
-          12000,
-          'تعذر قراءة حسابات المحفظة الاجتماعية.'
-        );
-        account = accounts?.[0] || null;
-      } catch {}
-      if (!account) {
-        try {
-          const accounts = await withTimeout(
-            socialProvider.request({ method: "solana_accounts" }),
-            12000,
-            'تعذر قراءة حسابات المحفظة الاجتماعية.'
-          );
-          account = accounts?.[0] || null;
-        } catch {}
-      }
-      if (!account && socialProvider.publicKey?.toString) {
-        account = socialProvider.publicKey.toString();
-      }
+      const account = await resolveSocialAccount(socialProvider);
       if (!isValidSolAddress(account)) {
         throw new WalletOperationError('Social wallet account is invalid.', {
           code: 'ADDRESS_INVALID',
@@ -498,7 +554,7 @@ export const WalletProvider = ({ children }) => {
       }
       throw handleWalletAdapterError(error, 'social_connect');
     }
-  }, [authorizeSessionWithProvider, connect, createAdapterFor, ensureWeb3AuthInitialized, withTimeout]);
+  }, [authorizeSessionWithProvider, connect, createAdapterFor, ensureWeb3AuthInitialized, resolveSocialAccount, withTimeout]);
 
   /**
    * @param {'MetaMask'|'Binance'|'Coinbase'} walletName

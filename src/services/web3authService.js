@@ -1,3 +1,5 @@
+import { CHAIN_NAMESPACES } from "@web3auth/base";
+
 const WEB3AUTH_CLIENT_ID = import.meta?.env?.VITE_WEB3AUTH_CLIENT_ID || "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
 const WEB3AUTH_ALLOWED_ORIGINS = (import.meta?.env?.VITE_WEB3AUTH_ALLOWED_ORIGINS || '')
   .split(',')
@@ -5,7 +7,7 @@ const WEB3AUTH_ALLOWED_ORIGINS = (import.meta?.env?.VITE_WEB3AUTH_ALLOWED_ORIGIN
   .filter(Boolean);
 
 const chainConfig = {
-  chainNamespace: "solana",
+  chainNamespace: CHAIN_NAMESPACES.SOLANA,
   chainId: "0x1", // Mainnet-beta
   rpcTarget: "https://api.mainnet-beta.solana.com",
   displayName: "Solana Mainnet",
@@ -19,6 +21,12 @@ const AUTH_CONNECTION_KEYS = {
   twitter: "X",
   telegram: "TELEGRAM",
   email_passwordless: "EMAIL_PASSWORDLESS",
+};
+const AUTH_CONNECTION_ALIASES = {
+  google: ["GOOGLE", "google"],
+  twitter: ["X", "TWITTER", "twitter", "x"],
+  telegram: ["TELEGRAM", "telegram"],
+  email_passwordless: ["EMAIL_PASSWORDLESS", "EMAIL", "email_passwordless", "email"],
 };
 const WEB3AUTH_CONNECT_TIMEOUT_MS = 25000;
 
@@ -70,9 +78,21 @@ class Web3AuthService {
   }
 
   resolveAuthConnection(loginProvider) {
-    const key = AUTH_CONNECTION_KEYS[loginProvider];
-    if (!key || !this.authConnections) return null;
-    return this.authConnections[key] || null;
+    if (!this.authConnections) return null;
+    const directKey = AUTH_CONNECTION_KEYS[loginProvider];
+    if (directKey && this.authConnections[directKey]) return this.authConnections[directKey];
+    const aliases = AUTH_CONNECTION_ALIASES[loginProvider] || [];
+    for (const alias of aliases) {
+      if (this.authConnections[alias]) return this.authConnections[alias];
+    }
+    const entries = Object.entries(this.authConnections);
+    const lowerAliases = aliases.map((item) => String(item).toLowerCase());
+    for (const [key, value] of entries) {
+      const k = String(key || "").toLowerCase();
+      const v = String(value || "").toLowerCase();
+      if (lowerAliases.some((alias) => k === alias || v === alias)) return value;
+    }
+    return null;
   }
 
   resolveAuthConnectionId(loginProvider) {
@@ -112,12 +132,29 @@ class Web3AuthService {
     const connector = this.walletConnectors?.AUTH || this.walletConnectors?.OPENLOGIN || "auth";
     const authConnection = this.resolveAuthConnection(loginProvider);
     const authConnectionId = this.resolveAuthConnectionId(loginProvider);
+    const isUnifiedAuthMode = Boolean(this.authConnections && Object.keys(this.authConnections).length > 0);
+    if (isUnifiedAuthMode && !authConnectionId && ['twitter', 'telegram', 'email_passwordless', 'google'].includes(loginProvider)) {
+      throw new Error(`Missing social Connection ID for ${loginProvider}.`);
+    }
     const loginHint = typeof extraLoginOptions?.login_hint === "string" ? extraLoginOptions.login_hint.trim() : "";
     const attempts = [];
+    if (authConnection && authConnectionId) {
+      attempts.push({
+        authConnection,
+        authConnectionId,
+        ...(loginHint ? { loginHint } : {}),
+      });
+    }
     if (authConnection) {
       attempts.push({
         authConnection,
-        ...(authConnectionId ? { authConnectionId } : {}),
+        ...(loginHint ? { loginHint } : {}),
+      });
+    }
+    if (authConnectionId) {
+      attempts.push({
+        authConnection: loginProvider,
+        authConnectionId,
         ...(loginHint ? { loginHint } : {}),
       });
     }
@@ -139,6 +176,10 @@ class Web3AuthService {
       }
     }
     const normalizedMessage = String(lastError?.message || '');
+    if (normalizedMessage.toLowerCase().includes('invalid auth connection')) {
+      const providerLabel = loginProvider === 'email_passwordless' ? 'Email OTP' : loginProvider;
+      throw new Error(`Invalid auth connection for ${providerLabel}. Configure proper Social Connection and Connection ID in Web3Auth Dashboard.`);
+    }
     if (normalizedMessage.toLowerCase().includes('timeout')) {
       throw new Error("Social auth timed out. Verify Web3Auth allowed origins and social connection IDs.");
     }
