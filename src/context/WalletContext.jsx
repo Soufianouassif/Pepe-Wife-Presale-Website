@@ -378,7 +378,6 @@ export const WalletProvider = ({ children }) => {
    */
   const loginWithSocial = useCallback(async (loginProvider, extraOptions = {}) => {
     const web3authInstance = await ensureWeb3AuthInitialized();
-    const { WALLET_ADAPTERS } = await import("@web3auth/base");
     try {
       if (!SOCIAL_LOGIN_PROVIDERS.has(loginProvider)) {
         throw new WalletOperationError('Unsupported social login provider.', {
@@ -397,10 +396,12 @@ export const WalletProvider = ({ children }) => {
       if (loginProvider === 'email_passwordless' && sanitizedLoginHint) {
         extraLoginOptions.login_hint = sanitizedLoginHint;
       }
-      const web3authProvider = await web3authInstance.connectTo(WALLET_ADAPTERS.AUTH, {
-        loginProvider,
-        extraLoginOptions,
-      });
+      const mod = await import('../services/web3authService.js');
+      const svc = mod.default;
+      if (svc.getStatus?.() === 'connected') {
+        await svc.logout();
+      }
+      const web3authProvider = await svc.login(loginProvider, extraLoginOptions);
       if (!web3authProvider) {
         throw new WalletOperationError('Web3Auth connection returned null provider.', {
           code: 'SOCIAL_PROVIDER_MISSING',
@@ -408,7 +409,7 @@ export const WalletProvider = ({ children }) => {
           retriable: true
         });
       }
-      const socialProvider = web3authInstance.provider;
+      const socialProvider = svc.getProvider?.() || web3authInstance.provider || web3authProvider;
       if (!socialProvider) {
         throw new WalletOperationError('Web3Auth provider missing after connect.', {
           code: 'SOCIAL_PROVIDER_MISSING',

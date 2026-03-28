@@ -15,8 +15,8 @@ const ScrollingTextLine = ({ text, color, duration, direction = 1, yOffset }) =>
         {Array.from({ length: 12 }).map((_, i) => (
           <span 
             key={i} 
-            className={`text-4xl md:text-7xl font-black uppercase px-8 md:px-16 ${color} opacity-20`}
-            style={{ fontFamily: "'Luckiest Guy', cursive" }}
+            className={`text-4xl md:text-7xl font-semibold uppercase px-8 md:px-16 ${color}`}
+            style={{ fontFamily: "'Sora', 'Fredoka', sans-serif" }}
           >
             {text}
           </span>
@@ -27,7 +27,7 @@ const ScrollingTextLine = ({ text, color, duration, direction = 1, yOffset }) =>
 };
 
 const TokenomicsBackground = ({ isEnabled = true }) => {
-  if (!isEnabled) return <div className="absolute inset-0 bg-[#22C55E]" />;
+  if (!isEnabled) return <div className="absolute inset-0 bg-[#38C172]" />;
 
   const lines = useMemo(() => [
     { text: "Buy PWIFE NOW", color: "text-pepe-yellow", duration: 35, direction: 1, yOffset: 5 },
@@ -40,12 +40,11 @@ const TokenomicsBackground = ({ isEnabled = true }) => {
   ], []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-[#22C55E]">
-      {/* Nature Green Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pepe-green/20 via-transparent to-black/10" />
+    <div className="absolute inset-0 z-0 overflow-hidden bg-[#38C172]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#7CFCB2] via-[#52D681] to-[#2FA865]" />
       
       {/* Moving Text Pattern Layer */}
-      <div className="relative h-full w-full opacity-60">
+      <div className="relative h-full w-full">
         {lines.map((line, index) => (
           <ScrollingTextLine 
             key={index}
@@ -55,7 +54,7 @@ const TokenomicsBackground = ({ isEnabled = true }) => {
       </div>
 
       {/* Subtle Noise Texture for Cartoon/Meme feel */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="absolute inset-0 opacity-[0.06] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       
       {/* Nature Glow Blobs */}
       <motion.div 
@@ -64,7 +63,7 @@ const TokenomicsBackground = ({ isEnabled = true }) => {
           opacity: [0.1, 0.3, 0.1]
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 w-[50%] h-[50%] bg-white/10 blur-[120px] rounded-full"
+        className="absolute top-1/4 left-1/4 w-[50%] h-[50%] bg-[#B6FFD6] blur-[120px] rounded-full"
       />
     </div>
   );

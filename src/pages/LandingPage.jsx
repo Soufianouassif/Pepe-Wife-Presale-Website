@@ -335,29 +335,26 @@ const TokenomicsSection = ({ t, openModal }) => {
     { label: t('tokenomics.category_marketing', 'Marketing'), percentage: 5, color: 'bg-white' },
   ];
   return (
-    <section id="tokenomics" className="relative py-16 sm:py-24 overflow-hidden bg-white">
-      {/* Dynamic Background Component */}
+    <section id="tokenomics" className="relative py-16 sm:py-24 overflow-hidden bg-[#38C172]">
       <TokenomicsBackground isEnabled={isAnimationEnabled} />
 
       <div className="section-container relative z-10 px-4 sm:px-6">
         <div className="text-center mb-12 sm:mb-16 relative">
-          {/* Animation Control Toggle */}
           <div className="absolute top-0 right-0 sm:right-4 z-20">
             <button 
               onClick={() => setIsAnimationEnabled(!isAnimationEnabled)}
-              className="bg-white/80 backdrop-blur-sm border-2 border-pepe-black px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-[2px_2px_0_0_#000] hover:bg-pepe-yellow transition-colors"
+              className="bg-white border-2 border-pepe-black px-3 py-1 rounded-full text-[10px] font-semibold uppercase shadow-[2px_2px_0_0_#000] hover:bg-pepe-yellow transition-colors"
             >
               {isAnimationEnabled ? 'Pause BG' : 'Play BG'}
             </button>
           </div>
 
-          <h2 className="text-3xl sm:text-7xl font-black uppercase italic drop-shadow-[6px_6px_0px_rgba(255,255,255,1)] text-pepe-black animate-title-gradient relative inline-block">
+          <h2 className="text-3xl sm:text-7xl font-semibold uppercase text-pepe-black animate-title-gradient relative inline-block">
             {t('tokenomics.title')}
-            {/* Glowing Token Name Effect */}
             <motion.span 
               animate={isAnimationEnabled ? { opacity: [0.5, 1, 0.5] } : {}}
               transition={{ duration: 2, repeat: Infinity }}
-              className="block text-pepe-green drop-shadow-[0_0_15px_rgba(20,241,149,0.5)] text-2xl sm:text-4xl mt-2"
+              className="block text-pepe-black text-2xl sm:text-4xl mt-2"
             >
               $PWIFE TOKENOMICS
             </motion.span>
@@ -366,11 +363,11 @@ const TokenomicsSection = ({ t, openModal }) => {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="space-y-8">
             <div className="bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] border-4 border-pepe-black shadow-[8px_8px_0_0_rgba(10,10,10,1)] lg:shadow-[12px_12px_0px_0px_rgba(10,10,10,1)]">
-              <h3 className="text-xl sm:text-3xl font-black uppercase mb-6 sm:mb-8 italic">{t('tokenomics.distribution_title', 'Token Distribution')}</h3>
+              <h3 className="text-xl sm:text-3xl font-semibold uppercase mb-6 sm:mb-8">{t('tokenomics.distribution_title', 'Token Distribution')}</h3>
               <div className="space-y-4 sm:space-y-6">
                 {distribution.map((item, idx) => (
                   <div key={idx} className="space-y-2">
-                    <div className="flex justify-between font-black uppercase italic text-xs sm:text-base">
+                    <div className="flex justify-between font-semibold uppercase text-xs sm:text-base">
                       <span>{item.label}</span>
                       <span>{item.percentage}%</span>
                     </div>
@@ -392,39 +389,39 @@ const TokenomicsSection = ({ t, openModal }) => {
               </div>
             </div>
             <div className="bg-pepe-black text-white p-6 sm:p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#FF69B4] space-y-4">
-              <div className="flex items-center justify-between bg-white/10 p-3 sm:p-4 rounded-xl border-2 border-white/20">
+              <div className="flex items-center justify-between bg-white p-3 sm:p-4 rounded-xl border-2 border-pepe-black">
                 <div className="flex items-center space-x-3 space-x-reverse">
                   <Flame size={20} className="text-pepe-yellow" />
-                  <span className="font-black uppercase italic tracking-tight text-xs sm:text-base">{t('tokenomics.zero_tax')}</span>
+                  <span className="font-semibold uppercase tracking-tight text-xs sm:text-base text-pepe-black">{t('tokenomics.zero_tax')}</span>
                 </div>
-                <div className="bg-pepe-green text-pepe-black px-2 sm:px-3 py-1 rounded-full text-[10px] font-black uppercase animate-pulse">Active</div>
+                <div className="bg-pepe-green text-pepe-black px-2 sm:px-3 py-1 rounded-full text-[10px] font-semibold uppercase">Active</div>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <Lock size={14} className="text-pepe-pink" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase">{t('tokenomics.liquidity_lock')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black">{t('tokenomics.liquidity_lock')}</span>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <ShieldCheck size={14} className="text-pepe-green" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase">{t('tokenomics.team_lock')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black">{t('tokenomics.team_lock')}</span>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <Lock size={14} className="text-pepe-yellow" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase">{t('tokenomics.marketing_lock')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black">{t('tokenomics.marketing_lock')}</span>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <Droplets size={14} className="text-blue-400" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase">{t('tokenomics.linear_vesting')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black">{t('tokenomics.linear_vesting')}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 opacity-50 cursor-not-allowed grayscale">
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <X size={14} className="text-red-500" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase line-through">{t('tokenomics.freeze')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black line-through">{t('tokenomics.freeze')}</span>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse bg-white/5 p-2 sm:p-3 rounded-xl border-2 border-white/10">
+                <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
                   <X size={14} className="text-red-500" />
-                  <span className="text-[9px] sm:text-xs font-bold uppercase line-through">{t('tokenomics.mint')}</span>
+                  <span className="text-[9px] sm:text-xs font-medium uppercase text-pepe-black line-through">{t('tokenomics.mint')}</span>
                 </div>
               </div>
             </div>

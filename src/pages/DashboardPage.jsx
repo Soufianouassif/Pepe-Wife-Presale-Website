@@ -27,6 +27,7 @@ const DashboardPage = () => {
   const [stakedBalance, setStakedBalance] = useState(0);
   const [stakingAmount, setStakingAmount] = useState('');
   const [isStaking, setIsStaking] = useState(false);
+  const [isBuyHouseOpen, setIsBuyHouseOpen] = useState(false);
   const [history, setHistory] = useState([
     { id: 1, date: 'March 24, 2026', type: 'Presale Purchase', amount: 100000, status: 'Confirmed' },
     { id: 2, date: 'March 22, 2026', type: 'Referral Reward', amount: 5000, status: 'Confirmed' },
@@ -310,7 +311,57 @@ const DashboardPage = () => {
 
                   {/* Professional Buy Box Component */}
                   <div className="lg:col-span-2">
-                    <BuyBox t={t} onSuccess={handleBuySuccess} />
+                    <div className="relative w-full min-h-[640px] rounded-[3rem] border-4 border-pepe-black bg-gradient-to-b from-[#B6E6FF] via-[#DDF5FF] to-[#F2FBFF] shadow-[15px_15px_0_0_#000] overflow-hidden">
+                      <div className="absolute inset-x-0 bottom-0 h-[72%] bg-[#FFE6A7] border-t-4 border-pepe-black" />
+                      <div className="absolute left-1/2 -translate-x-1/2 top-[11%] w-[92%] h-[33%] bg-[#FF6B6B] border-4 border-pepe-black rounded-[3rem] shadow-[0_8px_0_0_#000]" />
+                      <div className="absolute left-[6%] right-[6%] top-[38%] bottom-[5%] bg-[#FFD58A] border-4 border-pepe-black rounded-[2.5rem] shadow-[0_10px_0_0_#000]" />
+                      <motion.button
+                        type="button"
+                        onClick={() => setIsBuyHouseOpen((prev) => !prev)}
+                        whileTap={{ scale: 0.98 }}
+                        animate={{ rotateY: isBuyHouseOpen ? -105 : 0, x: isBuyHouseOpen ? -16 : 0 }}
+                        transition={{ type: 'spring', stiffness: 220, damping: 24 }}
+                        className="absolute left-[14%] top-[48%] w-[34%] h-[44%] origin-left bg-[#8B4513] border-4 border-pepe-black rounded-[1.5rem] shadow-[8px_8px_0_0_#000] z-20"
+                        style={{ transformStyle: 'preserve-3d' }}
+                      >
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-pepe-black bg-pepe-yellow" />
+                        <div className="absolute inset-x-5 top-5 h-3 rounded-full bg-[#6E3310]" />
+                        <div className="absolute inset-x-5 top-11 h-3 rounded-full bg-[#6E3310]" />
+                      </motion.button>
+                      <button
+                        type="button"
+                        onClick={() => setIsBuyHouseOpen((prev) => !prev)}
+                        className="absolute left-[56%] top-[50%] w-[22%] h-[20%] bg-[#8ED1FC] border-4 border-pepe-black rounded-[1.5rem] shadow-[6px_6px_0_0_#000] z-20 flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:scale-[1.02] transition-transform"
+                      >
+                        {isBuyHouseOpen ? 'Close Window' : 'Open Window'}
+                      </button>
+                      <div className="absolute left-[56%] top-[50%] w-[22%] h-[20%] border-x-4 border-pepe-black z-30 pointer-events-none" />
+                      <AnimatePresence mode="wait">
+                        {isBuyHouseOpen ? (
+                          <motion.div
+                            key="buybox-visible"
+                            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                            transition={{ duration: 0.35 }}
+                            className="absolute inset-x-[10%] bottom-[8%] z-10"
+                          >
+                            <BuyBox t={t} onSuccess={handleBuySuccess} />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="buybox-hidden"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-x-[16%] bottom-[14%] z-10 bg-white/70 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_#000]"
+                          >
+                            <p className="text-sm font-black uppercase tracking-wider">{t('dashboard.buy_box_locked', 'Buy Box Hidden')}</p>
+                            <p className="text-xs font-bold text-gray-600 mt-2">{t('dashboard.open_door_hint', 'Click the house door or window to reveal the buy box')}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
 

@@ -1,9 +1,13 @@
-import { Web3Auth } from "@web3auth/modal";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
-import { AuthAdapter } from "@web3auth/auth-adapter";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
+import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 
 const WEB3AUTH_CLIENT_ID = import.meta?.env?.VITE_WEB3AUTH_CLIENT_ID || "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
+const WEB3AUTH_ALLOWED_ORIGINS = (import.meta?.env?.VITE_WEB3AUTH_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -27,42 +31,54 @@ class Web3AuthService {
       if (!WEB3AUTH_CLIENT_ID || typeof WEB3AUTH_CLIENT_ID !== 'string') {
         throw new Error("Web3Auth client id is missing.");
       }
-      this.web3auth = new Web3Auth({
+      if (typeof window !== 'undefined' && WEB3AUTH_ALLOWED_ORIGINS.length > 0) {
+        const currentOrigin = window.location.origin;
+        if (!WEB3AUTH_ALLOWED_ORIGINS.includes(currentOrigin)) {
+          throw new Error("Current origin is not allowed for Web3Auth.");
+        }
+      }
+      this.web3auth = new Web3AuthNoModal({
         clientId: WEB3AUTH_CLIENT_ID,
         web3AuthNetwork: "sapphire_mainnet",
         chainConfig,
         privateKeyProvider: new SolanaPrivateKeyProvider({ config: { chainConfig } }),
-        sessionTime: 86400, // 24 hours
+        sessionTime: 86400,
         useCoreKitKey: false,
       });
 
-      const authAdapter = new AuthAdapter({
+      const openloginAdapter = new OpenloginAdapter({
         adapterSettings: {
           uxMode: "popup",
         },
       });
-      this.web3auth.configureAdapter(authAdapter);
-
-      await this.web3auth.initModal({
-        modalConfig: {
-          [WALLET_ADAPTERS.AUTH]: {
-            label: "Social Login",
-            showOnModal: true,
-            loginMethods: {
-              google: { name: "google", showOnModal: true },
-              twitter: { name: "twitter", showOnModal: true },
-              telegram: { name: "telegram", showOnModal: true },
-              email_passwordless: { name: "email_passwordless", showOnModal: true },
-            },
-          },
-          [WALLET_ADAPTERS.METAMASK]: { label: "MetaMask", showOnModal: false },
-          [WALLET_ADAPTERS.PHANTOM]: { label: "Phantom", showOnModal: false },
-        },
-      });
+      this.web3auth.configureAdapter(openloginAdapter);
+      await this.web3auth.init();
     } catch (error) {
       console.error("Web3AuthService: Initialization error:", error);
       throw new Error("Failed to initialize Web3Auth. Please refresh the page.");
     }
+  }
+
+  async login(loginProvider, extraLoginOptions = {}) {
+    await this.init();
+    const provider = await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+      loginProvider,
+      extraLoginOptions,
+    });
+    return provider;
+  }
+
+  async logout() {
+    if (!this.web3auth) return;
+    await this.web3auth.logout();
+  }
+
+  getProvider() {
+    return this.web3auth?.provider || null;
+  }
+
+  getStatus() {
+    return this.web3auth?.status || null;
   }
 
   getInstance() {
@@ -70,6 +86,5 @@ class Web3AuthService {
   }
 }
 
-// Singleton instance
 const web3AuthService = new Web3AuthService();
 export default web3AuthService;

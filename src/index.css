@@ -5,18 +5,18 @@
 :root {
   background-color: #ffffff;
   color: #0a0a0a;
-  font-family: 'Luckiest Guy', 'Fredoka', sans-serif;
+  font-family: 'Sora', 'Fredoka', sans-serif;
 }
 
 body {
-  font-family: 'Luckiest Guy', 'Fredoka', sans-serif;
+  font-family: 'Sora', 'Fredoka', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6, button, nav, a {
-  font-family: 'Luckiest Guy', cursive !important;
-  letter-spacing: 0.02em;
+  font-family: 'Sora', 'Fredoka', sans-serif !important;
+  letter-spacing: 0.01em;
 }
 
 @layer base {
@@ -30,15 +30,15 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
 
   /* Responsive Font Sizes for Mobile-First Approach */
   h1 {
-    @apply text-[28px] sm:text-[40px] md:text-[60px] lg:text-[144px] font-black leading-tight;
+    @apply text-[28px] sm:text-[40px] md:text-[60px] lg:text-[144px] font-semibold leading-tight;
   }
   
   h2 {
-    @apply text-[24px] sm:text-[32px] md:text-[48px] lg:text-[72px] font-black leading-tight;
+    @apply text-[24px] sm:text-[32px] md:text-[48px] lg:text-[72px] font-semibold leading-tight;
   }
 
   h3 {
-    @apply text-[20px] sm:text-[24px] md:text-[32px] lg:text-[48px] font-bold;
+    @apply text-[20px] sm:text-[24px] md:text-[32px] lg:text-[48px] font-medium;
   }
 
   p, span, li, a {
@@ -47,6 +47,22 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
 
   button, input {
     @apply text-[14px] sm:text-[16px];
+  }
+
+  h1, h2, h3, h4, h5, h6, p, span, a, button, li, label {
+    text-shadow: none !important;
+  }
+
+  [class*="drop-shadow"] {
+    filter: none !important;
+  }
+
+  .font-black {
+    font-weight: 700 !important;
+  }
+
+  .font-bold {
+    font-weight: 500 !important;
   }
 }
 
