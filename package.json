@@ -46,6 +46,10 @@
     "rimraf": "^5.0.5",
     "inflight": "npm:lru-cache@^10.2.0"
   },
+  "engines": {
+    "node": ">=20 <23",
+    "npm": ">=10"
+  },
   "devDependencies": {
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
