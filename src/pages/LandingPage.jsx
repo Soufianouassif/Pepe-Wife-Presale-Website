@@ -263,62 +263,132 @@ const HeroSection = ({ t, openBuyModal }) => {
 
 const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
   const [amount, setAmount] = useState('');
+  const [isDoorOpen, setIsDoorOpen] = useState(false);
   return (
-    <section className="py-16 sm:py-24 min-h-[700px] lg:min-h-[800px] relative overflow-hidden flex items-center">
-      <div className="absolute inset-0 z-0">
-        <picture>
-          <source media="(max-width: 1024px)" srcSet={ASSETS.BUY_BOX_MOBILE_BG} />
-          <img src={ASSETS.BUY_BOX_BG} alt="Buy Box BG" className="section-bg-full" />
-        </picture>
+    <section className="py-16 sm:py-24 min-h-[760px] lg:min-h-[860px] relative overflow-hidden flex items-center bg-[#78D7FF]">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <motion.div
+          animate={{ x: [0, 22, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-10 left-8 w-28 h-16 sm:w-44 sm:h-24 bg-white rounded-full border-4 border-pepe-black shadow-[5px_5px_0_0_#000]"
+        >
+          <div className="absolute -left-4 top-4 w-14 h-10 bg-white rounded-full border-4 border-pepe-black" />
+          <div className="absolute left-12 -top-3 w-16 h-12 bg-white rounded-full border-4 border-pepe-black" />
+        </motion.div>
+        <motion.div
+          animate={{ x: [0, -24, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-20 right-6 sm:right-14 w-24 h-14 sm:w-40 sm:h-20 bg-white rounded-full border-4 border-pepe-black shadow-[5px_5px_0_0_#000]"
+        >
+          <div className="absolute -right-4 top-2 w-12 h-9 bg-white rounded-full border-4 border-pepe-black" />
+          <div className="absolute left-6 -top-3 w-14 h-10 bg-white rounded-full border-4 border-pepe-black" />
+        </motion.div>
+        <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-28 bg-[#4A4A4A] border-t-4 border-pepe-black">
+          <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 border-t-4 border-dashed border-pepe-yellow/80" />
+        </div>
       </div>
       <div className="section-container relative z-10 px-4 sm:px-6 w-full">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="bg-white/95 backdrop-blur-sm p-6 sm:p-12 rounded-[2rem] sm:rounded-[2.5rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-pepe-pink opacity-10 rounded-full -mr-16 -mt-16 sm:-mr-20 sm:-mt-20" />
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-pepe-black mb-4 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
-              <p className="text-gray-600 text-sm sm:text-lg lg:text-xl font-bold">{t('buybox.desc')}</p>
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            className="relative mx-auto w-full max-w-4xl min-h-[560px] sm:min-h-[620px] lg:min-h-[680px]"
+          >
+            <div className="absolute left-1/2 top-[16%] -translate-x-1/2 z-10 w-[92%] sm:w-[78%] lg:w-[68%]">
+              <AnimatePresence>
+                {isDoorOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 25 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 25 }}
+                    transition={{ duration: 0.35 }}
+                    className="bg-white/95 backdrop-blur-sm p-5 sm:p-8 rounded-[1.8rem] sm:rounded-[2.2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] overflow-hidden"
+                  >
+                    <div className="text-center mb-6 sm:mb-8">
+                      <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-pepe-black mb-3 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
+                      <p className="text-gray-700 text-xs sm:text-base lg:text-lg font-bold">{t('buybox.desc')}</p>
+                    </div>
+                    <div className="flex justify-center mb-6 sm:mb-8">
+                      <div className="bg-pepe-yellow/25 border-4 border-pepe-black px-3 sm:px-8 py-3 sm:py-4 rounded-2xl sm:rounded-[2rem] flex items-center space-x-3 sm:space-x-5 space-x-reverse transform rotate-1">
+                        <div className="w-9 h-9 sm:w-14 sm:h-14 bg-pepe-yellow rounded-xl border-4 border-pepe-black flex items-center justify-center text-pepe-black font-black text-base sm:text-2xl shadow-[2px_2px_0px_0px_rgba(10,10,10,1)] sm:shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
+                          {ASSETS.COIN_ICON === '/assets/coin-icon.png' ? '$' : <img src={ASSETS.COIN_ICON} className="w-full h-full object-cover rounded-xl" />}
+                        </div>
+                        <div>
+                          <div className="text-[8px] sm:text-[10px] text-pepe-black font-black uppercase tracking-[0.2em]">{t('buybox.current_price')}</div>
+                          <div className="text-sm sm:text-xl font-black text-pepe-black tracking-tight whitespace-nowrap">1 $PWIFE = 0.00012 USDT</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4 sm:space-y-6 max-w-xl mx-auto">
+                      <input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder={t('buybox.input_placeholder')}
+                        className="w-full bg-white border-4 border-pepe-black rounded-xl sm:rounded-[1.3rem] px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-xl font-black outline-none transition-all placeholder:text-gray-400 text-center shadow-[4px_4px_0px_0px_rgba(10,10,10,1)] sm:shadow-[6px_6px_0px_0px_rgba(10,10,10,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_rgba(10,10,10,1)]"
+                      />
+                      <div className="flex flex-col space-y-3 sm:space-y-4">
+                        <Button
+                          variant="primary"
+                          onClick={openBuyModal}
+                          className="w-full py-3 sm:py-4 text-lg sm:text-2xl shadow-[6px_6px_0_0_rgba(10,10,10,1)]"
+                        >
+                          {t('buybox.buy_now')}
+                        </Button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <Button variant="secondary" className="py-3 text-sm sm:text-lg">
+                            {t('buybox.how_to_buy')}
+                          </Button>
+                          <Button variant="outline" className="py-3 text-sm sm:text-lg" onClick={() => openModal('audit')}>
+                            {t('buybox.audit')}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="flex justify-center mb-8 sm:mb-12">
-              <div className="bg-pepe-yellow/20 border-4 border-pepe-black px-4 sm:px-10 py-3 sm:py-6 rounded-2xl sm:rounded-[2rem] flex items-center space-x-3 sm:space-x-6 space-x-reverse transform rotate-1">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-pepe-yellow rounded-xl sm:rounded-2xl border-4 border-pepe-black flex items-center justify-center text-pepe-black font-black text-lg sm:text-3xl shadow-[2px_2px_0px_0px_rgba(10,10,10,1)] sm:shadow-[4px_4px_0px_0px_rgba(10,10,10,1)]">
-                  {ASSETS.COIN_ICON === '/assets/coin-icon.png' ? '$' : <img src={ASSETS.COIN_ICON} className="w-full h-full object-cover rounded-xl" />}
-                </div>
-                <div>
-                  <div className="text-[8px] sm:text-xs text-pepe-black font-black uppercase tracking-[0.2em]">{t('buybox.current_price')}</div>
-                  <div className="text-lg sm:text-3xl font-black text-pepe-black tracking-tight whitespace-nowrap">1 $PWIFE = 0.00012 USDT</div>
-                </div>
+
+            <div className="absolute inset-x-0 bottom-20 sm:bottom-24 mx-auto w-full max-w-4xl h-[420px] sm:h-[500px] bg-[#FFD166] border-4 border-pepe-black rounded-[2.5rem] shadow-[10px_10px_0_0_#000] z-20 overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-16 sm:h-20 bg-[#FF6FA9] border-b-4 border-pepe-black" />
+              <div className="absolute top-12 sm:top-14 left-[10%] w-20 h-20 sm:w-28 sm:h-28 bg-[#B8F2E6] border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">
+                <div className="absolute inset-x-1/2 top-0 bottom-0 -translate-x-1/2 border-l-4 border-pepe-black" />
+                <div className="absolute inset-y-1/2 left-0 right-0 -translate-y-1/2 border-t-4 border-pepe-black" />
               </div>
-            </div>
-            <div className="space-y-6 sm:space-y-8 max-w-2xl mx-auto">
-              <div className="relative group">
-                <input 
-                  type="number" 
-                  value={amount} 
-                  onChange={(e) => setAmount(e.target.value)} 
-                  placeholder={t('buybox.input_placeholder')} 
-                  className="w-full bg-white border-4 border-pepe-black rounded-xl sm:rounded-[1.5rem] px-4 sm:px-8 py-3 sm:py-6 text-lg sm:text-2xl font-black outline-none transition-all placeholder:text-gray-400 text-center shadow-[4px_4px_0px_0px_rgba(10,10,10,1)] sm:shadow-[6px_6px_0px_0px_rgba(10,10,10,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_rgba(10,10,10,1)]" 
-                />
+              <div className="absolute top-12 sm:top-14 right-[10%] w-20 h-20 sm:w-28 sm:h-28 bg-[#B8F2E6] border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">
+                <div className="absolute inset-x-1/2 top-0 bottom-0 -translate-x-1/2 border-l-4 border-pepe-black" />
+                <div className="absolute inset-y-1/2 left-0 right-0 -translate-y-1/2 border-t-4 border-pepe-black" />
               </div>
-              <div className="flex flex-col space-y-4 sm:space-y-6">
-                <Button 
-                  variant="primary" 
-                  onClick={openBuyModal}
-                  className="w-full py-4 sm:py-6 text-xl sm:text-3xl shadow-[6px_6px_0_0_rgba(10,10,10,1)] sm:shadow-[8px_8px_0_0_rgba(10,10,10,1)]"
+
+              <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-[46%] sm:w-[40%] h-[62%] sm:h-[66%]">
+                <div className="absolute inset-0 bg-[#8B5A2B] border-4 border-pepe-black rounded-t-[2rem]" />
+                <motion.button
+                  type="button"
+                  onClick={() => setIsDoorOpen((prev) => !prev)}
+                  whileTap={{ scale: 0.98 }}
+                  animate={{ rotateY: isDoorOpen ? -110 : 0 }}
+                  transition={{ duration: 0.55, ease: 'easeInOut' }}
+                  style={{ transformOrigin: 'left center', transformStyle: 'preserve-3d' }}
+                  className="absolute inset-0 bg-[#A06B37] border-4 border-pepe-black rounded-t-[2rem] shadow-[5px_5px_0_0_#000] cursor-pointer"
                 >
-                  {t('buybox.buy_now')}
-                </Button>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <Button variant="secondary" className="py-3 sm:py-5 text-base sm:text-xl">
-                    {t('buybox.how_to_buy')}
-                  </Button>
-                  <Button variant="outline" className="py-3 sm:py-5 text-base sm:text-xl" onClick={() => openModal('audit')}>
-                    {t('buybox.audit')}
-                  </Button>
-                </div>
+                  <span className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 bg-pepe-yellow border-4 border-pepe-black rounded-xl px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-xs font-black text-pepe-black whitespace-nowrap">
+                    اضغط لتفتح الباب
+                  </span>
+                  <span className="absolute top-1/2 right-4 sm:right-5 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 bg-pepe-yellow border-4 border-pepe-black rounded-full" />
+                </motion.button>
               </div>
+            </div>
+            <div className="absolute inset-x-0 bottom-8 sm:bottom-10 mx-auto w-[88%] max-w-4xl h-12 sm:h-14 bg-[#2D2D2D] border-4 border-pepe-black rounded-xl z-30" />
+            <div className="absolute inset-x-0 bottom-8 sm:bottom-10 mx-auto w-[88%] max-w-4xl h-12 sm:h-14 z-30 pointer-events-none">
+              <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 border-t-4 border-dashed border-pepe-yellow/80" />
             </div>
           </motion.div>
+          <div className="text-center mt-8">
+            <p className="inline-flex items-center bg-white border-4 border-pepe-black rounded-full px-5 py-2 text-xs sm:text-sm font-black text-pepe-black shadow-[4px_4px_0_0_#000]">
+              {isDoorOpen ? 'الباب مفتوح - صندوق البيع ظاهر الآن' : 'انقر على الباب لعرض صندوق البيع'}
+            </p>
+          </div>
         </div>
       </div>
     </section>

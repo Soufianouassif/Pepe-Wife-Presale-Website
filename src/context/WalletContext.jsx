@@ -41,6 +41,7 @@ const STORAGE_KEYS = {
 const SOLANA_WALLET_TYPES = new Set(['Social', 'Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet']);
 const EVM_WALLET_TYPES = new Set(['MetaMask', 'Binance', 'Coinbase', 'WalletConnect']);
 const SOCIAL_LOGIN_PROVIDERS = new Set(['google', 'twitter', 'telegram', 'email_passwordless']);
+const SOCIAL_FLOW_TIMEOUT_MS = 30000;
 
 /**
  * Wallet provider that exposes unified wallet operations for UI and business logic.
@@ -73,6 +74,26 @@ export const WalletProvider = ({ children }) => {
       return;
     }
     logger(`[Wallet] ${message}`, payload);
+  }, []);
+
+  const withTimeout = useCallback(async (promise, ms, userMessage) => {
+    let timer = null;
+    try {
+      return await Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            reject(new WalletOperationError('Operation timed out.', {
+              code: 'OPERATION_TIMEOUT',
+              userMessage,
+              retriable: true
+            }));
+          }, ms);
+        })
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }, []);
 
   const normalizeChainId = useCallback((chainId) => {
@@ -377,7 +398,11 @@ export const WalletProvider = ({ children }) => {
    * @returns {Promise<string|null>}
    */
   const loginWithSocial = useCallback(async (loginProvider, extraOptions = {}) => {
-    const web3authInstance = await ensureWeb3AuthInitialized();
+    const web3authInstance = await withTimeout(
+      ensureWeb3AuthInitialized(),
+      SOCIAL_FLOW_TIMEOUT_MS,
+      'انتهت مهلة تهيئة Web3Auth. تحقق من Client ID وAllowed Origins في لوحة Web3Auth.'
+    );
     try {
       if (!SOCIAL_LOGIN_PROVIDERS.has(loginProvider)) {
         throw new WalletOperationError('Unsupported social login provider.', {
@@ -399,9 +424,17 @@ export const WalletProvider = ({ children }) => {
       const mod = await import('../services/web3authService.js');
       const svc = mod.default;
       if (svc.getStatus?.() === 'connected') {
-        await svc.logout();
+        await withTimeout(
+          svc.logout(),
+          SOCIAL_FLOW_TIMEOUT_MS,
+          'تعذر إنهاء الجلسة الاجتماعية السابقة. حاول مرة أخرى.'
+        );
       }
-      const web3authProvider = await svc.login(loginProvider, extraLoginOptions);
+      const web3authProvider = await withTimeout(
+        svc.login(loginProvider, extraLoginOptions),
+        SOCIAL_FLOW_TIMEOUT_MS,
+        'انتهت مهلة تسجيل الدخول الاجتماعي. غالباً إعدادات Web3Auth Dashboard غير مكتملة.'
+      );
       if (!web3authProvider) {
         throw new WalletOperationError('Web3Auth connection returned null provider.', {
           code: 'SOCIAL_PROVIDER_MISSING',
@@ -419,12 +452,20 @@ export const WalletProvider = ({ children }) => {
       }
       let account = null;
       try {
-        const accounts = await socialProvider.request({ method: "solana_getAccounts" });
+        const accounts = await withTimeout(
+          socialProvider.request({ method: "solana_getAccounts" }),
+          12000,
+          'تعذر قراءة حسابات المحفظة الاجتماعية.'
+        );
         account = accounts?.[0] || null;
       } catch {}
       if (!account) {
         try {
-          const accounts = await socialProvider.request({ method: "solana_accounts" });
+          const accounts = await withTimeout(
+            socialProvider.request({ method: "solana_accounts" }),
+            12000,
+            'تعذر قراءة حسابات المحفظة الاجتماعية.'
+          );
           account = accounts?.[0] || null;
         } catch {}
       }
@@ -439,12 +480,16 @@ export const WalletProvider = ({ children }) => {
         });
       }
       const adapter = createAdapterFor('Social', socialProvider);
-      await authorizeSessionWithProvider({
-        address: account,
-        walletType: 'Social',
-        providerOverride: socialProvider,
-        adapterOverride: adapter
-      });
+      await withTimeout(
+        authorizeSessionWithProvider({
+          address: account,
+          walletType: 'Social',
+          providerOverride: socialProvider,
+          adapterOverride: adapter
+        }),
+        SOCIAL_FLOW_TIMEOUT_MS,
+        'انتهت مهلة توقيع المصادقة. تحقق من نافذة التوقيع في مزود المحفظة.'
+      );
       connect(account, 'Social', socialProvider, adapter);
       return account;
     } catch (error) {
@@ -453,7 +498,7 @@ export const WalletProvider = ({ children }) => {
       }
       throw handleWalletAdapterError(error, 'social_connect');
     }
-  }, [authorizeSessionWithProvider, connect, createAdapterFor, ensureWeb3AuthInitialized]);
+  }, [authorizeSessionWithProvider, connect, createAdapterFor, ensureWeb3AuthInitialized, withTimeout]);
 
   /**
    * @param {'MetaMask'|'Binance'|'Coinbase'} walletName
@@ -873,6 +918,23 @@ export const WalletProvider = ({ children }) => {
     };
     init();
   }, [attemptRehydrate, logWallet]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const preWarm = async () => {
+      try {
+        await ensureWeb3AuthInitialized();
+      } catch (error) {
+        if (!cancelled) {
+          logWallet('warn', 'web3auth prewarm failed', error);
+        }
+      }
+    };
+    preWarm();
+    return () => {
+      cancelled = true;
+    };
+  }, [ensureWeb3AuthInitialized, logWallet]);
 
   const contextValue = useMemo(() => ({
     isConnected,

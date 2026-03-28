@@ -20,6 +20,7 @@ const AUTH_CONNECTION_KEYS = {
   telegram: "TELEGRAM",
   email_passwordless: "EMAIL_PASSWORDLESS",
 };
+const WEB3AUTH_CONNECT_TIMEOUT_MS = 25000;
 
 class Web3AuthService {
   constructor() {
@@ -87,6 +88,22 @@ class Web3AuthService {
     return trimmed ? trimmed : null;
   }
 
+  async connectWithTimeout(connector, options) {
+    let timer = null;
+    try {
+      return await Promise.race([
+        this.web3auth.connectTo(connector, options),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            reject(new Error('Web3Auth connect timeout.'));
+          }, WEB3AUTH_CONNECT_TIMEOUT_MS);
+        })
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
   async login(loginProvider, extraLoginOptions = {}) {
     await this.init();
     if (!this.web3auth || typeof this.web3auth.connectTo !== "function") {
@@ -115,11 +132,15 @@ class Web3AuthService {
     let lastError = null;
     for (const options of attempts) {
       try {
-        const provider = await this.web3auth.connectTo(connector, options);
+        const provider = await this.connectWithTimeout(connector, options);
         if (provider) return provider;
       } catch (error) {
         lastError = error;
       }
+    }
+    const normalizedMessage = String(lastError?.message || '');
+    if (normalizedMessage.toLowerCase().includes('timeout')) {
+      throw new Error("Social auth timed out. Verify Web3Auth allowed origins and social connection IDs.");
     }
     throw lastError || new Error("Failed social connection.");
   }
