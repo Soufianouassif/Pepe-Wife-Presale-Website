@@ -5,7 +5,31 @@ import { WalletOperationError } from '../wallet/errors';
 
 const WalletContext = createContext();
 const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
-const EVM_REQUIRED_CHAIN_ID = import.meta?.env?.VITE_EVM_CHAIN_ID || '0x38';
+const DEFAULT_EVM_CHAIN_ID = import.meta?.env?.VITE_EVM_CHAIN_ID || '0x1';
+const ALLOWED_EVM_CHAIN_IDS = new Set(['0x1', '0x38', '0xaa36a7']);
+const EVM_CHAIN_PARAMS = {
+  '0x1': {
+    chainId: '0x1',
+    chainName: 'Ethereum Mainnet',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: ['https://rpc.ankr.com/eth'],
+    blockExplorerUrls: ['https://etherscan.io']
+  },
+  '0x38': {
+    chainId: '0x38',
+    chainName: 'BNB Smart Chain',
+    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+    rpcUrls: ['https://bsc-dataseed.binance.org'],
+    blockExplorerUrls: ['https://bscscan.com']
+  },
+  '0xaa36a7': {
+    chainId: '0xaa36a7',
+    chainName: 'Sepolia',
+    nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: ['https://rpc.sepolia.org'],
+    blockExplorerUrls: ['https://sepolia.etherscan.io']
+  }
+};
 
 const STORAGE_KEYS = {
   connected: 'walletConnected',
@@ -16,6 +40,7 @@ const STORAGE_KEYS = {
 
 const SOLANA_WALLET_TYPES = new Set(['Social', 'Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet']);
 const EVM_WALLET_TYPES = new Set(['MetaMask', 'Binance', 'Coinbase', 'WalletConnect']);
+const SOCIAL_LOGIN_PROVIDERS = new Set(['google', 'twitter', 'telegram', 'email_passwordless']);
 
 /**
  * Wallet provider that exposes unified wallet operations for UI and business logic.
@@ -29,6 +54,7 @@ export const WalletProvider = ({ children }) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [web3auth, setWeb3auth] = useState(null);
   const [activeChainId, setActiveChainId] = useState('');
+  const [requiredEvmChainId, setRequiredEvmChainIdState] = useState(DEFAULT_EVM_CHAIN_ID);
 
   const web3authInitPromiseRef = useRef(null);
   const adapterRef = useRef(null);
@@ -48,6 +74,40 @@ export const WalletProvider = ({ children }) => {
     }
     logger(`[Wallet] ${message}`, payload);
   }, []);
+
+  const normalizeChainId = useCallback((chainId) => {
+    if (typeof chainId !== 'string') return '';
+    const lower = chainId.trim().toLowerCase();
+    if (!lower) return '';
+    return lower.startsWith('0x') ? lower : `0x${Number.parseInt(lower, 10).toString(16)}`;
+  }, []);
+
+  const setRequiredEvmChainId = useCallback((chainId) => {
+    const normalized = normalizeChainId(chainId);
+    if (!ALLOWED_EVM_CHAIN_IDS.has(normalized)) {
+      throw new WalletOperationError('Unsupported EVM chain id.', {
+        code: 'CHAIN_NOT_ALLOWED',
+        userMessage: 'الشبكة المطلوبة غير مدعومة في إعدادات الأمان.',
+        retriable: false,
+        details: { chainId: normalized }
+      });
+    }
+    setRequiredEvmChainIdState(normalized);
+    return normalized;
+  }, [normalizeChainId]);
+
+  const resolveRequiredChainId = useCallback((requestedChainId) => {
+    const normalized = normalizeChainId(requestedChainId || requiredEvmChainId || DEFAULT_EVM_CHAIN_ID);
+    if (!ALLOWED_EVM_CHAIN_IDS.has(normalized)) {
+      throw new WalletOperationError('Unsupported requested EVM chain id.', {
+        code: 'CHAIN_NOT_ALLOWED',
+        userMessage: 'الشبكة المطلوبة غير مسموحة.',
+        retriable: false,
+        details: { chainId: normalized }
+      });
+    }
+    return normalized;
+  }, [normalizeChainId, requiredEvmChainId]);
 
   /**
    * @returns {Promise<any>}
@@ -89,13 +149,13 @@ export const WalletProvider = ({ children }) => {
    * @param {any} walletProvider
    * @returns {any|null}
    */
-  const createAdapterFor = useCallback((type, walletProvider) => {
+  const createAdapterFor = useCallback((type, walletProvider, expectedChainId = requiredEvmChainId) => {
     if (!walletProvider) return null;
     if (type === 'MetaMask') {
       return createWalletAdapter({
         provider: walletProvider,
         walletType: 'MetaMask',
-        expectedChainId: EVM_REQUIRED_CHAIN_ID,
+        expectedChainId,
         retries: 1
       });
     }
@@ -107,7 +167,7 @@ export const WalletProvider = ({ children }) => {
       });
     }
     return null;
-  }, []);
+  }, [requiredEvmChainId]);
 
   /**
    * @param {string} addr
@@ -206,12 +266,60 @@ export const WalletProvider = ({ children }) => {
     };
   }, []);
 
+  const ensureEvmChain = useCallback(async (evmProvider, requestedChainId, autoSwitch = true) => {
+    if (!evmProvider || typeof evmProvider.request !== 'function') {
+      throw new WalletOperationError('EVM provider is invalid.', {
+        code: 'PROVIDER_INVALID',
+        userMessage: 'مزود الشبكة غير صالح.',
+        retriable: false
+      });
+    }
+    const requiredChainId = resolveRequiredChainId(requestedChainId);
+    const current = normalizeChainId(await evmProvider.request({ method: 'eth_chainId' }));
+    if (current === requiredChainId) return requiredChainId;
+    if (!autoSwitch) {
+      throw new WalletOperationError(`Unexpected chain id: ${current}`, {
+        code: 'CHAIN_MISMATCH',
+        userMessage: 'الشبكة الحالية غير صحيحة. يرجى التبديل إلى الشبكة المطلوبة.',
+        retriable: false,
+        details: { current, requiredChainId }
+      });
+    }
+    try {
+      await evmProvider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: requiredChainId }]
+      });
+    } catch (switchError) {
+      const code = switchError?.code;
+      if (code === 4902 && EVM_CHAIN_PARAMS[requiredChainId]) {
+        await evmProvider.request({
+          method: 'wallet_addEthereumChain',
+          params: [EVM_CHAIN_PARAMS[requiredChainId]]
+        });
+      } else {
+        throw handleWalletAdapterError(switchError, 'switch_chain');
+      }
+    }
+    const afterSwitch = normalizeChainId(await evmProvider.request({ method: 'eth_chainId' }));
+    if (afterSwitch !== requiredChainId) {
+      throw new WalletOperationError(`Failed to switch to required chain: ${requiredChainId}`, {
+        code: 'CHAIN_MISMATCH',
+        userMessage: 'تعذر التبديل إلى الشبكة المطلوبة.',
+        retriable: false,
+        details: { afterSwitch, requiredChainId }
+      });
+    }
+    setActiveChainId(afterSwitch);
+    return afterSwitch;
+  }, [normalizeChainId, resolveRequiredChainId]);
+
   /**
    * @param {'MetaMask'|'Phantom'} preferred
    * @param {'MetaMask'|'Phantom'} fallback
    * @returns {Promise<{ address: string, walletType: string }>}
    */
-  const connectPreferredWallet = useCallback(async (preferred = 'MetaMask', fallback = 'Phantom') => {
+  const connectPreferredWallet = useCallback(async (preferred = 'MetaMask', fallback = 'Phantom', options = {}) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
@@ -219,8 +327,26 @@ export const WalletProvider = ({ children }) => {
         retriable: false
       });
     }
-    const selection = selectWalletProvider({ preferred, fallback, win: window });
-    const adapter = createAdapterFor(selection.walletType, selection.provider);
+    const allowFallback = options.allowFallback !== false;
+    const requestedChainId = resolveRequiredChainId(options.requiredChainId);
+    let selection = null;
+    if (allowFallback) {
+      selection = selectWalletProvider({ preferred, fallback, win: window });
+    } else {
+      const detected = detectWalletProviders(window);
+      if (!detected[preferred]) {
+        throw new WalletOperationError(`${preferred} provider not found.`, {
+          code: 'WALLET_NOT_FOUND',
+          userMessage: `المحفظة ${preferred} غير مثبتة.`,
+          retriable: false
+        });
+      }
+      selection = { walletType: preferred, provider: detected[preferred] };
+    }
+    if (selection.walletType === 'MetaMask') {
+      await ensureEvmChain(selection.provider, requestedChainId, options.autoSwitch !== false);
+    }
+    const adapter = createAdapterFor(selection.walletType, selection.provider, requestedChainId);
     if (!adapter) {
       throw new WalletOperationError('Failed to create wallet adapter.', {
         code: 'ADAPTER_NOT_CREATED',
@@ -243,7 +369,7 @@ export const WalletProvider = ({ children }) => {
       } catch {}
     }
     return { address: nextAddress, walletType: selection.walletType };
-  }, [authorizeSessionWithProvider, connect, createAdapterFor]);
+  }, [authorizeSessionWithProvider, connect, createAdapterFor, ensureEvmChain, resolveRequiredChainId]);
 
   /**
    * @param {string} loginProvider
@@ -254,12 +380,26 @@ export const WalletProvider = ({ children }) => {
     const web3authInstance = await ensureWeb3AuthInitialized();
     const { WALLET_ADAPTERS } = await import("@web3auth/base");
     try {
+      if (!SOCIAL_LOGIN_PROVIDERS.has(loginProvider)) {
+        throw new WalletOperationError('Unsupported social login provider.', {
+          code: 'SOCIAL_PROVIDER_UNSUPPORTED',
+          userMessage: 'مزود تسجيل الدخول الاجتماعي غير مسموح.',
+          retriable: false
+        });
+      }
       if (web3authInstance.status === "connected") {
         await web3authInstance.logout();
       }
+      const sanitizedLoginHint = typeof extraOptions.login_hint === 'string'
+        ? extraOptions.login_hint.trim()
+        : '';
+      const extraLoginOptions = {};
+      if (loginProvider === 'email_passwordless' && sanitizedLoginHint) {
+        extraLoginOptions.login_hint = sanitizedLoginHint;
+      }
       const web3authProvider = await web3authInstance.connectTo(WALLET_ADAPTERS.AUTH, {
         loginProvider,
-        extraLoginOptions: extraOptions.login_hint ? { login_hint: extraOptions.login_hint } : {},
+        extraLoginOptions,
       });
       if (!web3authProvider) {
         throw new WalletOperationError('Web3Auth connection returned null provider.', {
@@ -276,8 +416,20 @@ export const WalletProvider = ({ children }) => {
           retriable: true
         });
       }
-      const accounts = await socialProvider.request({ method: "solana_getAccounts" });
-      const account = accounts?.[0];
+      let account = null;
+      try {
+        const accounts = await socialProvider.request({ method: "solana_getAccounts" });
+        account = accounts?.[0] || null;
+      } catch {}
+      if (!account) {
+        try {
+          const accounts = await socialProvider.request({ method: "solana_accounts" });
+          account = accounts?.[0] || null;
+        } catch {}
+      }
+      if (!account && socialProvider.publicKey?.toString) {
+        account = socialProvider.publicKey.toString();
+      }
       if (!isValidSolAddress(account)) {
         throw new WalletOperationError('Social wallet account is invalid.', {
           code: 'ADDRESS_INVALID',
@@ -306,9 +458,13 @@ export const WalletProvider = ({ children }) => {
    * @param {'MetaMask'|'Binance'|'Coinbase'} walletName
    * @returns {Promise<string>}
    */
-  const connectEVMWallet = useCallback(async (walletName) => {
+  const connectEVMWallet = useCallback(async (walletName, options = {}) => {
     if (walletName === 'MetaMask') {
-      const result = await connectPreferredWallet('MetaMask', 'Phantom');
+      const result = await connectPreferredWallet('MetaMask', 'Phantom', {
+        requiredChainId: options.requiredChainId,
+        autoSwitch: options.autoSwitch !== false,
+        allowFallback: options.allowFallback === true
+      });
       return result.address;
     }
     if (typeof window === 'undefined') {
@@ -339,10 +495,12 @@ export const WalletProvider = ({ children }) => {
         });
       }
     }
+    const requestedChainId = resolveRequiredChainId(options.requiredChainId);
+    await ensureEvmChain(targetProvider, requestedChainId, options.autoSwitch !== false);
     const adapter = createWalletAdapter({
       provider: targetProvider,
       walletType: 'MetaMask',
-      expectedChainId: EVM_REQUIRED_CHAIN_ID,
+      expectedChainId: requestedChainId,
       retries: 1
     });
     const nextAddress = await adapter.connect();
@@ -356,7 +514,7 @@ export const WalletProvider = ({ children }) => {
     const chainId = await targetProvider.request({ method: 'eth_chainId' });
     setActiveChainId(chainId || '');
     return nextAddress;
-  }, [authorizeSessionWithProvider, connect, connectPreferredWallet]);
+  }, [authorizeSessionWithProvider, connect, connectPreferredWallet, ensureEvmChain, resolveRequiredChainId]);
 
   /**
    * @param {'Phantom'|'Solflare'|'Backpack'|'OKX'|'Trust Wallet'} walletName
@@ -417,7 +575,7 @@ export const WalletProvider = ({ children }) => {
    * @param {string} preferredWallet
    * @returns {Promise<string>}
    */
-  const connectWalletConnect = useCallback(async (preferredWallet) => {
+  const connectWalletConnect = useCallback(async (preferredWallet, options = {}) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
@@ -426,12 +584,14 @@ export const WalletProvider = ({ children }) => {
       });
     }
     try {
+      const requiredChainId = resolveRequiredChainId(options.requiredChainId);
+      const requiredChainDecimal = Number.parseInt(requiredChainId, 16);
       const { EthereumProvider } = await import("@walletconnect/ethereum-provider");
       const wcProvider = await EthereumProvider.init({
         projectId: WALLETCONNECT_PROJECT_ID,
         showQrModal: true,
         qrModalOptions: { themeMode: "light" },
-        chains: [56],
+        chains: [requiredChainDecimal],
         methods: ["eth_sendTransaction", "personal_sign", "eth_accounts", "eth_requestAccounts"],
         events: ["chainChanged", "accountsChanged"],
         metadata: {
@@ -454,7 +614,7 @@ export const WalletProvider = ({ children }) => {
       const adapter = createWalletAdapter({
         provider: wcProvider,
         walletType: 'MetaMask',
-        expectedChainId: EVM_REQUIRED_CHAIN_ID,
+        expectedChainId: requiredChainId,
         retries: 1
       });
       await authorizeSessionWithProvider({
@@ -470,7 +630,7 @@ export const WalletProvider = ({ children }) => {
     } catch (error) {
       throw handleWalletAdapterError(error, 'walletconnect_connect');
     }
-  }, [authorizeSessionWithProvider, connect]);
+  }, [authorizeSessionWithProvider, connect, resolveRequiredChainId]);
 
   /**
    * @param {object} transaction
@@ -531,9 +691,11 @@ export const WalletProvider = ({ children }) => {
       };
       const handleDisconnect = () => disconnect();
       const handleChainChanged = (chainId) => {
-        setActiveChainId(chainId || '');
-        if (EVM_REQUIRED_CHAIN_ID && chainId !== EVM_REQUIRED_CHAIN_ID) {
-          logWallet('warn', 'chain mismatch detected, disconnecting for safety', { chainId, expected: EVM_REQUIRED_CHAIN_ID });
+        const normalizedChainId = normalizeChainId(chainId || '');
+        setActiveChainId(normalizedChainId);
+        const requiredChainId = resolveRequiredChainId();
+        if (requiredChainId && normalizedChainId !== requiredChainId) {
+          logWallet('warn', 'chain mismatch detected, disconnecting for safety', { chainId: normalizedChainId, expected: requiredChainId });
           disconnect();
         }
       };
@@ -568,7 +730,7 @@ export const WalletProvider = ({ children }) => {
       });
     }
     return () => cleanupFns.forEach((fn) => fn());
-  }, [provider, walletType, connect, disconnect, isValidEvmAddress, isValidSolAddress, logWallet]);
+  }, [provider, walletType, connect, disconnect, isValidEvmAddress, isValidSolAddress, logWallet, normalizeChainId, resolveRequiredChainId]);
 
   const safeSessionGet = (key) => {
     try {
@@ -675,7 +837,7 @@ export const WalletProvider = ({ children }) => {
             const adapter = createWalletAdapter({
               provider: evmProvider,
               walletType: 'MetaMask',
-              expectedChainId: EVM_REQUIRED_CHAIN_ID,
+              expectedChainId: resolveRequiredChainId(),
               retries: 1
             });
             connect(storedAddress, storedType, evmProvider, adapter);
@@ -687,7 +849,7 @@ export const WalletProvider = ({ children }) => {
       return;
     }
     clearStoredWallet();
-  }, [connect, createAdapterFor, isValidSolAddress]);
+  }, [connect, createAdapterFor, isValidSolAddress, resolveRequiredChainId]);
 
   useEffect(() => {
     const init = async () => {
@@ -717,6 +879,8 @@ export const WalletProvider = ({ children }) => {
     walletType,
     isInitializing,
     activeChainId,
+    requiredEvmChainId,
+    setRequiredEvmChainId,
     detectAvailableWallets,
     connectPreferredWallet,
     connect,
@@ -734,6 +898,8 @@ export const WalletProvider = ({ children }) => {
     walletType,
     isInitializing,
     activeChainId,
+    requiredEvmChainId,
+    setRequiredEvmChainId,
     detectAvailableWallets,
     connectPreferredWallet,
     connect,

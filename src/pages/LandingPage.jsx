@@ -711,10 +711,20 @@ const BuyModal = ({ isOpen, onClose, t }) => {
   const [amount, setAmount] = useState('');
   const [currency, setSolCurrency] = useState('SOL');
   const [isLoading, setIsLoading] = useState(false);
-  const { isConnected, sendTransaction, address } = useWallet();
+  const { isConnected, sendTransaction, walletType, setRequiredEvmChainId } = useWallet();
   const navigate = useNavigate();
 
   const handleBuy = async () => {
+    const paymentCurrency = currency === 'USDT' ? 'USDT' : 'SOL';
+    const targetChainId = paymentCurrency === 'USDT' ? '0x1' : null;
+    if (targetChainId) {
+      try {
+        setRequiredEvmChainId(targetChainId);
+      } catch (error) {
+        alert(error?.userMessage || 'Network configuration is invalid.');
+        return;
+      }
+    }
     if (!isConnected) {
       navigate('/connect');
       return;
@@ -727,9 +737,21 @@ const BuyModal = ({ isOpen, onClose, t }) => {
 
     setIsLoading(true);
     try {
-      // For demonstration, we'll use a placeholder address
-      const treasuryAddress = '0x1234567890abcdef1234567890abcdef12345678';
-      const tx = await sendTransaction(treasuryAddress, amount, currency);
+      if (paymentCurrency === 'USDT' && !['MetaMask', 'Coinbase', 'Binance', 'WalletConnect'].includes(walletType)) {
+        throw new Error('يرجى ربط محفظة EVM للدفع بـ USDT على شبكة Ethereum.');
+      }
+      if (paymentCurrency === 'SOL' && !['Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet', 'Social'].includes(walletType)) {
+        throw new Error('يرجى ربط محفظة Solana للدفع بـ SOL.');
+      }
+      const tx = await sendTransaction({
+        to: paymentCurrency === 'USDT'
+          ? (import.meta?.env?.VITE_ETH_TREASURY_ADDRESS || '0x000000000000000000000000000000000000dEaD')
+          : (import.meta?.env?.VITE_SOL_TREASURY_ADDRESS || ''),
+        from: undefined,
+        value: undefined,
+        paymentCurrency,
+        amount
+      });
       console.log('Transaction success:', tx);
       alert('Transaction successful! Your $PWIFE tokens will be sent shortly.');
       onClose();

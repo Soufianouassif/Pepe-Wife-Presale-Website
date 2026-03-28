@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
-  AlertCircle, X, Zap, Smartphone
+  AlertCircle, X, Zap, Mail
 } from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
@@ -76,32 +76,6 @@ const BackgroundDecor = React.memo(() => (
   </div>
 ));
 
-const countries = [
-  { code: '+212', name: 'Morocco', flag: '🇲🇦' },
-  { code: '+966', name: 'Saudi Arabia', flag: '🇸🇦' },
-  { code: '+971', name: 'UAE', flag: '🇦🇪' },
-  { code: '+20', name: 'Egypt', flag: '🇪🇬' },
-  { code: '+974', name: 'Qatar', flag: '🇶🇦' },
-  { code: '+965', name: 'Kuwait', flag: '🇰🇼' },
-  { code: '+968', name: 'Oman', flag: '🇴🇲' },
-  { code: '+962', name: 'Jordan', flag: '🇯🇴' },
-  { code: '+213', name: 'Algeria', flag: '🇩🇿' },
-  { code: '+216', name: 'Tunisia', flag: '🇹🇳' },
-  { code: '+218', name: 'Libya', flag: '🇱🇾' },
-  { code: '+249', name: 'Sudan', flag: '🇸🇩' },
-  { code: '+961', name: 'Lebanon', flag: '🇱🇧' },
-  { code: '+963', name: 'Syria', flag: '🇸🇾' },
-  { code: '+964', name: 'Iraq', flag: '🇮🇶' },
-  { code: '+970', name: 'Palestine', flag: '🇵🇸' },
-  { code: '+973', name: 'Bahrain', flag: '🇧🇭' },
-  { code: '+967', name: 'Yemen', flag: '🇾🇪' },
-  { code: '+1', name: 'USA/Canada', flag: '🇺🇸' },
-  { code: '+44', name: 'UK', flag: '🇬🇧' },
-  { code: '+33', name: 'France', flag: '🇫🇷' },
-  { code: '+49', name: 'Germany', flag: '🇩🇪' },
-  { code: '+90', name: 'Turkey', flag: '🇹🇷' },
-];
-
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
   const { loginWithSocial, connectEVMWallet, connectSolanaWallet, connectWalletConnect, isInitializing } = useWallet();
@@ -110,10 +84,6 @@ const ConnectPage = () => {
   const [status, setStatus] = useState('idle'); 
   const [error, setError] = useState(null);
 
-  // Phone input states
-  const [showPhoneInput, setShowPhoneInput] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const [phoneNumber, setPhoneNumber] = useState('');
 
   const walletOptions = useMemo(() => [
     { id: 'Phantom', name: 'Phantom', icon: <Icons.Phantom />, color: 'bg-[#AB9FF2]/10', borderColor: 'border-[#AB9FF2]', recommended: true },
@@ -125,19 +95,10 @@ const ConnectPage = () => {
   ], []);
 
   const socialOptions = useMemo(() => [
-    // Social login is temporarily disabled as per user request.
-    // To re-enable, uncomment the following array.
-    /*
     { id: 'google', name: 'Google', icon: <Icons.Google />, color: 'bg-white', borderColor: 'border-gray-200' },
     { id: 'twitter', name: 'X (Twitter)', icon: <Icons.X />, color: 'bg-black', borderColor: 'border-black' },
-    { id: 'facebook', name: 'Facebook', icon: <Icons.Facebook />, color: 'bg-[#1877F2]/10', borderColor: 'border-[#1877F2]' },
-    { id: 'discord', name: 'Discord', icon: <Icons.Discord />, color: 'bg-[#5865F2]/10', borderColor: 'border-[#5865F2]' },
-    { id: 'apple', name: 'Apple', icon: <Icons.Apple />, color: 'bg-gray-100', borderColor: 'border-black' },
-    { id: 'line', name: 'LINE', icon: <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" className="w-6 h-6" />, color: 'bg-[#00B900]/10', borderColor: 'border-[#00B900]' },
-    { id: 'github', name: 'GitHub', icon: <Github size={24} />, color: 'bg-gray-100', borderColor: 'border-black' },
+    { id: 'telegram', name: 'Telegram', icon: <Globe className="text-[#229ED9]" />, color: 'bg-[#229ED9]/10', borderColor: 'border-[#229ED9]' },
     { id: 'email_passwordless', name: 'Email OTP', icon: <Mail className="text-pepe-pink" />, color: 'bg-pepe-pink/5', borderColor: 'border-pepe-pink' },
-    { id: 'sms_passwordless', name: 'SMS OTP', icon: <Smartphone className="text-pepe-green" />, color: 'bg-pepe-green/5', borderColor: 'border-pepe-green' },
-    */
   ], []);
 
   const handleWalletConnect = useCallback(async (walletId) => {
@@ -184,12 +145,6 @@ const ConnectPage = () => {
       console.warn("ConnectPage: System still initializing...");
       return;
     }
-    
-    // If it's SMS and we haven't shown the input yet
-    if (loginProvider === 'sms_passwordless' && !extraOptions.login_hint) {
-      setShowPhoneInput(true);
-      return;
-    }
 
     setStatus('connecting');
     setError(null);
@@ -221,15 +176,8 @@ const ConnectPage = () => {
     }
   }, [loginWithSocial, navigate, isInitializing]);
 
-  const submitPhoneLogin = useCallback(() => {
-    if (!phoneNumber) return;
-    const fullNumber = `${selectedCountry.code}${phoneNumber.replace(/^0+/, '')}`;
-    setShowPhoneInput(false);
-    handleSocialConnect('sms_passwordless', { login_hint: fullNumber });
-  }, [phoneNumber, selectedCountry, handleSocialConnect]);
-
   const handleConnect = useCallback((walletId) => {
-    const socialProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'line', 'github', 'email_passwordless', 'sms_passwordless'];
+    const socialProviders = ['google', 'twitter', 'telegram', 'email_passwordless'];
     if (socialProviders.includes(walletId)) {
       handleSocialConnect(walletId);
     } else {
@@ -285,59 +233,6 @@ const ConnectPage = () => {
           </div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-3 bg-white border-4 border-pepe-black rounded-[2.5rem] shadow-[12px_12px_0_0_#000] p-6 sm:p-10 space-y-8 relative">
-            <AnimatePresence>
-              {showPhoneInput && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute inset-0 z-50 bg-white rounded-[2.3rem] p-8 flex flex-col justify-center items-center space-y-6"
-                >
-                  <button 
-                    onClick={() => setShowPhoneInput(false)}
-                    className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={24} />
-                  </button>
-                  
-                  <div className="text-center space-y-2">
-                    <Smartphone size={48} className="mx-auto text-pepe-green mb-4" />
-                    <h3 className="text-2xl font-black italic uppercase">SMS Login</h3>
-                    <p className="text-sm font-bold text-gray-500">Select country and enter your number</p>
-                  </div>
-
-                  <div className="w-full max-w-sm space-y-4">
-                    <div className="flex gap-2">
-                      <select 
-                        value={selectedCountry.code}
-                        onChange={(e) => setSelectedCountry(countries.find(c => c.code === e.target.value))}
-                        className="bg-gray-50 border-4 border-pepe-black p-3 rounded-2xl font-black text-sm outline-none w-32"
-                      >
-                        {countries.map(c => (
-                          <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
-                        ))}
-                      </select>
-                      <input 
-                        type="tel"
-                        placeholder="Phone Number"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                        className="flex-1 bg-gray-50 border-4 border-pepe-black p-3 rounded-2xl font-black text-lg outline-none placeholder:text-gray-300"
-                        onKeyDown={(e) => e.key === 'Enter' && submitPhoneLogin()}
-                      />
-                    </div>
-                    
-                    <button 
-                      onClick={submitPhoneLogin}
-                      disabled={!phoneNumber}
-                      className="w-full bg-pepe-green border-4 border-pepe-black p-4 rounded-2xl font-black uppercase italic shadow-[4px_4px_0_0_#000] hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none transition-all"
-                    >
-                      Send OTP
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <div className="space-y-6">
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Popular Wallets</h2>
@@ -390,7 +285,7 @@ const ConnectPage = () => {
                         </motion.div>
                       ) : option.icon}
                     </div>
-                    <span className={`text-[8px] font-black uppercase tracking-widest text-center ${option.id === 'twitter' || option.id === 'apple' ? 'text-pepe-black' : 'text-pepe-black'}`}>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-center text-pepe-black">
                       {isInitializing ? (i18n.language === 'ar' ? 'تحميل...' : 'Loading...') : option.name}
                     </span>
                   </button>

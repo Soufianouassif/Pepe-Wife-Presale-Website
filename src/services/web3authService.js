@@ -3,7 +3,7 @@ import { SolanaPrivateKeyProvider } from "@web3auth/solana-provider";
 import { AuthAdapter } from "@web3auth/auth-adapter";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 
-const WEB3AUTH_CLIENT_ID = "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
+const WEB3AUTH_CLIENT_ID = import.meta?.env?.VITE_WEB3AUTH_CLIENT_ID || "BJILT6B9z2_gOIHCTrovzF2PLAbngM9-mgBSneY6eysUyuU-CU17mfX9_dFpAXGjAuE7bwgezUtOgXgV7ZK3w2E";
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
@@ -24,6 +24,9 @@ class Web3AuthService {
     if (this.web3auth) return;
     
     try {
+      if (!WEB3AUTH_CLIENT_ID || typeof WEB3AUTH_CLIENT_ID !== 'string') {
+        throw new Error("Web3Auth client id is missing.");
+      }
       this.web3auth = new Web3Auth({
         clientId: WEB3AUTH_CLIENT_ID,
         web3AuthNetwork: "sapphire_mainnet",
@@ -47,14 +50,9 @@ class Web3AuthService {
             showOnModal: true,
             loginMethods: {
               google: { name: "google", showOnModal: true },
-              facebook: { name: "facebook", showOnModal: true },
               twitter: { name: "twitter", showOnModal: true },
-              apple: { name: "apple", showOnModal: true },
-              discord: { name: "discord", showOnModal: true },
-              line: { name: "line", showOnModal: true },
-              github: { name: "github", showOnModal: true },
+              telegram: { name: "telegram", showOnModal: true },
               email_passwordless: { name: "email_passwordless", showOnModal: true },
-              sms_passwordless: { name: "sms_passwordless", showOnModal: true },
             },
           },
           [WALLET_ADAPTERS.METAMASK]: { label: "MetaMask", showOnModal: false },
