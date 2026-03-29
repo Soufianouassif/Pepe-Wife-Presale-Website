@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { 
-  ChevronDown, Info, ArrowDown, 
-  ShieldCheck, Zap, Settings2, 
-  Wallet, AlertCircle, Check
-} from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { CURRENT_TOKEN_PRICE_USD } from '../presaleConfig';
+import { PROJECT_CURRENCY_SYMBOL, PROJECT_CURRENCY_NAME } from '../constants/projectConstants';
+import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation';
+import EthereumUsdtNotice from './EthereumUsdtNotice';
+import AppIcon from './AppIcon';
 
 const TOKENS = [
   { id: 'SOL', name: 'Solana', symbol: 'SOL', icon: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', price: 185.50 },
@@ -30,6 +29,9 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
   const [showTokenList, setShowTokenList] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
   const [txStatus, setTxStatus] = useState('idle'); // idle, pending, success, error
+  const [amountError, setAmountError] = useState('');
+
+  const range = useMemo(() => getPaymentRange(fromToken.id), [fromToken.id]);
 
   const calculatedTokensNum = useMemo(() => {
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) return 0;
@@ -41,9 +43,37 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
     return calculatedTokensNum.toLocaleString(undefined, { maximumFractionDigits: 0 });
   }, [calculatedTokensNum]);
 
+  const handleAmountChange = (nextRaw) => {
+    setAmount(nextRaw);
+    if (nextRaw === '') {
+      setAmountError('');
+      return;
+    }
+    const validation = validatePaymentAmount(nextRaw, fromToken.id);
+    if (!validation.valid) {
+      setAmountError(t('validation.amount_range', { min: validation.min, max: validation.max }));
+      return;
+    }
+    setAmountError('');
+  };
+
+  const handleAmountBlur = () => {
+    if (amount === '') return;
+    const validation = validatePaymentAmount(amount, fromToken.id);
+    if (!validation.valid) {
+      const clamped = clampPaymentAmount(amount, fromToken.id);
+      setAmount(clamped);
+    }
+  };
+
   const handleBuy = async () => {
     if (!isConnected) return;
     if (!amount || parseFloat(amount) <= 0) return;
+    const validation = validatePaymentAmount(amount, fromToken.id);
+    if (!validation.valid) {
+      setAmountError(t('validation.amount_range', { min: validation.min, max: validation.max }));
+      return;
+    }
 
     setIsBuying(true);
     setTxStatus('pending');
@@ -73,26 +103,32 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3 space-x-reverse">
           <div className="w-10 h-10 bg-pepe-yellow rounded-xl border-2 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000]">
-            <Zap size={20} className="text-pepe-black" fill="currentColor" />
+            <AppIcon name="bolt" fallback="bolt" className="text-pepe-black text-xl" />
           </div>
           <h3 className="text-xl font-black uppercase italic tracking-tight">{t('buybox_widget.title')}</h3>
         </div>
         <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Settings2 size={20} className="text-gray-400" />
+          <AppIcon name="settings" fallback="settings" className="text-gray-400 text-lg" />
         </button>
       </div>
 
       {/* From Input */}
       <div className="space-y-3">
-        <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-400 px-2">
+        <div className="text-xs font-black uppercase tracking-wider text-gray-500 px-2">
           <span>{t('buybox_widget.you_pay')}</span>
+        </div>
+        <div className="flex justify-between text-[10px] font-bold text-gray-400 px-2">
           <span>{t('buybox_widget.balance')}</span>
+          <span>{t('buybox_widget.range_hint', { min: range.min, max: range.max })}</span>
         </div>
         <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-4 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
           <input 
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            min={range.min}
+            max={range.max}
+            onChange={(e) => handleAmountChange(e.target.value)}
+            onBlur={handleAmountBlur}
             placeholder={t('buybox_widget.amount_placeholder')}
             className="flex-1 bg-transparent text-2xl font-black outline-none placeholder:text-gray-300"
           />
@@ -102,15 +138,18 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
           >
             <img src={fromToken.icon} alt={fromToken.symbol} className="w-6 h-6 rounded-full" />
             <span className="font-black uppercase text-sm">{fromToken.symbol}</span>
-            <ChevronDown size={16} />
+            <AppIcon name="keyboard_arrow_down" fallback="open" className="text-base" />
           </button>
         </div>
+        {amountError && <p className="text-xs font-black text-red-600 px-2">{amountError}</p>}
       </div>
+
+      {fromToken.id === 'USDT' && <EthereumUsdtNotice />}
 
       {/* Divider / Switch */}
       <div className="flex justify-center -my-3 relative z-10">
         <div className="bg-pepe-black text-white p-2 rounded-full border-4 border-white shadow-lg">
-          <ArrowDown size={16} strokeWidth={4} />
+          <AppIcon name="south" fallback="down" className="text-base" />
         </div>
       </div>
 
@@ -127,6 +166,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
           <div className="flex items-center gap-2 bg-white/10 border-2 border-white/20 px-3 py-2 rounded-xl">
             <img src="/assets/hero-character.png" alt="PWIFE" className="w-6 h-6 object-contain" />
             <span className="font-black uppercase text-sm text-white">$PWIFE</span>
+            <span className="sr-only">{PROJECT_CURRENCY_SYMBOL}</span>
           </div>
         </div>
       </div>
@@ -135,13 +175,13 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border-2 border-pepe-black/5">
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            {t('buybox_widget.exchange_rate')} <Info size={12} />
+            {t('buybox_widget.exchange_rate')} <AppIcon name="info" fallback="info" className="text-xs" />
           </div>
-          <span className="font-black text-pepe-black">1 {fromToken.symbol} ≈ {(fromToken.price / PWIFE_PRICE).toLocaleString()} PWIFE</span>
+            <span className="font-black text-pepe-black">1 {fromToken.symbol} ≈ {(fromToken.price / PWIFE_PRICE).toLocaleString()} {PROJECT_CURRENCY_NAME}</span>
         </div>
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            {t('buybox_widget.network_fee')} <Info size={12} />
+            {t('buybox_widget.network_fee')} <AppIcon name="info" fallback="info" className="text-xs" />
           </div>
           <span className="font-black text-pepe-black">~$0.25</span>
         </div>
@@ -150,7 +190,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       {/* Action Button */}
       <button 
         onClick={handleBuy}
-        disabled={isBuying || !amount || txStatus !== 'idle'}
+        disabled={isBuying || !amount || txStatus !== 'idle' || !!amountError}
         className={`
           w-full py-5 rounded-2xl border-4 border-pepe-black font-black uppercase italic text-xl shadow-[8px_8px_0_0_#000]
           transition-all active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed
@@ -162,18 +202,18 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
         {isBuying ? (
           <div className="flex items-center justify-center gap-3">
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-              <Zap size={24} fill="currentColor" />
+              <AppIcon name="progress_activity" fallback="loading" className="text-2xl" />
             </motion.div>
             {t('buybox_widget.processing')}
           </div>
         ) : txStatus === 'success' ? (
           <div className="flex items-center justify-center gap-3">
-            <Check size={24} strokeWidth={4} />
+            <AppIcon name="check_circle" fallback="success" className="text-2xl" />
             {t('buybox_widget.success')}
           </div>
         ) : txStatus === 'error' ? (
           <div className="flex items-center justify-center gap-3">
-            <AlertCircle size={24} strokeWidth={4} />
+            <AppIcon name="error" fallback="failed" className="text-2xl" />
             {t('buybox_widget.failed')}
           </div>
         ) : (
@@ -183,7 +223,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
 
       {/* Footer Security */}
       <div className="flex items-center justify-center gap-2 opacity-30 text-[10px] font-black uppercase tracking-widest">
-        <ShieldCheck size={14} />
+        <AppIcon name="shield" fallback="secure" className="text-sm" />
         {t('buybox_widget.secured')}
       </div>
 
@@ -199,7 +239,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
             <div className="flex justify-between items-center mb-6">
               <h4 className="font-black uppercase italic text-lg">{t('buybox_widget.select_token')}</h4>
               <button onClick={() => setShowTokenList(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <Settings2 size={20} className="rotate-45" />
+                <AppIcon name="close" fallback="close" className="text-lg" />
               </button>
             </div>
             <div className="space-y-2 overflow-y-auto custom-scrollbar pr-2">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Rocket, Info, Shield, Map, HelpCircle, ArrowRight, Download, Globe, Copy, Check, Lock, ExternalLink, Droplets, ShieldCheck, Flame } from 'lucide-react';
+import { Menu, X, Rocket, Info, Shield, Map, HelpCircle, ArrowRight, Download, Globe, Copy, Check, Lock, ExternalLink, Droplets, ShieldCheck, Flame } from '../components/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
@@ -12,6 +12,9 @@ import TokenomicsBackground from '../components/TokenomicsBackground';
 import RiskWarningBackground from '../components/RiskWarningBackground';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { PRESALE_CONFIG, TOKENS_PER_USDT } from '../presaleConfig';
+import { validatePaymentAmount, getPaymentRange, clampPaymentAmount } from '../utils/amountValidation';
+import EthereumUsdtNotice from '../components/EthereumUsdtNotice';
+import { PROJECT_CURRENCY_SYMBOL } from '../constants/projectConstants';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -780,9 +783,33 @@ const BuyModal = ({ isOpen, onClose, t }) => {
   const [amount, setAmount] = useState('');
   const [currency, setSolCurrency] = useState('SOL');
   const [isLoading, setIsLoading] = useState(false);
+  const [amountError, setAmountError] = useState('');
   const { isConnected, sendTransaction, walletType, setRequiredEvmChainId } = useWallet();
   const navigate = useNavigate();
   const currentPrice = PRESALE_CONFIG.currentPhase.priceUsd.toFixed(8);
+  const amountRange = getPaymentRange(currency);
+
+  const handleAmountChange = (nextRaw) => {
+    setAmount(nextRaw);
+    if (nextRaw === '') {
+      setAmountError('');
+      return;
+    }
+    const result = validatePaymentAmount(nextRaw, currency);
+    if (!result.valid) {
+      setAmountError(t('validation.amount_range', { min: result.min, max: result.max }));
+      return;
+    }
+    setAmountError('');
+  };
+
+  const handleAmountBlur = () => {
+    if (amount === '') return;
+    const result = validatePaymentAmount(amount, currency);
+    if (!result.valid) {
+      setAmount(clampPaymentAmount(amount, currency));
+    }
+  };
 
   const handleBuy = async () => {
     const paymentCurrency = currency === 'USDT' ? 'USDT' : 'SOL';
@@ -802,6 +829,11 @@ const BuyModal = ({ isOpen, onClose, t }) => {
 
     if (!amount || parseFloat(amount) <= 0) {
       alert(t('buy_modal.errors.invalid_amount'));
+      return;
+    }
+    const validation = validatePaymentAmount(amount, currency);
+    if (!validation.valid) {
+      alert(t('validation.amount_range', { min: validation.min, max: validation.max }));
       return;
     }
 
@@ -850,38 +882,62 @@ const BuyModal = ({ isOpen, onClose, t }) => {
         <div className="space-y-4 sm:space-y-6">
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <button 
-              onClick={() => setSolCurrency('SOL')}
+              onClick={() => {
+                setSolCurrency('SOL');
+                if (amount) {
+                  const v = validatePaymentAmount(amount, 'SOL');
+                  setAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }));
+                }
+              }}
               className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all text-sm sm:text-base ${currency === 'SOL' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
             >
               {t('buy_modal.pay_sol')}
             </button>
             <button 
-              onClick={() => setSolCurrency('USDT')}
+              onClick={() => {
+                setSolCurrency('USDT');
+                if (amount) {
+                  const v = validatePaymentAmount(amount, 'USDT');
+                  setAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }));
+                }
+              }}
               className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all text-sm sm:text-base ${currency === 'USDT' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
             >
               {t('buy_modal.pay_usdt')}
             </button>
           </div>
 
-          <div className="relative">
+          <div className="space-y-2">
+            <label className="block text-xs sm:text-sm font-black uppercase tracking-wide text-pepe-black">
+              {t('buy_modal.amount_label', { currency })}
+            </label>
             <input 
               type="number" 
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              min={amountRange.min}
+              max={amountRange.max}
+              onChange={(e) => handleAmountChange(e.target.value)}
+              onBlur={handleAmountBlur}
               placeholder={t('buybox.input_placeholder')}
               className="w-full bg-white border-4 border-pepe-black rounded-xl sm:rounded-2xl p-4 sm:p-6 text-xl sm:text-2xl font-black outline-none shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000]"
             />
-            <span className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 font-black text-pepe-pink text-sm sm:text-base">{currency}</span>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[11px] sm:text-xs font-bold text-gray-600">{t('buy_modal.range_hint', { min: amountRange.min, max: amountRange.max })}</span>
+              <span className="font-black text-pepe-pink text-sm sm:text-base">{currency}</span>
+            </div>
+            {amountError && <p className="text-xs font-black text-red-600">{amountError}</p>}
           </div>
+
+          {currency === 'USDT' && <EthereumUsdtNotice />}
 
           <div className="bg-pepe-black text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border-4 border-pepe-black flex justify-between items-center">
             <span className="font-black uppercase text-xs sm:text-base">{t('buy_modal.you_will_get')}</span>
-            <span className="text-lg sm:text-2xl font-black text-pepe-yellow">{amount ? (amount * TOKENS_PER_USDT).toLocaleString() : '0'} $PWIFE</span>
+            <span className="text-lg sm:text-2xl font-black text-pepe-yellow">{amount ? (amount * TOKENS_PER_USDT).toLocaleString() : '0'} {PROJECT_CURRENCY_SYMBOL}</span>
           </div>
 
           <button 
             onClick={handleBuy}
-            disabled={isLoading}
+            disabled={isLoading || !!amountError}
             className={`w-full bg-pepe-green text-pepe-black border-4 border-pepe-black py-4 sm:py-6 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black uppercase italic shadow-[6px_6px_0_0_#000] sm:shadow-[8px_8px_0_0_#000] hover:translate-y-1 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoading ? t('buy_modal.processing') : t('buybox.buy_now')}

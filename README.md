@@ -97,3 +97,64 @@ npx lighthouse http://127.0.0.1:4173 --only-categories=performance --chrome-flag
 
 - Smart contract integration guide for dashboard buy flow:
   - `docs/dashboard-contract-integration.md`
+
+## Web UX, Validation, and Accessibility Updates
+
+### Financial Input Protection
+
+- Payment amount validation now enforces strict ranges:
+  - `SOL`: min `1`, max `50`
+  - `USDT`: min `1`, max `10000`
+- Validation is immediate and prevents out-of-range submission with localized error messages.
+- Shared implementation:
+  - `src/utils/amountValidation.js`
+  - `src/constants/projectConstants.js`
+
+### USDT Ethereum Notice
+
+- A dedicated notice component is shown whenever `USDT` is selected.
+- It explicitly warns that transactions run on Ethereum and shows estimated gas range.
+- Component:
+  - `src/components/EthereumUsdtNotice.jsx`
+
+### Icons and Fallback Strategy
+
+- Core buy/dashboard flows are migrated to async Material Symbols loaded from Google Fonts CDN.
+- Each icon uses screen-reader fallback text.
+- Added:
+  - `src/components/AppIcon.jsx`
+  - async icon stylesheet in `index.html`
+
+### Label-Input and Overflow Improvements
+
+- Inputs in buy flows now follow label-first structure with helper text.
+- Added range hints and inline validation messages.
+- Navbar/sidebar/table fields use truncation and responsive overflow handling.
+
+### Currency Naming Consistency
+
+- Project currency constants are centralized:
+  - `src/constants/projectConstants.js`
+- UI strings now prefer `PWIFE` naming in buy/dashboard flows.
+
+### Tests
+
+- Added unit + integration coverage for amount ranges and clamping:
+  - `src/utils/amountValidation.test.js`
+
+Run:
+
+```bash
+npm run test
+```
+
+### Accessibility (WCAG 2.1) Notes
+
+- Added persistent labels for amount fields and helper hints.
+- Added `sr-only` fallback labels for icons.
+- Preserved keyboard-friendly native inputs/selects/buttons.
+
+### Screenshots
+
+- Before: `docs/screenshots/dashboard-before.svg`
+- After: `docs/screenshots/dashboard-after.svg`

@@ -41,7 +41,7 @@
   },
   "buybox": {
     "title": "البيع المسبق متاح الآن!",
-    "desc": "احصل على توكنات $PWIFE بأقل سعر",
+    "desc": "احصل على $PWIFE بأقل سعر",
     "phase_badge": "المرحلة {{current}} / {{total}}",
     "current_price": "السعر الحالي",
     "price_line": "1 $PWIFE = {{price}} USDT",
@@ -106,11 +106,11 @@
     "q1": "ما هو مشروع Pepe Wife ($PWIFE)؟",
     "a1": "Pepe Wife هو مشروع عملة ميم أنيق وممتع مبني على بلوكشين Solana، تم تصميمه لإضفاء لمسة من الرقي على نظام الميم البيئي.",
     "q2": "كيف يمكنني الانضمام إلى البيع المسبق؟",
-    "a2": "يمكنك الانضمام من خلال ربط محفظتك بموقعنا الرسمي واستبدال USDT بتوكنات $PWIFE خلال مراحل البيع المسبق النشطة.",
+    "a2": "يمكنك الانضمام من خلال ربط محفظتك بموقعنا الرسمي واستبدال USDT بـ $PWIFE خلال مراحل البيع المسبق النشطة.",
     "q3": "هل العقد الذكي آمن؟",
     "a3": "نعم، تم تدقيق عقدنا الذكي بالكامل من قبل شركات أمنية رائدة، وسيتم قفل السيولة لضمان سلامة المجتمع.",
-    "q4": "متى سيتم إدراج التوكن؟",
-    "a4": "من المقرر إدراج التوكن في المرحلة الثانية من خارطة الطريق، بدءاً بالمنصات اللامركزية (DEX) ثم المنصات المركزية (CEX)."
+    "q4": "متى سيتم إدراج PWIFE؟",
+    "a4": "من المقرر إدراج PWIFE في المرحلة الثانية من خارطة الطريق، بدءاً بالمنصات اللامركزية (DEX) ثم المنصات المركزية (CEX)."
   },
   "whybuy": {
     "badge": "قوة الإقناع",
@@ -199,7 +199,7 @@
     "reset": "إعادة تعيين",
     "results": {
       "initial": "الاستثمار الأولي",
-      "tokens": "التوكنات المستلمة",
+      "tokens": "PWIFE المستلمة",
       "revenue": "صافي الإيرادات",
       "profit": "الربح التقديري",
       "roi": "عائد الاستثمار (ROI)",
@@ -213,7 +213,10 @@
   "dashboard_pro": {
     "sidebar": {
       "overview": "نظرة عامة",
-      "buy": "شراء التوكن",
+      "buy": "شراء PWIFE",
+      "transactions": "سجل المعاملات",
+      "performance": "تحليلات الأداء",
+      "tokens": "PWIFE الخاصة بي",
       "referral": "الإحالة",
       "claim": "المطالبة",
       "staking": "التخثين",
@@ -224,7 +227,7 @@
     "soon": "قريبًا",
     "soon_desc": "هذا القسم غير مفعل حالياً وسيتم إطلاقه في تحديث قادم.",
     "notifications": {
-      "invalid_amount": "أدخل كمية صالحة قبل الشراء.",
+      "invalid_amount": "أدخل قيمة دفع صالحة قبل الشراء.",
       "require_solana": "لشراء مقابل SOL يجب ربط محفظة Solana مثل Phantom.",
       "require_evm": "لشراء مقابل USDT يجب ربط محفظة EVM مثل MetaMask.",
       "signature_failed": "فشل التحقق من التوقيع.",
@@ -234,7 +237,7 @@
     "overview": {
       "total_supply": "إجمالي المعروض",
       "presale_available": "المتوفر في البيع",
-      "token_price": "سعر التوكن",
+      "token_price": "سعر PWIFE",
       "roi_calculator": "آلة تقدير العائد",
       "investment_placeholder": "الاستثمار (USDT)",
       "target_placeholder": "السعر المستهدف",
@@ -249,12 +252,14 @@
       "phase_status": "المرحلة النشطة {{current}} من {{total}}"
     },
     "buy": {
-      "title": "شراء التوكن",
-      "current_price": "سعر التوكن الحالي",
+      "title": "شراء PWIFE",
+      "current_price": "سعر PWIFE الحالي",
       "payment_currency": "عملة الدفع",
-      "token_amount": "كمية التوكن المطلوبة (PWIFE)",
-      "token_amount_placeholder": "0",
+      "payment_amount": "قيمة الدفع ({{currency}})",
+      "payment_placeholder": "أدخل قيمة بين {{min}} و{{max}}",
+      "range_hint": "النطاق المسموح: {{min}} - {{max}}",
       "total_cost": "التكلفة الإجمالية",
+      "estimated_receive": "الكمية المتوقعة: {{amount}} {{currency}}",
       "phase_supply": "معروض المرحلة: {{supply}} PWIFE",
       "security_title": "التحقق والأمان",
       "security_1": "يتم التحقق من العنوان وفق نوع المحفظة قبل الإرسال.",
@@ -272,10 +277,63 @@
       "title": "المحفظة",
       "connected_address": "العنوان المتصل",
       "copy": "نسخ العنوان",
+      "copy_nav": "نسخ",
       "copied": "تم النسخ",
       "explorer": "مستكشف الشبكة",
       "sol_balance": "رصيد SOL",
       "usdt_balance": "رصيد USDT (Ethereum)"
+    },
+    "wallet_overview": {
+      "title": "نظرة عامة على المحفظة",
+      "total_value": "القيمة الإجمالية للمحفظة"
+    },
+    "transactions": {
+      "filter_type": "فلترة حسب النوع",
+      "filter_range": "فلترة حسب التاريخ",
+      "range_7d": "7 أيام",
+      "range_30d": "30 يومًا",
+      "range_90d": "90 يومًا",
+      "range_all": "الكل",
+      "types": {
+        "all": "الكل",
+        "buy": "شراء",
+        "referral": "مكافأة إحالة",
+        "claim": "مطالبة"
+      },
+      "table": {
+        "date": "التاريخ",
+        "type": "النوع",
+        "tokens": "PWIFE",
+        "amount": "القيمة",
+        "status": "الحالة"
+      },
+      "status": {
+        "confirmed": "مؤكدة",
+        "pending": "معلقة",
+        "failed": "فاشلة"
+      },
+      "empty": "لا توجد معاملات مطابقة للفلاتر المحددة."
+    },
+    "performance": {
+      "title": "تحليلات الأداء",
+      "current": "السعر الحالي",
+      "high": "أعلى قيمة ضمن النطاق",
+      "low": "أدنى قيمة ضمن النطاق"
+    },
+    "tokens": {
+      "title": "PWIFE المشتراة",
+      "total_bought": "إجمالي ما تم شراؤه",
+      "empty": "لا توجد عمليات شراء بعد."
+    },
+    "referral": {
+      "title": "برنامج الإحالة",
+      "unique_link": "رابط الإحالة الخاص بك",
+      "copy_link": "نسخ الرابط",
+      "invited": "الأصدقاء المدعوون",
+      "active": "الإحالات النشطة",
+      "earned": "مكافآت الإحالة",
+      "reward_progress": "تقدم المكافآت",
+      "next_reward": "عند بلوغ مكافآت إجمالية قدرها ${{amount}} سيتم فتح المستوى التالي."
     }
   },
   "brand": {
@@ -294,7 +352,9 @@
     "you_will_get": "سوف تحصل على:",
     "processing": "جاري المعالجة...",
     "secure_tx": "معاملة آمنة عبر العقد الذكي",
-    "success": "تمت المعاملة بنجاح! سيتم إرسال توكنات $PWIFE قريباً.",
+    "amount_label": "قيمة الدفع ({{currency}})",
+    "range_hint": "النطاق المسموح: {{min}} - {{max}}",
+    "success": "تمت المعاملة بنجاح! سيتم إرسال $PWIFE قريباً.",
     "errors": {
       "invalid_network_config": "إعداد الشبكة غير صالح.",
       "invalid_amount": "يرجى إدخال كمية صالحة",
@@ -344,9 +404,10 @@
     "reload": "إعادة تحميل الصفحة"
   },
   "buybox_widget": {
-    "title": "صندوق شراء البيع المسبق",
+    "title": "صندوق شراء PWIFE",
     "you_pay": "أنت تدفع",
     "balance": "الرصيد: 0.00",
+    "range_hint": "النطاق المسموح: {{min}} - {{max}}",
     "amount_placeholder": "0.00",
     "you_receive": "أنت تستلم",
     "price": "السعر: $0.00000005",
@@ -357,7 +418,7 @@
     "failed": "فشل",
     "buy_now": "شراء $PWIFE",
     "secured": "مؤمّن عبر العقد الذكي",
-    "select_token": "اختر العملة",
+    "select_token": "اختر الأصل",
     "tokens": {
       "sol_name": "سولانا",
       "usdt_name": "تيذر",
@@ -392,6 +453,13 @@
     "walletconnect_invalid_account": "فشل الحصول على عنوان صالح عبر WalletConnect.",
     "adapter_not_ready": "المحفظة غير متصلة بشكل صحيح."
   },
+  "validation": {
+    "amount_range": "القيمة يجب أن تكون بين {{min}} و{{max}}"
+  },
+  "usdt_notice": {
+    "title": "USDT على شبكة Ethereum فقط",
+    "desc": "مدفوعات USDT تتم عبر شبكة {{network}} فقط. رسوم الغاز التقريبية: {{gas}}."
+  },
   "admin": {
     "hub_title": "لوحة الإدارة",
     "node_status_online": "حالة العقدة: متصلة",
@@ -420,14 +488,14 @@
     "phase": {
       "active_seed_round": "المرحلة النشطة: الجولة التمهيدية",
       "running": "قيد التشغيل",
-      "token_price_sol": "سعر التوكن (SOL)",
+      "token_price_sol": "سعر PWIFE (SOL)",
       "hard_cap_sol": "الحد الأقصى (SOL)",
       "start_date": "تاريخ البداية",
       "end_date": "تاريخ النهاية"
     },
     "vesting": {
       "title": "التحكم في الاستحقاق",
-      "desc": "إدارة جدول تحرير التوكنات",
+      "desc": "إدارة جدول تحرير PWIFE",
       "configure": "إعداد الاستحقاق"
     },
     "security_checks": {

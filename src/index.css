@@ -228,6 +228,16 @@ html[dir="rtl"] body {
   text-align: right;
 }
 
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.material-symbols-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
 [dir="rtl"] #root,
 [dir="rtl"] main,
 [dir="rtl"] section,

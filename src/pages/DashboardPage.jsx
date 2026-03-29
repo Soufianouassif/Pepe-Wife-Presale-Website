@@ -11,10 +11,10 @@ import { getDashboardStats, submitPresaleIntent } from '../services/dashboardApi
 import { isValidEvmAddress, isValidSolAddress } from '../wallet/adapters'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_PHASE_SUPPLY } from '../presaleConfig'
-import {
-  LayoutDashboard, ShoppingCart, Users, HandCoins, Lock, LifeBuoy, Wallet, LogOut,
-  Menu, X, Copy, ExternalLink, Sun, Moon, CheckCircle2, AlertTriangle, Loader2
-} from 'lucide-react'
+import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
+import AppIcon from '../components/AppIcon'
+import { PROJECT_CURRENCY_NAME } from '../constants/projectConstants'
+import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation'
 
 const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 const ERC20_ABI = ['function balanceOf(address owner) view returns (uint256)']
@@ -27,13 +27,16 @@ const navLinks = [
 ]
 
 const sidebarItems = [
-  { id: 'overview', labelKey: 'dashboard_pro.sidebar.overview', icon: LayoutDashboard, enabled: true },
-  { id: 'buy', labelKey: 'dashboard_pro.sidebar.buy', icon: ShoppingCart, enabled: true },
-  { id: 'referral', labelKey: 'dashboard_pro.sidebar.referral', icon: Users, enabled: false },
-  { id: 'claim', labelKey: 'dashboard_pro.sidebar.claim', icon: HandCoins, enabled: false },
-  { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking', icon: Lock, enabled: false },
-  { id: 'support', labelKey: 'dashboard_pro.sidebar.support', icon: LifeBuoy, enabled: true },
-  { id: 'wallet', labelKey: 'dashboard_pro.sidebar.wallet', icon: Wallet, enabled: true }
+  { id: 'overview', labelKey: 'dashboard_pro.sidebar.overview', icon: 'dashboard', enabled: true },
+  { id: 'buy', labelKey: 'dashboard_pro.sidebar.buy', icon: 'shopping_cart', enabled: true },
+  { id: 'transactions', labelKey: 'dashboard_pro.sidebar.transactions', icon: 'calendar_month', enabled: true },
+  { id: 'performance', labelKey: 'dashboard_pro.sidebar.performance', icon: 'monitoring', enabled: true },
+  { id: 'tokens', labelKey: 'dashboard_pro.sidebar.tokens', icon: 'token', enabled: true },
+  { id: 'referral', labelKey: 'dashboard_pro.sidebar.referral', icon: 'groups', enabled: true },
+  { id: 'claim', labelKey: 'dashboard_pro.sidebar.claim', icon: 'redeem', enabled: false },
+  { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking', icon: 'lock', enabled: false },
+  { id: 'support', labelKey: 'dashboard_pro.sidebar.support', icon: 'support_agent', enabled: true },
+  { id: 'wallet', labelKey: 'dashboard_pro.sidebar.wallet', icon: 'account_balance_wallet', enabled: true }
 ]
 
 const DashboardPage = () => {
@@ -66,16 +69,26 @@ const DashboardPage = () => {
   })
   const [statsLoading, setStatsLoading] = useState(true)
   const [notification, setNotification] = useState(null)
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState('')
   const [walletBalances, setWalletBalances] = useState({ sol: null, usdt: null })
   const [walletBalancesLoading, setWalletBalancesLoading] = useState(false)
+  const [txTypeFilter, setTxTypeFilter] = useState('all')
+  const [txRangeFilter, setTxRangeFilter] = useState('30d')
+  const [performanceRange, setPerformanceRange] = useState('30d')
 
   const [roiInvestment, setRoiInvestment] = useState('1000')
   const [roiTargetPrice, setRoiTargetPrice] = useState('0.0003')
 
   const [buyCurrency, setBuyCurrency] = useState('SOL')
-  const [buyTokenAmount, setBuyTokenAmount] = useState('')
+  const [buyPaymentAmount, setBuyPaymentAmount] = useState('')
+  const [buyAmountError, setBuyAmountError] = useState('')
   const [txProcessing, setTxProcessing] = useState(false)
+  const [transactions, setTransactions] = useState([
+    { id: 'tx-1001', date: '2026-03-26T09:10:00Z', type: 'buy', currency: 'USDT', tokenAmount: 600000, usdAmount: 30, status: 'confirmed' },
+    { id: 'tx-1002', date: '2026-03-25T15:40:00Z', type: 'referral', currency: 'USDT', tokenAmount: 100000, usdAmount: 5, status: 'confirmed' },
+    { id: 'tx-1003', date: '2026-03-23T12:30:00Z', type: 'buy', currency: 'SOL', tokenAmount: 1400000, usdAmount: 70, status: 'confirmed' },
+    { id: 'tx-1004', date: '2026-03-20T07:20:00Z', type: 'claim', currency: 'PWIFE', tokenAmount: 250000, usdAmount: 0, status: 'confirmed' }
+  ])
 
   const supportUrl = import.meta?.env?.VITE_SUPPORT_URL || 'mailto:support@pepewife.io'
   const explorerUrl = useMemo(() => {
@@ -152,31 +165,124 @@ const DashboardPage = () => {
     navigate('/')
   }
 
-  const handleCopy = async () => {
-    if (!address) return
-    await navigator.clipboard.writeText(address)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1800)
+  const handleCopy = async (text, type) => {
+    if (!text) return
+    await navigator.clipboard.writeText(text)
+    setCopied(type)
+    setTimeout(() => setCopied(''), 1800)
   }
 
   const roiResult = useMemo(() => {
     return calculateProfit(roiInvestment, stats.tokenPriceUsd, roiTargetPrice, 0)
   }, [roiInvestment, roiTargetPrice, stats.tokenPriceUsd])
 
-  const buyTotalCost = useMemo(() => {
-    const qty = Number(buyTokenAmount || 0)
-    if (!qty || qty <= 0) return 0
-    return qty * stats.tokenPriceUsd
-  }, [buyTokenAmount, stats.tokenPriceUsd])
+  const buyRange = useMemo(() => getPaymentRange(buyCurrency), [buyCurrency])
 
   const buyCostInSelectedCurrency = useMemo(() => {
-    if (!buyTotalCost) return 0
-    if (buyCurrency === 'SOL') return buyTotalCost / Math.max(stats.solUsd, 1)
-    return buyTotalCost / Math.max(stats.usdtUsd, 1)
-  }, [buyTotalCost, buyCurrency, stats.solUsd, stats.usdtUsd])
+    const pay = Number(buyPaymentAmount || 0)
+    if (!pay || pay <= 0) return 0
+    return pay
+  }, [buyPaymentAmount])
+
+  const buyTotalCost = useMemo(() => {
+    if (!buyCostInSelectedCurrency) return 0
+    if (buyCurrency === 'SOL') return buyCostInSelectedCurrency * Math.max(stats.solUsd, 1)
+    return buyCostInSelectedCurrency * Math.max(stats.usdtUsd, 1)
+  }, [buyCostInSelectedCurrency, buyCurrency, stats.solUsd, stats.usdtUsd])
+
+  const buyTokenAmount = useMemo(() => {
+    if (!buyTotalCost || !stats.tokenPriceUsd) return 0
+    return Math.floor(buyTotalCost / stats.tokenPriceUsd)
+  }, [buyTotalCost, stats.tokenPriceUsd])
+
+  const handleBuyAmountChange = (raw) => {
+    setBuyPaymentAmount(raw)
+    if (raw === '') {
+      setBuyAmountError('')
+      return
+    }
+    const validation = validatePaymentAmount(raw, buyCurrency)
+    if (!validation.valid) {
+      setBuyAmountError(t('validation.amount_range', { min: validation.min, max: validation.max }))
+      return
+    }
+    setBuyAmountError('')
+  }
+
+  const handleBuyAmountBlur = () => {
+    if (buyPaymentAmount === '') return
+    const validation = validatePaymentAmount(buyPaymentAmount, buyCurrency)
+    if (!validation.valid) {
+      setBuyPaymentAmount(clampPaymentAmount(buyPaymentAmount, buyCurrency))
+    }
+  }
+
+  const totalWalletUsd = useMemo(() => {
+    const solUsd = walletBalances.sol === null ? 0 : walletBalances.sol * stats.solUsd
+    const usdtUsd = walletBalances.usdt === null ? 0 : walletBalances.usdt
+    return solUsd + usdtUsd
+  }, [walletBalances.sol, walletBalances.usdt, stats.solUsd])
+
+  const filteredTransactions = useMemo(() => {
+    const now = Date.now()
+    const daysMap = { '7d': 7, '30d': 30, '90d': 90, all: 9999 }
+    const maxDays = daysMap[txRangeFilter] || 30
+    return transactions.filter((tx) => {
+      const byType = txTypeFilter === 'all' ? true : tx.type === txTypeFilter
+      const diffDays = (now - new Date(tx.date).getTime()) / 86_400_000
+      const byRange = txRangeFilter === 'all' ? true : diffDays <= maxDays
+      return byType && byRange
+    })
+  }, [transactions, txTypeFilter, txRangeFilter])
+
+  const buyTransactions = useMemo(() => transactions.filter((tx) => tx.type === 'buy'), [transactions])
+  const totalBoughtTokens = useMemo(() => buyTransactions.reduce((sum, tx) => sum + tx.tokenAmount, 0), [buyTransactions])
+
+  const performanceSeries = useMemo(() => {
+    const pointsMap = { '7d': 7, '30d': 12, '90d': 20 }
+    const points = pointsMap[performanceRange] || 12
+    return Array.from({ length: points }).map((_, i) => {
+      const base = stats.tokenPriceUsd
+      const wave = Math.sin(i / 2.4) * (base * 0.16)
+      const trend = i * (base * 0.02)
+      const value = Number((base + wave + trend).toFixed(10))
+      return { label: `${i + 1}`, value }
+    })
+  }, [performanceRange, stats.tokenPriceUsd])
+
+  const chartPath = useMemo(() => {
+    if (!performanceSeries.length) return ''
+    const values = performanceSeries.map((d) => d.value)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const spread = Math.max(max - min, 0.000000001)
+    return performanceSeries.map((d, i) => {
+      const x = (i / Math.max(performanceSeries.length - 1, 1)) * 100
+      const y = 100 - ((d.value - min) / spread) * 100
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`
+    }).join(' ')
+  }, [performanceSeries])
+
+  const referralCode = useMemo(() => (address ? `${address.slice(0, 6)}${address.slice(-4)}` : 'guest0000'), [address])
+  const referralLink = useMemo(() => {
+    if (typeof window === 'undefined') return `https://pepewife.io/?ref=${referralCode}`
+    return `${window.location.origin}/?ref=${referralCode}`
+  }, [referralCode])
+  const referralStats = useMemo(() => ({
+    invitedFriends: 18,
+    activeReferrals: 9,
+    earnedUsd: 386.4,
+    nextRewardUsd: 500
+  }), [])
+  const referralProgress = Math.min(100, Math.round((referralStats.earnedUsd / referralStats.nextRewardUsd) * 100))
 
   const handleBuy = async () => {
     const qty = Number(buyTokenAmount || 0)
+    const validation = validatePaymentAmount(buyPaymentAmount, buyCurrency)
+    if (!validation.valid) {
+      notify('error', t('validation.amount_range', { min: validation.min, max: validation.max }))
+      return
+    }
     if (!address || qty <= 0) {
       notify('error', t('dashboard_pro.notifications.invalid_amount'))
       return
@@ -205,8 +311,21 @@ const DashboardPage = () => {
         quoteUsd: buyTotalCost,
         signature
       })
+      setTransactions((prev) => [
+        {
+          id: `tx-${Date.now()}`,
+          date: new Date().toISOString(),
+          type: 'buy',
+          currency: buyCurrency,
+          tokenAmount: qty,
+          usdAmount: buyTotalCost,
+          status: 'confirmed'
+        },
+        ...prev
+      ])
       notify('success', t('dashboard_pro.notifications.buy_success'))
-      setBuyTokenAmount('')
+      setBuyPaymentAmount('')
+      setBuyAmountError('')
     } catch (error) {
       notify('error', error?.userMessage || error?.message || t('dashboard_pro.notifications.buy_failed'))
     } finally {
@@ -222,17 +341,20 @@ const DashboardPage = () => {
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-[#F8FAFC] text-pepe-black'} ${isRTL ? 'rtl' : 'ltr'}`}>
       <header className={`sticky top-0 z-40 border-b-2 ${theme === 'dark' ? 'bg-[#0b1224]/90 border-gray-800' : 'bg-white/95 border-gray-100'} backdrop-blur`}>
         <div className="px-4 lg:px-8 h-20 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button onClick={() => setSidebarOpen((v) => !v)} className={`lg:hidden p-2 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              {sidebarOpen ? <AppIcon name="close" fallback="close menu" className="text-lg" /> : <AppIcon name="menu" fallback="open menu" className="text-lg" />}
             </button>
-            <button onClick={() => navigate('/')} className="font-black italic text-2xl">
-              {brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span>
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 min-w-0">
+              <img src="/assets/hero-character.png" alt={t('brand.name')} className="w-10 h-10 object-contain shrink-0" />
+              <span className="font-black italic text-2xl leading-none truncate">
+                {brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span>
+              </span>
             </button>
           </div>
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6 min-w-0">
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className={`font-black text-sm ${theme === 'dark' ? 'text-gray-200 hover:text-pepe-yellow' : 'text-gray-700 hover:text-pepe-pink'}`}>
+              <a key={link.href} href={link.href} className={`font-black text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-200 hover:text-pepe-yellow' : 'text-gray-700 hover:text-pepe-pink'}`}>
                 {t(link.labelKey)}
               </a>
             ))}
@@ -240,11 +362,15 @@ const DashboardPage = () => {
           <div className="flex items-center gap-3">
             <LanguageSwitcher className="hidden md:flex" />
             <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'dark' ? <AppIcon name="light_mode" fallback="light mode" className="text-base" /> : <AppIcon name="dark_mode" fallback="dark mode" className="text-base" />}
             </button>
-            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
-              <span className="font-black text-xs">{formatAddress(address)}</span>
+            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border-2 max-w-[240px] ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+              <span className="font-black text-xs truncate">{formatAddress(address)}</span>
             </div>
+            <button onClick={() => handleCopy(address, 'navbar')} className={`h-11 px-3 rounded-xl border-2 font-black text-xs flex items-center gap-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+              <AppIcon name="content_copy" fallback="copy address" className={`text-sm ${copied === 'navbar' ? 'text-pepe-pink' : ''}`} />
+              {copied === 'navbar' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}
+            </button>
           </div>
         </div>
       </header>
@@ -254,7 +380,6 @@ const DashboardPage = () => {
           <div className={`h-full rounded-3xl border-4 p-4 ${cardBase}`}>
             <div className="space-y-2">
               {sidebarItems.map((item) => {
-                const Icon = item.icon
                 return (
                   <button
                     key={item.id}
@@ -268,9 +393,9 @@ const DashboardPage = () => {
                         : `${theme === 'dark' ? 'border-gray-700 text-gray-200' : 'border-pepe-black/20 text-pepe-black'}`
                     } ${!item.enabled ? 'opacity-60' : ''}`}
                   >
-                    <span className="flex items-center gap-3">
-                      <Icon size={18} />
-                      <span className="font-black text-sm">{t(item.labelKey)}</span>
+                      <span className="flex items-center gap-3 min-w-0">
+                      <AppIcon name={item.icon} fallback={t(item.labelKey)} className="text-lg" />
+                        <span className="font-black text-sm truncate">{t(item.labelKey)}</span>
                     </span>
                     {!item.enabled && <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span>}
                   </button>
@@ -281,7 +406,7 @@ const DashboardPage = () => {
               onClick={handleLogout}
               className={`mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-black ${theme === 'dark' ? 'border-red-500/40 text-red-300' : 'border-red-500/30 text-red-600'}`}
             >
-              <LogOut size={16} />
+              <AppIcon name="logout" fallback="logout" className="text-base" />
               {t('dashboard_pro.logout')}
             </button>
           </div>
@@ -300,7 +425,7 @@ const DashboardPage = () => {
                     : 'bg-red-50 border-red-300 text-red-700'
                 }`}
               >
-                {notification.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                {notification.type === 'success' ? <AppIcon name="check_circle" fallback="success" className="text-lg" /> : <AppIcon name="warning" fallback="warning" className="text-lg" />}
                 <span className="font-black text-sm">{notification.message}</span>
               </motion.div>
             )}
@@ -311,11 +436,11 @@ const DashboardPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_supply')}</p>
-                  <p className="text-3xl font-black mt-2">{stats.totalSupply.toLocaleString()} PWIFE</p>
+                  <p className="text-3xl font-black mt-2">{stats.totalSupply.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
                 </div>
                 <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.presale_available')}</p>
-                  <p className="text-3xl font-black mt-2">{stats.presaleAvailable.toLocaleString()} PWIFE</p>
+                  <p className="text-3xl font-black mt-2">{stats.presaleAvailable.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
                 </div>
                 <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.token_price')}</p>
@@ -351,7 +476,7 @@ const DashboardPage = () => {
                   <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.stats_title')}</h3>
                   {statsLoading ? (
                     <div className="h-40 flex items-center justify-center">
-                      <Loader2 className="animate-spin" />
+                      <AppIcon name="progress_activity" fallback="loading" className="text-2xl animate-spin" />
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -375,6 +500,24 @@ const DashboardPage = () => {
                   )}
                 </div>
               </div>
+
+              <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                <h3 className="text-xl font-black mb-4">{t('dashboard_pro.wallet_overview.title')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet_overview.total_value')}</p>
+                    <p className="text-2xl font-black mt-1 truncate">${totalWalletUsd.toFixed(2)}</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
+                    <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
+                    <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -391,16 +534,26 @@ const DashboardPage = () => {
                   <label className="text-sm font-black">{t('dashboard_pro.buy.payment_currency')}</label>
                   <div className="grid grid-cols-2 gap-3">
                     {['SOL', 'USDT'].map((currency) => (
-                      <button key={currency} onClick={() => setBuyCurrency(currency)} className={`p-3 rounded-xl border-2 font-black ${buyCurrency === currency ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
+                      <button key={currency} onClick={() => {
+                        setBuyCurrency(currency)
+                        if (buyPaymentAmount) {
+                          const v = validatePaymentAmount(buyPaymentAmount, currency)
+                          setBuyAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }))
+                        }
+                      }} className={`p-3 rounded-xl border-2 font-black ${buyCurrency === currency ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
                         {currency}
                       </button>
                     ))}
                   </div>
-                  <label className="text-sm font-black">{t('dashboard_pro.buy.token_amount')}</label>
-                  <input value={buyTokenAmount} onChange={(e) => setBuyTokenAmount(e.target.value)} type="number" placeholder={t('dashboard_pro.buy.token_amount_placeholder')} className={`w-full p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                  <label className="text-sm font-black">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
+                  <input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} className={`w-full p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                  <p className="text-[11px] font-bold opacity-70">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
+                  {buyAmountError && <p className="text-xs font-black text-red-500">{buyAmountError}</p>}
+                  {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
                   <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
                     <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.total_cost')}</p>
                     <p className="text-xl font-black mt-1">${buyTotalCost.toFixed(2)} ≈ {buyCostInSelectedCurrency.toFixed(4)} {buyCurrency}</p>
+                    <p className="text-xs font-black opacity-60 mt-1">{t('dashboard_pro.buy.estimated_receive', { amount: buyTokenAmount.toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
                   </div>
                 </div>
                 <div className={`rounded-2xl border-2 p-5 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
@@ -412,10 +565,10 @@ const DashboardPage = () => {
                   </ul>
                   <button
                     onClick={handleBuy}
-                    disabled={txProcessing || !buyTokenAmount || Number(buyTokenAmount) <= 0}
+                    disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError}
                     className="mt-5 w-full p-4 rounded-xl border-2 border-pepe-black bg-pepe-pink text-white font-black disabled:opacity-60 flex items-center justify-center gap-2"
                   >
-                    {txProcessing && <Loader2 className="animate-spin" size={18} />}
+                    {txProcessing && <AppIcon name="progress_activity" fallback="loading" className="text-lg animate-spin" />}
                     {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
                   </button>
                 </div>
@@ -423,7 +576,158 @@ const DashboardPage = () => {
             </div>
           )}
 
-          {['referral', 'claim', 'staking'].includes(activeSection) && (
+          {activeSection === 'transactions' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+              <div className="flex flex-wrap gap-3 items-end">
+                <div>
+                  <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_type')}</p>
+                  <select value={txTypeFilter} onChange={(e) => setTxTypeFilter(e.target.value)} className={`p-2 rounded-xl border-2 font-black ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`}>
+                    <option value="all">{t('dashboard_pro.transactions.types.all')}</option>
+                    <option value="buy">{t('dashboard_pro.transactions.types.buy')}</option>
+                    <option value="referral">{t('dashboard_pro.transactions.types.referral')}</option>
+                    <option value="claim">{t('dashboard_pro.transactions.types.claim')}</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_range')}</p>
+                  <select value={txRangeFilter} onChange={(e) => setTxRangeFilter(e.target.value)} className={`p-2 rounded-xl border-2 font-black ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`}>
+                    <option value="7d">{t('dashboard_pro.transactions.range_7d')}</option>
+                    <option value="30d">{t('dashboard_pro.transactions.range_30d')}</option>
+                    <option value="90d">{t('dashboard_pro.transactions.range_90d')}</option>
+                    <option value="all">{t('dashboard_pro.transactions.range_all')}</option>
+                  </select>
+                </div>
+              </div>
+              <div className={`rounded-2xl border-2 overflow-hidden ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[760px]">
+                    <thead className={theme === 'dark' ? 'bg-[#0b1224]' : 'bg-gray-50'}>
+                      <tr>
+                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.date')}</th>
+                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.type')}</th>
+                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.tokens')}</th>
+                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.amount')}</th>
+                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTransactions.map((tx) => (
+                        <tr key={tx.id} className={`border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                          <td className="p-3 text-sm font-bold whitespace-nowrap">{new Date(tx.date).toLocaleDateString()}</td>
+                          <td className="p-3 text-sm font-bold">{t(`dashboard_pro.transactions.types.${tx.type}`)}</td>
+                          <td className="p-3 text-sm font-bold">{Number(tx.tokenAmount).toLocaleString()} {PROJECT_CURRENCY_NAME}</td>
+                          <td className="p-3 text-sm font-bold">{tx.usdAmount.toFixed(2)} {tx.currency}</td>
+                          <td className="p-3 text-sm font-bold">{t(`dashboard_pro.transactions.status.${tx.status}`)}</td>
+                        </tr>
+                      ))}
+                      {!filteredTransactions.length && (
+                        <tr>
+                          <td className="p-4 text-sm font-black opacity-70" colSpan={5}>{t('dashboard_pro.transactions.empty')}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'performance' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-2xl font-black">{t('dashboard_pro.performance.title')}</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {['7d', '30d', '90d'].map((range) => (
+                    <button key={range} onClick={() => setPerformanceRange(range)} className={`px-3 py-2 rounded-xl border-2 text-xs font-black ${performanceRange === range ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
+                      {t(`dashboard_pro.transactions.range_${range}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
+                <svg viewBox="0 0 100 100" className="w-full h-56">
+                  <path d={chartPath} fill="none" stroke="#ec4899" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+                </svg>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.current')}</p>
+                  <p className="text-xl font-black mt-1">${stats.tokenPriceUsd.toFixed(8)}</p>
+                </div>
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.high')}</p>
+                  <p className="text-xl font-black mt-1">${Math.max(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
+                </div>
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.low')}</p>
+                  <p className="text-xl font-black mt-1">${Math.min(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'tokens' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+              <h3 className="text-2xl font-black">{t('dashboard_pro.tokens.title')}</h3>
+              <div className={`p-4 rounded-2xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <p className="text-xs font-black opacity-60">{t('dashboard_pro.tokens.total_bought')}</p>
+                <p className="text-3xl font-black mt-1 break-words">{totalBoughtTokens.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+              </div>
+              <div className="space-y-3">
+                {buyTransactions.map((tx) => (
+                  <div key={tx.id} className={`p-4 rounded-xl border-2 grid grid-cols-1 md:grid-cols-4 gap-3 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-sm font-black">{new Date(tx.date).toLocaleDateString()}</p>
+                    <p className="text-sm font-black break-words">{tx.tokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+                    <p className="text-sm font-black">{tx.usdAmount.toFixed(2)} {tx.currency}</p>
+                    <p className="text-sm font-black">{t(`dashboard_pro.transactions.status.${tx.status}`)}</p>
+                  </div>
+                ))}
+                {!buyTransactions.length && <p className="text-sm font-black opacity-70">{t('dashboard_pro.tokens.empty')}</p>}
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'referral' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+              <h3 className="text-2xl font-black">{t('dashboard_pro.referral.title')}</h3>
+              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
+                <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.unique_link')}</p>
+                <div className="mt-2 flex flex-col sm:flex-row gap-3">
+                  <p className="font-black text-sm break-all flex-1">{referralLink}</p>
+                  <button onClick={() => handleCopy(referralLink, 'referral')} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                    <AppIcon name="content_copy" fallback="copy link" className={`text-sm ${copied === 'referral' ? 'text-pepe-pink' : ''}`} />
+                    {copied === 'referral' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.referral.copy_link')}
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.invited')}</p>
+                  <p className="text-2xl font-black mt-1">{referralStats.invitedFriends}</p>
+                </div>
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.active')}</p>
+                  <p className="text-2xl font-black mt-1">{referralStats.activeReferrals}</p>
+                </div>
+                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.earned')}</p>
+                  <p className="text-2xl font-black mt-1">${referralStats.earnedUsd.toFixed(2)}</p>
+                </div>
+              </div>
+              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.reward_progress')}</p>
+                  <p className="text-xs font-black">{referralProgress}%</p>
+                </div>
+                <div className={`h-3 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                  <div className="h-full bg-pepe-pink transition-all" style={{ width: `${referralProgress}%` }} />
+                </div>
+                <p className="text-xs font-black opacity-70 mt-2">{t('dashboard_pro.referral.next_reward', { amount: referralStats.nextRewardUsd.toFixed(2) })}</p>
+              </div>
+            </div>
+          )}
+
+          {['claim', 'staking'].includes(activeSection) && (
             <div className={`rounded-3xl border-4 p-8 text-center ${cardBase}`}>
               <p className="text-3xl font-black">{t('dashboard_pro.soon')}</p>
               <p className="text-sm font-bold opacity-70 mt-2">{t('dashboard_pro.soon_desc')}</p>
@@ -436,7 +740,7 @@ const DashboardPage = () => {
               <p className="text-sm font-bold opacity-80 mb-6">{t('dashboard_pro.support.desc')}</p>
               <a href={supportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-pepe-black bg-pepe-yellow font-black">
                 {t('dashboard_pro.support.open')}
-                <ExternalLink size={16} />
+                <AppIcon name="open_in_new" fallback="open link" className="text-base" />
               </a>
             </div>
           )}
@@ -448,13 +752,13 @@ const DashboardPage = () => {
                 <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.connected_address')}</p>
                 <p className="font-black break-all mt-1">{address || '---'}</p>
                 <div className="flex flex-wrap gap-3 mt-4">
-                  <button onClick={handleCopy} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
-                    <Copy size={14} />
-                    {copied ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy')}
+                  <button onClick={() => handleCopy(address, 'wallet')} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                    <AppIcon name="content_copy" fallback="copy address" className="text-sm" />
+                    {copied === 'wallet' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy')}
                   </button>
                   <a href={explorerUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
                     {t('dashboard_pro.wallet.explorer')}
-                    <ExternalLink size={14} />
+                    <AppIcon name="open_in_new" fallback="open explorer" className="text-sm" />
                   </a>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { calculateProfit } from '../utils/calculator';
-import { Calculator, RotateCcw, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { Calculator, RotateCcw, TrendingUp, TrendingDown, Info } from './icons';
 import { CURRENT_TOKEN_PRICE_USD } from '../presaleConfig';
 
 const ProfitCalculator = ({ t: tProp }) => {

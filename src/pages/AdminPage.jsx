@@ -5,7 +5,7 @@ import {
   Settings, Lock, Unlock, ArrowRight,
   Database, Activity, BarChart3, AlertTriangle,
   Search, Download, Save, RefreshCw
-} from 'lucide-react';
+} from '../components/icons';
 import { useTranslation } from 'react-i18next';
 
 const AdminPage = () => {

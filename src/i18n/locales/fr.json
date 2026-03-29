@@ -41,7 +41,7 @@
   },
   "buybox": {
     "title": "La Prévente est lancée !",
-    "desc": "Sécurisez vos jetons $PWIFE au prix le plus bas",
+    "desc": "Sécurisez vos $PWIFE au prix le plus bas",
     "phase_badge": "Phase {{current}} / {{total}}",
     "current_price": "Prix Actuel",
     "price_line": "1 $PWIFE = {{price}} USDT",
@@ -106,11 +106,11 @@
     "q1": "Qu'est-ce que Pepe Wife ($PWIFE) ?",
     "a1": "Pepe Wife est un projet de memecoin élégant et ludique construit sur la blockchain Solana, conçu pour apporter une touche de sophistication à l'écosystème meme.",
     "q2": "Comment puis-je rejoindre la prévente ?",
-    "a2": "Vous pouvez rejoindre la prévente en connectant votre portefeuille à notre site officiel et en échangeant des USDT contre des jetons $PWIFE.",
+    "a2": "Vous pouvez rejoindre la prévente en connectant votre portefeuille à notre site officiel et en échangeant des USDT contre des $PWIFE.",
     "q3": "Le contrat intelligent est-il sûr ?",
     "a3": "Oui, notre contrat intelligent a été entièrement audité par des firmes de sécurité de premier plan, et la liquidité sera verrouillée.",
-    "q4": "Quand le jeton sera-t-il listé ?",
-    "a4": "Le listing du jeton est prévu pour la phase 2 de notre feuille de route, en commençant par les DEX puis les CEX."
+    "q4": "Quand PWIFE sera-t-il listé ?",
+    "a4": "Le listing de PWIFE est prévu pour la phase 2 de notre feuille de route, en commençant par les DEX puis les CEX."
   },
   "whybuy": {
     "badge": "Pouvoir de Persuasion",
@@ -199,7 +199,7 @@
     "reset": "Réinitialiser",
     "results": {
       "initial": "Investissement Initial",
-      "tokens": "Jetons Reçus",
+      "tokens": "PWIFE reçus",
       "revenue": "Revenu Net",
       "profit": "Profit Estimé",
       "roi": "ROI",
@@ -211,12 +211,129 @@
     "switch_to_mobile": "Version Mobile"
   },
   "dashboard_pro": {
+    "sidebar": {
+      "overview": "Vue d'ensemble",
+      "buy": "Acheter PWIFE",
+      "transactions": "Transactions",
+      "performance": "Performance",
+      "tokens": "Mes PWIFE",
+      "referral": "Parrainage",
+      "claim": "Claim",
+      "staking": "Staking",
+      "support": "Support",
+      "wallet": "Wallet"
+    },
+    "logout": "Déconnexion",
+    "soon": "Bientôt",
+    "soon_desc": "Cette section est désactivée pour le moment et sera activée prochainement.",
+    "notifications": {
+      "invalid_amount": "Entrez un montant de paiement valide avant l'achat.",
+      "require_solana": "Pour payer en SOL, connectez un wallet Solana comme Phantom.",
+      "require_evm": "Pour payer en USDT, connectez un wallet EVM comme MetaMask.",
+      "signature_failed": "La vérification de signature a échoué.",
+      "buy_success": "La demande d'achat a été confirmée avec succès.",
+      "buy_failed": "Échec du traitement de la demande d'achat."
+    },
     "overview": {
+      "total_supply": "Offre Totale",
+      "presale_available": "Disponible en prévente",
+      "token_price": "Prix PWIFE",
+      "roi_calculator": "Calculateur ROI",
+      "investment_placeholder": "Investissement (USDT)",
+      "target_placeholder": "Prix cible",
+      "invalid_roi": "Saisissez des valeurs valides pour le calcul ROI.",
+      "profit": "Profit",
+      "stats_title": "Statistiques générales",
+      "market_cap": "Capitalisation",
+      "total_liquidity": "Liquidité totale",
+      "holders": "Détenteurs",
+      "pairs": "SOL / USDT",
       "roi": "ROI",
       "phase_status": "Phase active {{current}} sur {{total}}"
     },
     "buy": {
-      "phase_supply": "Allocation de phase : {{supply}} PWIFE"
+      "title": "Acheter PWIFE",
+      "current_price": "Prix actuel de PWIFE",
+      "payment_currency": "Devise de paiement",
+      "payment_amount": "Montant du paiement ({{currency}})",
+      "payment_placeholder": "Entrez un montant entre {{min}} et {{max}}",
+      "range_hint": "Intervalle autorisé : {{min}} - {{max}}",
+      "total_cost": "Coût total",
+      "estimated_receive": "Réception estimée : {{amount}} {{currency}}",
+      "phase_supply": "Allocation de phase : {{supply}} PWIFE",
+      "security_title": "Validation & Sécurité",
+      "security_1": "L'adresse wallet est validée selon le type de réseau avant soumission.",
+      "security_2": "Une signature wallet est requise avant l'envoi de l'intention d'achat.",
+      "security_3": "Les sections désactivées restent inactives jusqu'à activation future.",
+      "processing": "Traitement de la transaction...",
+      "confirm": "Confirmer l'achat"
+    },
+    "support": {
+      "title": "Support",
+      "desc": "Ouvrez un chat de support direct ou créez un ticket.",
+      "open": "Ouvrir le Support"
+    },
+    "wallet": {
+      "title": "Wallet",
+      "connected_address": "Adresse connectée",
+      "copy": "Copier l'adresse",
+      "copy_nav": "Copier",
+      "copied": "Copié",
+      "explorer": "Explorateur",
+      "sol_balance": "Solde SOL",
+      "usdt_balance": "Solde USDT (Ethereum)"
+    },
+    "wallet_overview": {
+      "title": "Vue Wallet",
+      "total_value": "Valeur totale du wallet"
+    },
+    "transactions": {
+      "filter_type": "Filtrer par type",
+      "filter_range": "Filtrer par date",
+      "range_7d": "7J",
+      "range_30d": "30J",
+      "range_90d": "90J",
+      "range_all": "Tout",
+      "types": {
+        "all": "Tout",
+        "buy": "Achat",
+        "referral": "Récompense parrainage",
+        "claim": "Claim"
+      },
+      "table": {
+        "date": "Date",
+        "type": "Type",
+        "tokens": "PWIFE",
+        "amount": "Montant",
+        "status": "Statut"
+      },
+      "status": {
+        "confirmed": "Confirmé",
+        "pending": "En attente",
+        "failed": "Échoué"
+      },
+      "empty": "Aucune transaction trouvée avec ce filtre."
+    },
+    "performance": {
+      "title": "Analytique de performance",
+      "current": "Prix actuel",
+      "high": "Plus haut",
+      "low": "Plus bas"
+    },
+    "tokens": {
+      "title": "PWIFE achetés",
+      "total_bought": "Total acheté",
+      "empty": "Aucun achat pour le moment."
+    },
+    "referral": {
+      "title": "Programme de parrainage",
+      "unique_link": "Votre lien de parrainage unique",
+      "copy_link": "Copier le lien",
+      "invited": "Amis invités",
+      "active": "Parrainages actifs",
+      "earned": "Récompenses de parrainage",
+      "reward_progress": "Progression des récompenses",
+      "next_reward": "Atteignez ${{amount}} de récompenses totales pour débloquer le prochain palier."
     }
   },
   "brand": {
@@ -235,7 +352,9 @@
     "you_will_get": "Vous recevrez :",
     "processing": "Traitement...",
     "secure_tx": "Transaction sécurisée par smart contract",
-    "success": "Transaction réussie ! Vos jetons $PWIFE seront envoyés sous peu.",
+    "amount_label": "Montant du paiement ({{currency}})",
+    "range_hint": "Intervalle autorisé : {{min}} - {{max}}",
+    "success": "Transaction réussie ! Vos $PWIFE seront envoyés sous peu.",
     "errors": {
       "invalid_network_config": "La configuration réseau est invalide.",
       "invalid_amount": "Veuillez entrer un montant valide",
@@ -285,9 +404,10 @@
     "reload": "Recharger la page"
   },
   "buybox_widget": {
-    "title": "Boîte d'achat prévente",
+    "title": "Boîte d'achat PWIFE",
     "you_pay": "Vous payez",
     "balance": "Solde : 0.00",
+    "range_hint": "Intervalle autorisé : {{min}} - {{max}}",
     "amount_placeholder": "0.00",
     "you_receive": "Vous recevez",
     "price": "Prix : $0.00000005",
@@ -298,7 +418,7 @@
     "failed": "Échec",
     "buy_now": "Acheter $PWIFE",
     "secured": "Sécurisé par smart contract",
-    "select_token": "Sélectionner un token",
+    "select_token": "Sélectionner un actif",
     "tokens": {
       "sol_name": "Solana",
       "usdt_name": "Tether",
@@ -333,6 +453,13 @@
     "walletconnect_invalid_account": "Impossible d'obtenir un compte valide via WalletConnect.",
     "adapter_not_ready": "Le wallet n'est pas correctement connecté."
   },
+  "validation": {
+    "amount_range": "La valeur doit être comprise entre {{min}} et {{max}}"
+  },
+  "usdt_notice": {
+    "title": "USDT sur Ethereum uniquement",
+    "desc": "Les paiements USDT sont traités uniquement sur {{network}}. Frais de gas estimés : {{gas}}."
+  },
   "admin": {
     "hub_title": "Centre Admin",
     "node_status_online": "Statut nœud : En ligne",
@@ -361,14 +488,14 @@
     "phase": {
       "active_seed_round": "Phase active : Seed Round",
       "running": "En cours",
-      "token_price_sol": "Prix token (SOL)",
+      "token_price_sol": "Prix PWIFE (SOL)",
       "hard_cap_sol": "Hard Cap (SOL)",
       "start_date": "Date de début",
       "end_date": "Date de fin"
     },
     "vesting": {
       "title": "Contrôle vesting",
-      "desc": "Gérer le calendrier de libération des tokens",
+      "desc": "Gérer le calendrier de libération des PWIFE",
       "configure": "Configurer le vesting"
     },
     "security_checks": {

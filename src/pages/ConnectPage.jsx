@@ -7,7 +7,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   AlertCircle, X
-} from 'lucide-react';
+} from '../components/icons';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
 const Icons = {
