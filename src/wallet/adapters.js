@@ -1,5 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { WalletOperationError, normalizeWalletError, withRetry } from './errors';
+import i18n from '../i18n/config';
 
 /**
  * @typedef {'MetaMask'|'Phantom'|'Solana'} SupportedWallet
@@ -32,7 +33,7 @@ export const createWalletAdapter = (config) => {
   if (!config?.provider || !config?.walletType) {
     throw new WalletOperationError('Wallet adapter configuration is invalid.', {
       code: 'ADAPTER_CONFIG_INVALID',
-      userMessage: 'تهيئة المحفظة غير صالحة.',
+      userMessage: i18n.t('wallet_errors.config_invalid'),
       retriable: false
     });
   }
@@ -44,7 +45,7 @@ export const createWalletAdapter = (config) => {
   }
   throw new WalletOperationError('Unsupported wallet type.', {
     code: 'WALLET_TYPE_UNSUPPORTED',
-    userMessage: 'نوع المحفظة غير مدعوم.',
+    userMessage: i18n.t('wallet_errors.wallet_type_unsupported'),
     retriable: false
   });
 };
@@ -64,7 +65,7 @@ const createEvmAdapter = (config) => {
       if (expectedChainId && chainId !== expectedChainId) {
         throw new WalletOperationError(`Unexpected chain id: ${chainId}`, {
           code: 'CHAIN_MISMATCH',
-          userMessage: 'الشبكة الحالية غير صحيحة. يرجى التبديل إلى الشبكة المطلوبة.',
+          userMessage: i18n.t('wallet_errors.chain_mismatch'),
           details: { expectedChainId, currentChainId: chainId },
           retriable: false
         });
@@ -78,7 +79,7 @@ const createEvmAdapter = (config) => {
         if (!isValidEvmAddress(account)) {
           throw new WalletOperationError('Invalid EVM address.', {
             code: 'ADDRESS_INVALID',
-            userMessage: 'عنوان المحفظة غير صالح.',
+            userMessage: i18n.t('wallet_errors.invalid_address'),
             retriable: false
           });
         }
@@ -94,14 +95,14 @@ const createEvmAdapter = (config) => {
         if (!message || typeof message !== 'string') {
           throw new WalletOperationError('Message is required for signing.', {
             code: 'SIGN_MESSAGE_INVALID',
-            userMessage: 'الرسالة المطلوبة للتوقيع غير صالحة.',
+            userMessage: i18n.t('wallet_errors.sign_message_invalid'),
             retriable: false
           });
         }
         if (!isValidEvmAddress(address)) {
           throw new WalletOperationError('Address is invalid for signing.', {
             code: 'ADDRESS_INVALID',
-            userMessage: 'عنوان المحفظة غير صالح.',
+            userMessage: i18n.t('wallet_errors.invalid_address'),
             retriable: false
           });
         }
@@ -114,14 +115,14 @@ const createEvmAdapter = (config) => {
         if (!transaction || typeof transaction !== 'object') {
           throw new WalletOperationError('Transaction payload is invalid.', {
             code: 'TRANSACTION_INVALID',
-            userMessage: 'بيانات المعاملة غير صالحة.',
+            userMessage: i18n.t('wallet_errors.transaction_invalid'),
             retriable: false
           });
         }
         if (transaction.from && transaction.from.toLowerCase() !== String(address).toLowerCase()) {
           throw new WalletOperationError('Transaction sender mismatch.', {
             code: 'TRANSACTION_SENDER_MISMATCH',
-            userMessage: 'عنوان المرسل لا يطابق المحفظة المتصلة.',
+            userMessage: i18n.t('wallet_errors.sender_mismatch'),
             retriable: false
           });
         }
@@ -149,7 +150,7 @@ const createPhantomAdapter = (config) => {
         if (!isValidSolAddress(address)) {
           throw new WalletOperationError('Invalid Solana address.', {
             code: 'ADDRESS_INVALID',
-            userMessage: 'عنوان المحفظة غير صالح.',
+            userMessage: i18n.t('wallet_errors.invalid_address'),
             retriable: false
           });
         }
@@ -161,7 +162,7 @@ const createPhantomAdapter = (config) => {
         if (!message || typeof message !== 'string') {
           throw new WalletOperationError('Message is required for signing.', {
             code: 'SIGN_MESSAGE_INVALID',
-            userMessage: 'الرسالة المطلوبة للتوقيع غير صالحة.',
+            userMessage: i18n.t('wallet_errors.sign_message_invalid'),
             retriable: false
           });
         }
@@ -178,7 +179,7 @@ const createPhantomAdapter = (config) => {
         }
         throw new WalletOperationError('Signing not supported on provider.', {
           code: 'SIGN_UNSUPPORTED',
-          userMessage: 'المحفظة لا تدعم عملية التوقيع.',
+          userMessage: i18n.t('wallet_errors.sign_unsupported'),
           retriable: false
         });
       }, { retries });
@@ -188,14 +189,14 @@ const createPhantomAdapter = (config) => {
         if (!transaction || typeof transaction !== 'object') {
           throw new WalletOperationError('Transaction payload is invalid.', {
             code: 'TRANSACTION_INVALID',
-            userMessage: 'بيانات المعاملة غير صالحة.',
+            userMessage: i18n.t('wallet_errors.transaction_invalid'),
             retriable: false
           });
         }
         if (typeof provider.request !== 'function') {
           throw new WalletOperationError('Provider does not support transaction requests.', {
             code: 'TRANSACTION_UNSUPPORTED',
-            userMessage: 'المحفظة لا تدعم إرسال المعاملة.',
+            userMessage: i18n.t('wallet_errors.transaction_unsupported'),
             retriable: false
           });
         }
@@ -214,5 +215,5 @@ const createPhantomAdapter = (config) => {
  * @returns {WalletOperationError}
  */
 export const handleWalletAdapterError = (error, operation) => {
-  return normalizeWalletError(error, 'WALLET_ADAPTER_ERROR', `فشل تنفيذ عملية ${operation} على المحفظة.`);
+  return normalizeWalletError(error, 'WALLET_ADAPTER_ERROR', i18n.t('wallet_errors.adapter_operation_failed', { operation }));
 };

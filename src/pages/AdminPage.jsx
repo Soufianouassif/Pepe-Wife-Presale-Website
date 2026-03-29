@@ -123,7 +123,7 @@ const AdminPage = () => {
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.token_price_sol')}</label>
-                <input type="number" defaultValue="0.00012" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20" />
+                <input type="number" defaultValue="0.00000005" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20" />
               </div>
               <div className="space-y-4">
                 <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.hard_cap_sol')}</label>

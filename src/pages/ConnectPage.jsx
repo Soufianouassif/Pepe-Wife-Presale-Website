@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   AlertCircle, X
@@ -147,6 +148,7 @@ const ConnectPage = () => {
           <ArrowLeft size={20} className="rtl:rotate-180" /> {t('nav.home')}
         </button>
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden sm:flex" />
           <img src="/assets/hero-character.png" alt="Logo" className="w-10 h-10 object-contain" />
           <span className="text-xl font-black italic">{brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span></span>
         </div>

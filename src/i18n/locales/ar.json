@@ -42,7 +42,9 @@
   "buybox": {
     "title": "البيع المسبق متاح الآن!",
     "desc": "احصل على توكنات $PWIFE بأقل سعر",
+    "phase_badge": "المرحلة {{current}} / {{total}}",
     "current_price": "السعر الحالي",
+    "price_line": "1 $PWIFE = {{price}} USDT",
     "input_placeholder": "أدخل كمية USDT",
     "buy_now": "اشتري $PWIFE الآن",
     "how_to_buy": "كيفية الشراء",
@@ -243,7 +245,8 @@
       "total_liquidity": "إجمالي السيولة",
       "holders": "عدد الحائزين",
       "pairs": "SOL / USDT",
-      "roi": "العائد ROI"
+      "roi": "العائد ROI",
+      "phase_status": "المرحلة النشطة {{current}} من {{total}}"
     },
     "buy": {
       "title": "شراء التوكن",
@@ -252,6 +255,7 @@
       "token_amount": "كمية التوكن المطلوبة (PWIFE)",
       "token_amount_placeholder": "0",
       "total_cost": "التكلفة الإجمالية",
+      "phase_supply": "معروض المرحلة: {{supply}} PWIFE",
       "security_title": "التحقق والأمان",
       "security_1": "يتم التحقق من العنوان وفق نوع المحفظة قبل الإرسال.",
       "security_2": "يتم طلب توقيع المحفظة قبل تسجيل عملية الشراء.",
@@ -284,7 +288,7 @@
     "closed_hint": "انقر على الباب لعرض صندوق البيع"
   },
   "buy_modal": {
-    "phase_live": "المرحلة الأولى مباشرة الآن!",
+    "phase_live": "المرحلة {{current}} من {{total}} مباشرة الآن!",
     "pay_sol": "الدفع بـ SOL",
     "pay_usdt": "الدفع بـ USDT",
     "you_will_get": "سوف تحصل على:",
@@ -345,7 +349,7 @@
     "balance": "الرصيد: 0.00",
     "amount_placeholder": "0.00",
     "you_receive": "أنت تستلم",
-    "price": "السعر: $0.00012",
+    "price": "السعر: $0.00000005",
     "exchange_rate": "سعر الصرف",
     "network_fee": "رسوم الشبكة",
     "processing": "جاري المعالجة...",
@@ -360,6 +364,33 @@
       "eth_name": "إيثريوم",
       "bnb_name": "BNB"
     }
+  },
+  "wallet_errors": {
+    "user_rejected": "تم إلغاء العملية من طرف المستخدم.",
+    "request_pending": "يوجد طلب معلّق في المحفظة. أغلق الطلب السابق ثم حاول مرة واحدة.",
+    "operation_failed": "فشلت العملية على المحفظة.",
+    "config_invalid": "تهيئة المحفظة غير صالحة.",
+    "wallet_type_unsupported": "نوع المحفظة غير مدعوم.",
+    "chain_mismatch": "الشبكة الحالية غير صحيحة. يرجى التبديل إلى الشبكة المطلوبة.",
+    "invalid_address": "عنوان المحفظة غير صالح.",
+    "sign_message_invalid": "الرسالة المطلوبة للتوقيع غير صالحة.",
+    "transaction_invalid": "بيانات المعاملة غير صالحة.",
+    "sender_mismatch": "عنوان المرسل لا يطابق المحفظة المتصلة.",
+    "sign_unsupported": "المحفظة لا تدعم عملية التوقيع.",
+    "transaction_unsupported": "المحفظة لا تدعم إرسال المعاملة.",
+    "adapter_operation_failed": "فشل تنفيذ عملية {{operation}} على المحفظة.",
+    "chain_not_allowed": "الشبكة المطلوبة غير مسموحة ضمن سياسة الأمان.",
+    "session_context_missing": "تعذر تجهيز سياق التحقق من جلسة المحفظة.",
+    "provider_invalid": "مزود الشبكة غير صالح.",
+    "chain_switch_failed": "تعذر التبديل إلى الشبكة المطلوبة.",
+    "browser_required": "الاتصال بالمحفظة متاح فقط داخل المتصفح.",
+    "wallet_not_installed": "محفظة {{wallet}} غير مثبتة.",
+    "no_supported_wallet": "لم يتم العثور على أي محفظة مدعومة في هذا المتصفح.",
+    "adapter_not_created": "تعذر إنشاء طبقة التوافق للمحفظة.",
+    "social_disabled": "تم تعطيل تسجيل الدخول الاجتماعي مؤقتًا. استخدم المحافظ المتاحة.",
+    "wallet_provider_unavailable": "مزود محفظة {{wallet}} غير متوفر في هذا المتصفح.",
+    "walletconnect_invalid_account": "فشل الحصول على عنوان صالح عبر WalletConnect.",
+    "adapter_not_ready": "المحفظة غير متصلة بشكل صحيح."
   },
   "admin": {
     "hub_title": "لوحة الإدارة",

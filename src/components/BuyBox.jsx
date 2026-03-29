@@ -7,6 +7,7 @@ import {
   Wallet, AlertCircle, Check
 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
+import { CURRENT_TOKEN_PRICE_USD } from '../presaleConfig';
 
 const TOKENS = [
   { id: 'SOL', name: 'Solana', symbol: 'SOL', icon: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', price: 185.50 },
@@ -15,7 +16,7 @@ const TOKENS = [
   { id: 'BNB', name: 'BNB', symbol: 'BNB', icon: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png', price: 580.40 }
 ];
 
-const PWIFE_PRICE = 0.00012; // 1 $PWIFE = 0.00012 USDT
+const PWIFE_PRICE = CURRENT_TOKEN_PRICE_USD;
 
 const BuyBox = ({ t: tProp, onSuccess }) => {
   const { t: i18nT } = useTranslation();

@@ -9,6 +9,8 @@ import { formatAddress } from '../utils/format'
 import { calculateProfit } from '../utils/calculator'
 import { getDashboardStats, submitPresaleIntent } from '../services/dashboardApi'
 import { isValidEvmAddress, isValidSolAddress } from '../wallet/adapters'
+import LanguageSwitcher from '../components/LanguageSwitcher'
+import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_PHASE_SUPPLY } from '../presaleConfig'
 import {
   LayoutDashboard, ShoppingCart, Users, HandCoins, Lock, LifeBuoy, Wallet, LogOut,
   Menu, X, Copy, ExternalLink, Sun, Moon, CheckCircle2, AlertTriangle, Loader2
@@ -51,14 +53,16 @@ const DashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboard-theme') || 'light')
   const [stats, setStats] = useState({
-    tokenPriceUsd: 0.00012,
-    totalSupply: 1_000_000_000,
-    presaleAvailable: 400_000_000,
-    marketCapUsd: 120_000,
+    tokenPriceUsd: CURRENT_TOKEN_PRICE_USD,
+    totalSupply: TOTAL_PRESALE_SUPPLY,
+    presaleAvailable: CURRENT_PHASE_SUPPLY,
+    marketCapUsd: CURRENT_TOKEN_PRICE_USD * TOTAL_PRESALE_SUPPLY,
     liquidityUsd: 2_450_000,
     holders: 12489,
     solUsd: 185,
-    usdtUsd: 1
+    usdtUsd: 1,
+    currentPhase: PRESALE_CONFIG.currentPhase.id,
+    totalPhases: PRESALE_CONFIG.totalPhases
   })
   const [statsLoading, setStatsLoading] = useState(true)
   const [notification, setNotification] = useState(null)
@@ -234,6 +238,7 @@ const DashboardPage = () => {
             ))}
           </nav>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher className="hidden md:flex" />
             <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -314,7 +319,8 @@ const DashboardPage = () => {
                 </div>
                 <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.token_price')}</p>
-                  <p className="text-3xl font-black mt-2">${stats.tokenPriceUsd.toFixed(6)}</p>
+                  <p className="text-3xl font-black mt-2">${stats.tokenPriceUsd.toFixed(8)}</p>
+                  <p className="text-xs font-black opacity-60 mt-2">{t('dashboard_pro.overview.phase_status', { current: stats.currentPhase || PRESALE_CONFIG.currentPhase.id, total: stats.totalPhases || PRESALE_CONFIG.totalPhases })}</p>
                 </div>
               </div>
 
@@ -379,7 +385,8 @@ const DashboardPage = () => {
                 <div className="space-y-4">
                   <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
                     <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.current_price')}</p>
-                    <p className="text-2xl font-black mt-1">${stats.tokenPriceUsd.toFixed(6)}</p>
+                    <p className="text-2xl font-black mt-1">${stats.tokenPriceUsd.toFixed(8)}</p>
+                    <p className="text-[11px] font-black opacity-60 mt-1">{t('dashboard_pro.buy.phase_supply', { supply: Number(stats.presaleAvailable || 0).toLocaleString() })}</p>
                   </div>
                   <label className="text-sm font-black">{t('dashboard_pro.buy.payment_currency')}</label>
                   <div className="grid grid-cols-2 gap-3">

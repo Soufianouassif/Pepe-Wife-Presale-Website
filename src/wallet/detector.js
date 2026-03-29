@@ -1,4 +1,5 @@
 import { WalletOperationError } from './errors';
+import i18n from '../i18n/config';
 
 /**
  * @typedef {'MetaMask'|'Phantom'|'Unknown'} DetectedWalletType
@@ -72,7 +73,7 @@ export const selectWalletProvider = (options = {}) => {
   }
   throw new WalletOperationError('No supported wallet detected.', {
     code: 'WALLET_NOT_FOUND',
-    userMessage: 'لم يتم العثور على MetaMask أو Phantom في المتصفح.',
+    userMessage: i18n.t('wallet_errors.no_supported_wallet'),
     details: { preferred, fallback },
     retriable: false
   });

@@ -1,6 +1,4 @@
-const TOKEN_PRICE_USD_FALLBACK = 0.00012
-const TOTAL_SUPPLY = 1_000_000_000
-const PRESALE_AVAILABLE = 400_000_000
+import { CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_PHASE_SUPPLY, PRESALE_CONFIG } from '../presaleConfig'
 
 const withTimeout = async (promise, ms = 5000) => {
   let timer
@@ -25,27 +23,31 @@ export const getDashboardStats = async () => {
     const prices = await response.json()
     const solUsd = Number(prices?.solana?.usd || 185)
     const usdtUsd = Number(prices?.tether?.usd || 1)
-    const tokenPriceUsd = TOKEN_PRICE_USD_FALLBACK
+    const tokenPriceUsd = CURRENT_TOKEN_PRICE_USD
     return {
       tokenPriceUsd,
-      totalSupply: TOTAL_SUPPLY,
-      presaleAvailable: PRESALE_AVAILABLE,
-      marketCapUsd: tokenPriceUsd * TOTAL_SUPPLY,
+      totalSupply: TOTAL_PRESALE_SUPPLY,
+      presaleAvailable: CURRENT_PHASE_SUPPLY,
+      marketCapUsd: tokenPriceUsd * TOTAL_PRESALE_SUPPLY,
       liquidityUsd: 2_450_000,
       holders: 12489,
       solUsd,
-      usdtUsd
+      usdtUsd,
+      currentPhase: PRESALE_CONFIG.currentPhase.id,
+      totalPhases: PRESALE_CONFIG.totalPhases
     }
   } catch {
     return {
-      tokenPriceUsd: TOKEN_PRICE_USD_FALLBACK,
-      totalSupply: TOTAL_SUPPLY,
-      presaleAvailable: PRESALE_AVAILABLE,
-      marketCapUsd: TOKEN_PRICE_USD_FALLBACK * TOTAL_SUPPLY,
+      tokenPriceUsd: CURRENT_TOKEN_PRICE_USD,
+      totalSupply: TOTAL_PRESALE_SUPPLY,
+      presaleAvailable: CURRENT_PHASE_SUPPLY,
+      marketCapUsd: CURRENT_TOKEN_PRICE_USD * TOTAL_PRESALE_SUPPLY,
       liquidityUsd: 2_450_000,
       holders: 12489,
       solUsd: 185,
-      usdtUsd: 1
+      usdtUsd: 1,
+      currentPhase: PRESALE_CONFIG.currentPhase.id,
+      totalPhases: PRESALE_CONFIG.totalPhases
     }
   }
 }

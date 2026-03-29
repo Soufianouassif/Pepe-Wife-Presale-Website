@@ -30,11 +30,12 @@ function App() {
   });
 
   useEffect(() => {
-    // ...
-    // Persist language choice
     try {
-      localStorage.setItem('i18nextLng', i18n.language);
+      localStorage.removeItem('i18nextLng');
     } catch (e) {}
+    const html = document.documentElement;
+    html.setAttribute('lang', isRTL ? 'ar' : i18n.language?.startsWith('fr') ? 'fr' : 'en');
+    html.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
   }, [i18n.language, isRTL]);
 
   useEffect(() => {

@@ -1,13 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 import en from './locales/en.json';
 import ar from './locales/ar.json';
 import fr from './locales/fr.json';
 
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
@@ -15,11 +13,9 @@ i18n
       ar: { translation: ar },
       fr: { translation: fr }
     },
+    lng: 'en',
     fallbackLng: 'en',
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
-    },
+    supportedLngs: ['en', 'ar', 'fr'],
     interpolation: {
       escapeValue: false
     }

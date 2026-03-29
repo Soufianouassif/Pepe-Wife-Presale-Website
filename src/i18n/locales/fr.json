@@ -42,7 +42,9 @@
   "buybox": {
     "title": "La Prévente est lancée !",
     "desc": "Sécurisez vos jetons $PWIFE au prix le plus bas",
+    "phase_badge": "Phase {{current}} / {{total}}",
     "current_price": "Prix Actuel",
+    "price_line": "1 $PWIFE = {{price}} USDT",
     "input_placeholder": "Entrez le montant USDT",
     "buy_now": "Acheter $PWIFE Maintenant",
     "how_to_buy": "Comment Acheter",
@@ -210,7 +212,11 @@
   },
   "dashboard_pro": {
     "overview": {
-      "roi": "ROI"
+      "roi": "ROI",
+      "phase_status": "Phase active {{current}} sur {{total}}"
+    },
+    "buy": {
+      "phase_supply": "Allocation de phase : {{supply}} PWIFE"
     }
   },
   "brand": {
@@ -223,7 +229,7 @@
     "closed_hint": "Cliquez sur la porte pour afficher la boîte d'achat"
   },
   "buy_modal": {
-    "phase_live": "La Phase 1 est en direct !",
+    "phase_live": "La phase {{current}} sur {{total}} est en direct !",
     "pay_sol": "Payer en SOL",
     "pay_usdt": "Payer en USDT",
     "you_will_get": "Vous recevrez :",
@@ -284,7 +290,7 @@
     "balance": "Solde : 0.00",
     "amount_placeholder": "0.00",
     "you_receive": "Vous recevez",
-    "price": "Prix : $0.00012",
+    "price": "Prix : $0.00000005",
     "exchange_rate": "Taux de change",
     "network_fee": "Frais réseau",
     "processing": "Traitement...",
@@ -299,6 +305,33 @@
       "eth_name": "Ethereum",
       "bnb_name": "BNB"
     }
+  },
+  "wallet_errors": {
+    "user_rejected": "L'opération a été annulée par l'utilisateur.",
+    "request_pending": "Une demande est déjà en attente dans votre wallet. Fermez-la puis réessayez une seule fois.",
+    "operation_failed": "L'opération du wallet a échoué.",
+    "config_invalid": "La configuration du wallet est invalide.",
+    "wallet_type_unsupported": "Le type de wallet n'est pas pris en charge.",
+    "chain_mismatch": "Le réseau actuel est incorrect. Veuillez basculer vers le réseau requis.",
+    "invalid_address": "L'adresse du wallet est invalide.",
+    "sign_message_invalid": "Le message à signer est invalide.",
+    "transaction_invalid": "Les données de transaction sont invalides.",
+    "sender_mismatch": "L'adresse expéditeur ne correspond pas au wallet connecté.",
+    "sign_unsupported": "Ce wallet ne prend pas en charge la signature.",
+    "transaction_unsupported": "Ce wallet ne prend pas en charge l'envoi de transaction.",
+    "adapter_operation_failed": "Échec de l'opération wallet : {{operation}}.",
+    "chain_not_allowed": "Le réseau demandé n'est pas autorisé par la politique de sécurité.",
+    "session_context_missing": "Impossible de préparer le contexte de vérification de session wallet.",
+    "provider_invalid": "Le fournisseur réseau est invalide.",
+    "chain_switch_failed": "Impossible de basculer vers le réseau requis.",
+    "browser_required": "La connexion wallet est disponible uniquement dans un navigateur.",
+    "wallet_not_installed": "Le wallet {{wallet}} n'est pas installé.",
+    "no_supported_wallet": "Aucun wallet pris en charge n'a été trouvé dans ce navigateur.",
+    "adapter_not_created": "Impossible de créer l'adaptateur wallet.",
+    "social_disabled": "La connexion sociale est temporairement désactivée. Utilisez les wallets disponibles.",
+    "wallet_provider_unavailable": "Le fournisseur du wallet {{wallet}} est indisponible dans ce navigateur.",
+    "walletconnect_invalid_account": "Impossible d'obtenir un compte valide via WalletConnect.",
+    "adapter_not_ready": "Le wallet n'est pas correctement connecté."
   },
   "admin": {
     "hub_title": "Centre Admin",

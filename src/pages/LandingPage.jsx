@@ -10,6 +10,8 @@ import ViewModeToggle from '../components/ViewModeToggle';
 import MoneyRain from '../components/MoneyRain';
 import TokenomicsBackground from '../components/TokenomicsBackground';
 import RiskWarningBackground from '../components/RiskWarningBackground';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { PRESALE_CONFIG, TOKENS_PER_USDT } from '../presaleConfig';
 
 // ASSET PLACEHOLDERS
 const ASSETS = {
@@ -264,6 +266,7 @@ const HeroSection = ({ t, openBuyModal }) => {
 const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
   const [amount, setAmount] = useState('');
   const [isDoorOpen, setIsDoorOpen] = useState(false);
+  const currentPrice = PRESALE_CONFIG.currentPhase.priceUsd.toFixed(8);
   return (
     <section className="py-16 sm:py-24 min-h-[760px] lg:min-h-[860px] relative overflow-hidden flex items-center bg-[#78D7FF]">
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -306,6 +309,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
                   >
                     <div className="text-center mb-6 sm:mb-8">
                       <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-pepe-black mb-3 uppercase italic tracking-tight animate-title-gradient">{t('buybox.title')}</h2>
+                      <p className="text-[10px] sm:text-xs font-black uppercase text-pepe-pink mb-2">{t('buybox.phase_badge', { current: PRESALE_CONFIG.currentPhase.id, total: PRESALE_CONFIG.totalPhases })}</p>
                       <p className="text-gray-700 text-xs sm:text-base lg:text-lg font-bold">{t('buybox.desc')}</p>
                     </div>
                     <div className="flex justify-center mb-6 sm:mb-8">
@@ -315,7 +319,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
                         </div>
                         <div>
                           <div className="text-[8px] sm:text-[10px] text-pepe-black font-black uppercase tracking-[0.2em]">{t('buybox.current_price')}</div>
-                          <div className="text-sm sm:text-xl font-black text-pepe-black tracking-tight whitespace-nowrap">{t('buybox.price_line')}</div>
+                          <div className="text-sm sm:text-xl font-black text-pepe-black tracking-tight whitespace-nowrap">{t('buybox.price_line', { price: currentPrice })}</div>
                         </div>
                       </div>
                     </div>
@@ -730,7 +734,7 @@ const Footer = ({ t }) => (
   </footer>
 );
 
-const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal }) => {
+const Navbar = ({ isOpen, setIsOpen, t, openModal }) => {
   return (
     <nav className="fixed top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-50 rounded-2xl sm:rounded-[2rem] border-4 border-pepe-black shadow-[0_4px_0_0_rgba(10,10,10,1)] sm:shadow-[0_8px_0_0_rgba(10,10,10,1)] overflow-hidden h-16 sm:h-20 bg-white">
       <div className="absolute inset-0 z-0">
@@ -759,9 +763,7 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
         </div>
 
         <div className="flex items-center space-x-2 md:space-x-4 space-x-reverse shrink-0">
-          <div className="hidden sm:flex bg-pepe-black/10 p-1 rounded-xl border-2 border-pepe-black/20">
-            {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 md:px-3 py-1 rounded-lg text-[10px] md:text-xs font-black uppercase transition-all ${currentLng === lang ? 'bg-pepe-pink text-white shadow-md' : 'text-pepe-black/60 hover:text-pepe-black'}`}>{lang}</button>)}
-          </div>
+          <LanguageSwitcher className="hidden sm:flex" />
           <div className="hidden md:block">
             <WalletButton t={t} />
           </div>
@@ -780,6 +782,7 @@ const BuyModal = ({ isOpen, onClose, t }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isConnected, sendTransaction, walletType, setRequiredEvmChainId } = useWallet();
   const navigate = useNavigate();
+  const currentPrice = PRESALE_CONFIG.currentPhase.priceUsd.toFixed(8);
 
   const handleBuy = async () => {
     const paymentCurrency = currency === 'USDT' ? 'USDT' : 'SOL';
@@ -840,8 +843,8 @@ const BuyModal = ({ isOpen, onClose, t }) => {
     <Modal isOpen={isOpen} onClose={onClose} title={t('hero.join_presale')} headerColor="bg-pepe-green">
       <div className="space-y-6 sm:space-y-8">
         <div className="text-center space-y-2 sm:space-y-4">
-          <h4 className="text-xl sm:text-3xl font-black uppercase italic animate-title-gradient">{t('buy_modal.phase_live')}</h4>
-          <p className="text-base sm:text-xl font-bold text-gray-600">{t('buybox.price_line')}</p>
+          <h4 className="text-xl sm:text-3xl font-black uppercase italic animate-title-gradient">{t('buy_modal.phase_live', { current: PRESALE_CONFIG.currentPhase.id, total: PRESALE_CONFIG.totalPhases })}</h4>
+          <p className="text-base sm:text-xl font-bold text-gray-600">{t('buybox.price_line', { price: currentPrice })}</p>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
@@ -873,7 +876,7 @@ const BuyModal = ({ isOpen, onClose, t }) => {
 
           <div className="bg-pepe-black text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border-4 border-pepe-black flex justify-between items-center">
             <span className="font-black uppercase text-xs sm:text-base">{t('buy_modal.you_will_get')}</span>
-            <span className="text-lg sm:text-2xl font-black text-pepe-yellow">{amount ? (amount * 8333).toLocaleString() : '0'} $PWIFE</span>
+            <span className="text-lg sm:text-2xl font-black text-pepe-yellow">{amount ? (amount * TOKENS_PER_USDT).toLocaleString() : '0'} $PWIFE</span>
           </div>
 
           <button 
@@ -909,18 +912,13 @@ const LandingPage = () => {
       document.body.dir = isRTL ? 'rtl' : 'ltr';
     }, [isRTL]);
 
-    const changeLanguage = (lng) => {
-      i18n.changeLanguage(lng);
-      setIsMobileMenuOpen(false);
-    };
-
     const copyAddress = () => {
       navigator.clipboard.writeText('0x1234567890abcdef1234567890abcdef12345678');
     };
 
     return (
       <div className={`min-h-screen bg-white text-pepe-black selection:bg-pepe-pink selection:text-white ${isRTL ? 'rtl' : 'ltr'}`}>
-        <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} changeLanguage={changeLanguage} t={t} currentLng={i18n.language} openModal={setActiveModal} />
+        <Navbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} t={t} openModal={setActiveModal} />
         
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -935,7 +933,7 @@ const LandingPage = () => {
                 <WalletButton t={t} openModal={setActiveModal} />
               </div>
               <div className="flex space-x-4 space-x-reverse">
-                {['en', 'ar', 'fr'].map((lang) => <button key={lang} onClick={() => changeLanguage(lang)} className={`px-4 py-2 rounded-xl font-black uppercase border-2 border-pepe-black ${i18n.language === lang ? 'bg-pepe-pink text-white' : 'bg-white'}`}>{lang}</button>)}
+                <LanguageSwitcher />
               </div>
             </motion.div>
           )}

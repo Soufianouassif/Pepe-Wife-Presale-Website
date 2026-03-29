@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { calculateProfit } from '../utils/calculator';
 import { Calculator, RotateCcw, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { CURRENT_TOKEN_PRICE_USD } from '../presaleConfig';
 
 const ProfitCalculator = ({ t: tProp }) => {
   const { t: i18nT } = useTranslation();
   const t = tProp || i18nT;
   const [inputs, setInputs] = useState({
     amount: '',
-    buyPrice: '0.00012', // Default PWIFE price
+    buyPrice: CURRENT_TOKEN_PRICE_USD.toFixed(8),
     sellPrice: '',
     fees: '0'
   });
@@ -31,7 +32,7 @@ const ProfitCalculator = ({ t: tProp }) => {
   const handleReset = () => {
     setInputs({
       amount: '',
-      buyPrice: '0.00012',
+      buyPrice: CURRENT_TOKEN_PRICE_USD.toFixed(8),
       sellPrice: '',
       fees: '0'
     });

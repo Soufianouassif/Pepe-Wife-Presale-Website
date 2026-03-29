@@ -1,3 +1,5 @@
+import i18n from '../i18n/config';
+
 /**
  * @typedef {Object} WalletErrorOptions
  * @property {string} code
@@ -42,7 +44,7 @@ export const normalizeWalletError = (error, fallbackCode, fallbackUserMessage) =
   if (errorCode === 4001 || errorCode === '4001') {
     return new WalletOperationError(message, {
       code: 'USER_REJECTED',
-      userMessage: 'تم إلغاء العملية من طرف المستخدم.',
+      userMessage: i18n.t('wallet_errors.user_rejected'),
       cause: error,
       retriable: false
     });
@@ -50,16 +52,16 @@ export const normalizeWalletError = (error, fallbackCode, fallbackUserMessage) =
   if (errorCode === -32002 || errorCode === '-32002' || lower.includes('already processing') || lower.includes('already pending')) {
     return new WalletOperationError(message, {
       code: 'REQUEST_PENDING',
-      userMessage: 'يوجد طلب معلّق في المحفظة. أغلق الطلب السابق ثم حاول مرة واحدة.',
+      userMessage: i18n.t('wallet_errors.request_pending'),
       cause: error,
       retriable: false
     });
   }
-  const isRejected = lower.includes('reject') || lower.includes('denied') || lower.includes('cancel');
+  const isRejected = lower.includes('reject') || lower.includes('denied') || lower.includes('cancel') || lower.includes('close') || lower.includes('closed');
   if (isRejected) {
     return new WalletOperationError(message, {
       code: 'USER_REJECTED',
-      userMessage: 'تم إلغاء العملية من طرف المستخدم.',
+      userMessage: i18n.t('wallet_errors.user_rejected'),
       cause: error,
       retriable: false
     });
@@ -90,7 +92,7 @@ export const withRetry = async (operation, options = {}) => {
     } catch (error) {
       const normalized = error instanceof WalletOperationError
         ? error
-        : normalizeWalletError(error, 'WALLET_OPERATION_FAILED', 'فشلت العملية على المحفظة.');
+        : normalizeWalletError(error, 'WALLET_OPERATION_FAILED', i18n.t('wallet_errors.operation_failed'));
       lastError = normalized;
       if (attempt >= retries || !shouldRetry(normalized)) {
         throw normalized;

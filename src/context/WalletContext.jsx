@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext, useRef, useCallb
 import { detectWalletProviders, selectWalletProvider } from '../wallet/detector';
 import { createWalletAdapter, handleWalletAdapterError, isValidEvmAddress, isValidSolAddress } from '../wallet/adapters';
 import { WalletOperationError } from '../wallet/errors';
+import i18n from '../i18n/config';
 
 const WalletContext = createContext();
 const WALLETCONNECT_PROJECT_ID = "90be08cc5b7174d4051d2de451af0d9b";
@@ -40,6 +41,7 @@ const STORAGE_KEYS = {
 
 const SOLANA_WALLET_TYPES = new Set(['Social', 'Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet']);
 const EVM_WALLET_TYPES = new Set(['MetaMask', 'Binance', 'Coinbase', 'WalletConnect']);
+const wt = (key, options) => i18n.t(key, options);
 
 /**
  * Wallet provider that exposes unified wallet operations for UI and business logic.
@@ -84,7 +86,7 @@ export const WalletProvider = ({ children }) => {
     if (!ALLOWED_EVM_CHAIN_IDS.has(normalized)) {
       throw new WalletOperationError('Unsupported EVM chain id.', {
         code: 'CHAIN_NOT_ALLOWED',
-        userMessage: 'الشبكة المطلوبة غير مدعومة في إعدادات الأمان.',
+        userMessage: wt('wallet_errors.chain_not_allowed'),
         retriable: false,
         details: { chainId: normalized }
       });
@@ -98,7 +100,7 @@ export const WalletProvider = ({ children }) => {
     if (!ALLOWED_EVM_CHAIN_IDS.has(normalized)) {
       throw new WalletOperationError('Unsupported requested EVM chain id.', {
         code: 'CHAIN_NOT_ALLOWED',
-        userMessage: 'الشبكة المطلوبة غير مسموحة.',
+        userMessage: wt('wallet_errors.chain_not_allowed'),
         retriable: false,
         details: { chainId: normalized }
       });
@@ -166,7 +168,7 @@ export const WalletProvider = ({ children }) => {
     if (!activeAddress || !activeType || !activeProvider || !activeAdapter) {
       throw new WalletOperationError('Missing wallet session authorization context.', {
         code: 'SESSION_CONTEXT_MISSING',
-        userMessage: 'تعذر تجهيز سياق التحقق من الجلسة.',
+        userMessage: wt('wallet_errors.session_context_missing'),
         retriable: false
       });
     }
@@ -239,7 +241,7 @@ export const WalletProvider = ({ children }) => {
     if (!evmProvider || typeof evmProvider.request !== 'function') {
       throw new WalletOperationError('EVM provider is invalid.', {
         code: 'PROVIDER_INVALID',
-        userMessage: 'مزود الشبكة غير صالح.',
+        userMessage: wt('wallet_errors.provider_invalid'),
         retriable: false
       });
     }
@@ -249,7 +251,7 @@ export const WalletProvider = ({ children }) => {
     if (!autoSwitch) {
       throw new WalletOperationError(`Unexpected chain id: ${current}`, {
         code: 'CHAIN_MISMATCH',
-        userMessage: 'الشبكة الحالية غير صحيحة. يرجى التبديل إلى الشبكة المطلوبة.',
+        userMessage: wt('wallet_errors.chain_mismatch'),
         retriable: false,
         details: { current, requiredChainId }
       });
@@ -274,7 +276,7 @@ export const WalletProvider = ({ children }) => {
     if (afterSwitch !== requiredChainId) {
       throw new WalletOperationError(`Failed to switch to required chain: ${requiredChainId}`, {
         code: 'CHAIN_MISMATCH',
-        userMessage: 'تعذر التبديل إلى الشبكة المطلوبة.',
+        userMessage: wt('wallet_errors.chain_switch_failed'),
         retriable: false,
         details: { afterSwitch, requiredChainId }
       });
@@ -292,7 +294,7 @@ export const WalletProvider = ({ children }) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
-        userMessage: 'الاتصال بالمحفظة متاح فقط داخل المتصفح.',
+        userMessage: wt('wallet_errors.browser_required'),
         retriable: false
       });
     }
@@ -306,7 +308,7 @@ export const WalletProvider = ({ children }) => {
       if (!detected[preferred]) {
         throw new WalletOperationError(`${preferred} provider not found.`, {
           code: 'WALLET_NOT_FOUND',
-          userMessage: `المحفظة ${preferred} غير مثبتة.`,
+          userMessage: wt('wallet_errors.wallet_not_installed', { wallet: preferred }),
           retriable: false
         });
       }
@@ -319,7 +321,7 @@ export const WalletProvider = ({ children }) => {
     if (!adapter) {
       throw new WalletOperationError('Failed to create wallet adapter.', {
         code: 'ADAPTER_NOT_CREATED',
-        userMessage: 'تعذر إنشاء طبقة التوافق للمحفظة.',
+        userMessage: wt('wallet_errors.adapter_not_created'),
         retriable: false
       });
     }
@@ -348,7 +350,7 @@ export const WalletProvider = ({ children }) => {
   const loginWithSocial = useCallback(async () => {
     throw new WalletOperationError('Social login is disabled.', {
       code: 'SOCIAL_DISABLED',
-      userMessage: 'تم تعطيل تسجيل الدخول الاجتماعي مؤقتًا. استخدم المحافظ المتاحة.',
+      userMessage: wt('wallet_errors.social_disabled'),
       retriable: false
     });
   }, []);
@@ -369,7 +371,7 @@ export const WalletProvider = ({ children }) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
-        userMessage: 'الاتصال بالمحفظة متاح فقط داخل المتصفح.',
+        userMessage: wt('wallet_errors.browser_required'),
         retriable: false
       });
     }
@@ -389,7 +391,7 @@ export const WalletProvider = ({ children }) => {
         window.open('https://www.coinbase.com/wallet', '_blank');
         throw new WalletOperationError('Coinbase wallet not found.', {
           code: 'WALLET_NOT_FOUND',
-          userMessage: 'محفظة Coinbase غير مثبتة على المتصفح.',
+          userMessage: wt('wallet_errors.wallet_not_installed', { wallet: 'Coinbase' }),
           retriable: false
         });
       }
@@ -423,7 +425,7 @@ export const WalletProvider = ({ children }) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
-        userMessage: 'الاتصال بالمحفظة متاح فقط داخل المتصفح.',
+        userMessage: wt('wallet_errors.browser_required'),
         retriable: false
       });
     }
@@ -433,7 +435,7 @@ export const WalletProvider = ({ children }) => {
       if (selected.walletType !== 'Phantom') {
         throw new WalletOperationError('Phantom not found for Solana connection.', {
           code: 'WALLET_NOT_FOUND',
-          userMessage: 'محفظة Phantom غير مثبتة.',
+          userMessage: wt('wallet_errors.wallet_not_installed', { wallet: 'Phantom' }),
           retriable: false
         });
       }
@@ -450,7 +452,7 @@ export const WalletProvider = ({ children }) => {
     if (!targetProvider) {
       throw new WalletOperationError(`${walletName} provider not available.`, {
         code: 'WALLET_NOT_FOUND',
-        userMessage: `المحفظة ${walletName} غير متوفرة في المتصفح.`,
+        userMessage: wt('wallet_errors.wallet_provider_unavailable', { wallet: walletName }),
         retriable: false
       });
     }
@@ -478,7 +480,7 @@ export const WalletProvider = ({ children }) => {
     if (typeof window === 'undefined') {
       throw new WalletOperationError('Wallet connection is browser-only.', {
         code: 'BROWSER_REQUIRED',
-        userMessage: 'الاتصال بالمحفظة متاح فقط داخل المتصفح.',
+        userMessage: wt('wallet_errors.browser_required'),
         retriable: false
       });
     }
@@ -506,7 +508,7 @@ export const WalletProvider = ({ children }) => {
       if (!isValidEvmAddress(account)) {
         throw new WalletOperationError('No valid account via WalletConnect.', {
           code: 'ADDRESS_INVALID',
-          userMessage: 'فشل الحصول على عنوان صالح عبر WalletConnect.',
+          userMessage: wt('wallet_errors.walletconnect_invalid_account'),
           retriable: true
         });
       }
@@ -540,7 +542,7 @@ export const WalletProvider = ({ children }) => {
     if (!adapter) {
       throw new WalletOperationError('Wallet adapter is not ready.', {
         code: 'ADAPTER_NOT_READY',
-        userMessage: 'المحفظة غير متصلة بشكل صحيح.',
+        userMessage: wt('wallet_errors.adapter_not_ready'),
         retriable: false
       });
     }
@@ -560,7 +562,7 @@ export const WalletProvider = ({ children }) => {
     if (!adapter) {
       throw new WalletOperationError('Wallet adapter is not ready.', {
         code: 'ADAPTER_NOT_READY',
-        userMessage: 'المحفظة غير متصلة بشكل صحيح.',
+        userMessage: wt('wallet_errors.adapter_not_ready'),
         retriable: false
       });
     }

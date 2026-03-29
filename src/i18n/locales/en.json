@@ -42,7 +42,9 @@
   "buybox": {
     "title": "Presale is LIVE!",
     "desc": "Secure your $PWIFE tokens at the lowest price",
+    "phase_badge": "Phase {{current}} / {{total}}",
     "current_price": "Current Price",
+    "price_line": "1 $PWIFE = {{price}} USDT",
     "input_placeholder": "Enter USDT Amount",
     "buy_now": "Buy $PWIFE Now",
     "how_to_buy": "How to Buy",
@@ -243,7 +245,8 @@
       "total_liquidity": "Total Liquidity",
       "holders": "Holders",
       "pairs": "SOL / USDT",
-      "roi": "ROI"
+      "roi": "ROI",
+      "phase_status": "Active Phase {{current}} of {{total}}"
     },
     "buy": {
       "title": "Buy Token",
@@ -252,6 +255,7 @@
       "token_amount": "Requested Token Amount (PWIFE)",
       "token_amount_placeholder": "0",
       "total_cost": "Total Cost",
+      "phase_supply": "Phase Supply: {{supply}} PWIFE",
       "security_title": "Validation & Security",
       "security_1": "Wallet address is validated by wallet network type before submit.",
       "security_2": "Wallet signature is required before submitting buy intent.",
@@ -284,7 +288,7 @@
     "closed_hint": "Click the door to reveal the buy box"
   },
   "buy_modal": {
-    "phase_live": "Phase 1 is Live!",
+    "phase_live": "Phase {{current}} of {{total}} is Live!",
     "pay_sol": "Pay with SOL",
     "pay_usdt": "Pay with USDT",
     "you_will_get": "You will get:",
@@ -345,7 +349,7 @@
     "balance": "Balance: 0.00",
     "amount_placeholder": "0.00",
     "you_receive": "You Receive",
-    "price": "Price: $0.00012",
+    "price": "Price: $0.00000005",
     "exchange_rate": "Exchange Rate",
     "network_fee": "Network Fee",
     "processing": "Processing...",
@@ -360,6 +364,33 @@
       "eth_name": "Ethereum",
       "bnb_name": "BNB"
     }
+  },
+  "wallet_errors": {
+    "user_rejected": "Operation was cancelled by user.",
+    "request_pending": "There is a pending request in your wallet. Close it and try again once.",
+    "operation_failed": "Wallet operation failed.",
+    "config_invalid": "Wallet configuration is invalid.",
+    "wallet_type_unsupported": "Wallet type is not supported.",
+    "chain_mismatch": "Current network is incorrect. Please switch to the required network.",
+    "invalid_address": "Wallet address is invalid.",
+    "sign_message_invalid": "Signing message is invalid.",
+    "transaction_invalid": "Transaction payload is invalid.",
+    "sender_mismatch": "Sender address does not match the connected wallet.",
+    "sign_unsupported": "This wallet does not support message signing.",
+    "transaction_unsupported": "This wallet does not support sending transactions.",
+    "adapter_operation_failed": "Wallet operation failed: {{operation}}.",
+    "chain_not_allowed": "Requested network is not allowed by security policy.",
+    "session_context_missing": "Unable to prepare wallet session verification context.",
+    "provider_invalid": "Network provider is invalid.",
+    "chain_switch_failed": "Failed to switch to the required network.",
+    "browser_required": "Wallet connection is available only in a browser.",
+    "wallet_not_installed": "{{wallet}} wallet is not installed.",
+    "no_supported_wallet": "No supported wallet was found in this browser.",
+    "adapter_not_created": "Failed to create wallet adapter.",
+    "social_disabled": "Social login is temporarily disabled. Use available wallets.",
+    "wallet_provider_unavailable": "{{wallet}} wallet provider is unavailable in this browser.",
+    "walletconnect_invalid_account": "Failed to get a valid account via WalletConnect.",
+    "adapter_not_ready": "Wallet is not connected correctly."
   },
   "admin": {
     "hub_title": "Admin Hub",

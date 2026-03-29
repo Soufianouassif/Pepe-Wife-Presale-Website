@@ -222,6 +222,47 @@ html[lang="ar"] {
 }
 
 /* RTL Adjustments for Arabic */
+html[dir="rtl"],
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] #root,
+[dir="rtl"] main,
+[dir="rtl"] section,
+[dir="rtl"] article,
+[dir="rtl"] nav,
+[dir="rtl"] header,
+[dir="rtl"] footer,
+[dir="rtl"] aside,
+[dir="rtl"] div,
+[dir="rtl"] p,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5,
+[dir="rtl"] h6,
+[dir="rtl"] span,
+[dir="rtl"] label,
+[dir="rtl"] li,
+[dir="rtl"] a,
+[dir="rtl"] button,
+[dir="rtl"] input,
+[dir="rtl"] textarea {
+  direction: inherit;
+  text-align: inherit;
+}
+
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .rtl-space-reverse {
+  flex-direction: row-reverse;
+}
+
 [dir="rtl"] .animate-marquee {
   animation: marquee-rtl 60s linear infinite;
 }
