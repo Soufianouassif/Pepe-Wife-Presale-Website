@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShieldCheck, Users, TrendingUp, Wallet, 
@@ -14,18 +14,18 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const stats = [
-    { label: 'Total Raised', value: '4,250 SOL', icon: <TrendingUp className="text-pepe-green" />, trend: '+12.5%' },
-    { label: 'Total Participants', value: '1,842', icon: <Users className="text-pepe-yellow" />, trend: '+48 today' },
-    { label: 'Token Supply Sold', value: '45.2%', icon: <Activity className="text-pepe-pink" />, trend: 'Phase 1' },
-    { label: 'Vault Balance', value: '1,120 SOL', icon: <Wallet className="text-blue-400" />, trend: 'Secured' },
+    { label: t('admin.stats.total_raised'), value: '4,250 SOL', icon: <TrendingUp className="text-pepe-green" />, trend: '+12.5%' },
+    { label: t('admin.stats.total_participants'), value: '1,842', icon: <Users className="text-pepe-yellow" />, trend: t('admin.stats.trend_today') },
+    { label: t('admin.stats.token_supply_sold'), value: '45.2%', icon: <Activity className="text-pepe-pink" />, trend: t('admin.stats.trend_phase_1') },
+    { label: t('admin.stats.vault_balance'), value: '1,120 SOL', icon: <Wallet className="text-blue-400" />, trend: t('admin.stats.trend_secured') },
   ];
 
   const sidebarItems = [
-    { id: 'overview', label: 'Dashboard', icon: <BarChart3 size={20} /> },
-    { id: 'presale', label: 'Presale Settings', icon: <Settings size={20} /> },
-    { id: 'whitelist', label: 'Whitelist Management', icon: <Users size={20} /> },
-    { id: 'security', label: 'Security & Access', icon: <Lock size={20} /> },
-    { id: 'logs', label: 'System Logs', icon: <Database size={20} /> },
+    { id: 'overview', label: t('admin.sidebar.dashboard'), icon: <BarChart3 size={20} /> },
+    { id: 'presale', label: t('admin.sidebar.presale_settings'), icon: <Settings size={20} /> },
+    { id: 'whitelist', label: t('admin.sidebar.whitelist_management'), icon: <Users size={20} /> },
+    { id: 'security', label: t('admin.sidebar.security_access'), icon: <Lock size={20} /> },
+    { id: 'logs', label: t('admin.sidebar.system_logs'), icon: <Database size={20} /> },
   ];
 
   return (
@@ -36,7 +36,7 @@ const AdminPage = () => {
           <div className="w-10 h-10 bg-pepe-yellow rounded-xl flex items-center justify-center border-2 border-white shadow-[4px_4px_0_0_#FF69B4]">
             <ShieldCheck size={24} className="text-pepe-black" strokeWidth={3} />
           </div>
-          <span className="text-xl font-black uppercase italic tracking-tighter">Admin Hub</span>
+          <span className="text-xl font-black uppercase italic tracking-tighter">{t('admin.hub_title')}</span>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -60,10 +60,10 @@ const AdminPage = () => {
         <div className="bg-white/5 p-6 rounded-3xl border-2 border-white/10 space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-pepe-green rounded-full animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Node Status: Online</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.node_status_online')}</span>
           </div>
           <button className="w-full bg-red-500/20 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
-            Emergency Stop
+            {t('admin.emergency_stop')}
           </button>
         </div>
       </aside>
@@ -72,8 +72,8 @@ const AdminPage = () => {
       <main className="flex-1 p-10 overflow-y-auto custom-scrollbar">
         <header className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="text-4xl font-black uppercase italic text-pepe-black">Presale Management</h2>
-            <p className="text-gray-400 font-bold">Control center for Pepe Wife decentralized protocol</p>
+            <h2 className="text-4xl font-black uppercase italic text-pepe-black">{t('admin.header.presale_management')}</h2>
+            <p className="text-gray-400 font-bold">{t('admin.header.control_center')}</p>
           </div>
           <div className="flex gap-4">
             <button className="p-4 bg-white border-4 border-pepe-black rounded-2xl shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all">
@@ -81,7 +81,7 @@ const AdminPage = () => {
             </button>
             <button className="flex items-center gap-3 bg-pepe-black text-white px-8 py-4 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#FF69B4] hover:translate-y-1 transition-all">
               <Save size={20} />
-              Publish Changes
+              {t('admin.publish_changes')}
             </button>
           </div>
         </header>
@@ -116,25 +116,25 @@ const AdminPage = () => {
           {/* Phase Management */}
           <div className="lg:col-span-2 bg-white border-4 border-pepe-black rounded-[3.5rem] p-10 shadow-[15px_15px_0_0_#000] space-y-10">
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black uppercase italic">Active Phase: Seed Round</h3>
-              <span className="bg-pepe-green text-pepe-black px-6 py-2 rounded-full font-black uppercase text-xs">Running</span>
+              <h3 className="text-2xl font-black uppercase italic">{t('admin.phase.active_seed_round')}</h3>
+              <span className="bg-pepe-green text-pepe-black px-6 py-2 rounded-full font-black uppercase text-xs">{t('admin.phase.running')}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
-                <label className="text-xs font-black uppercase text-gray-400 ml-2">Token Price (SOL)</label>
+                <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.token_price_sol')}</label>
                 <input type="number" defaultValue="0.00012" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20" />
               </div>
               <div className="space-y-4">
-                <label className="text-xs font-black uppercase text-gray-400 ml-2">Hard Cap (SOL)</label>
+                <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.hard_cap_sol')}</label>
                 <input type="number" defaultValue="10000" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20" />
               </div>
               <div className="space-y-4">
-                <label className="text-xs font-black uppercase text-gray-400 ml-2">Start Date</label>
+                <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.start_date')}</label>
                 <input type="date" defaultValue="2026-03-20" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none" />
               </div>
               <div className="space-y-4">
-                <label className="text-xs font-black uppercase text-gray-400 ml-2">End Date</label>
+                <label className="text-xs font-black uppercase text-gray-400 ml-2">{t('admin.phase.end_date')}</label>
                 <input type="date" defaultValue="2026-04-20" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none" />
               </div>
             </div>
@@ -145,12 +145,12 @@ const AdminPage = () => {
                   <Unlock size={32} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="text-xl font-black uppercase italic">Vesting Control</h4>
-                  <p className="text-sm font-bold text-gray-500 leading-none">Manage token release schedule</p>
+                  <h4 className="text-xl font-black uppercase italic">{t('admin.vesting.title')}</h4>
+                  <p className="text-sm font-bold text-gray-500 leading-none">{t('admin.vesting.desc')}</p>
                 </div>
               </div>
               <button className="bg-pepe-black text-white px-8 py-4 rounded-2xl font-black uppercase italic text-sm shadow-[4px_4px_0_0_#FF69B4]">
-                Configure Vesting
+                {t('admin.vesting.configure')}
               </button>
             </div>
           </div>
@@ -158,12 +158,12 @@ const AdminPage = () => {
           {/* Quick Actions / Security */}
           <div className="space-y-10">
             <div className="bg-pepe-black text-white p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#FF69B4] space-y-8">
-              <h3 className="text-2xl font-black uppercase italic text-pepe-yellow">Security Checks</h3>
+              <h3 className="text-2xl font-black uppercase italic text-pepe-yellow">{t('admin.security_checks.title')}</h3>
               <div className="space-y-4">
                 {[
-                  { label: 'Multisig Check', status: 'Passed' },
-                  { label: 'Contract Audit', status: 'Verified' },
-                  { label: 'Liquidity Lock', status: 'Active' },
+                  { label: t('admin.security_checks.multisig_check'), status: t('admin.security_checks.passed') },
+                  { label: t('admin.security_checks.contract_audit'), status: t('admin.security_checks.verified') },
+                  { label: t('admin.security_checks.liquidity_lock'), status: t('admin.security_checks.active') },
                 ].map((check, i) => (
                   <div key={i} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border-2 border-white/10">
                     <span className="font-black uppercase text-xs text-gray-400">{check.label}</span>
@@ -172,24 +172,24 @@ const AdminPage = () => {
                 ))}
               </div>
               <button className="w-full bg-white text-pepe-black border-4 border-pepe-black py-4 rounded-2xl font-black uppercase italic shadow-[6px_6px_0_0_#000]">
-                Run Security Audit
+                {t('admin.security_checks.run_audit')}
               </button>
             </div>
 
             <div className="bg-pepe-yellow p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#000] space-y-6">
               <div className="flex items-center gap-4">
                 <AlertTriangle className="text-red-500" size={32} />
-                <h3 className="text-2xl font-black uppercase italic leading-none text-pepe-black">Risk Control</h3>
+                <h3 className="text-2xl font-black uppercase italic leading-none text-pepe-black">{t('admin.risk_control.title')}</h3>
               </div>
               <p className="text-xs font-bold text-pepe-black/60 leading-relaxed">
-                Emergency functions to protect investors in case of protocol anomalies.
+                {t('admin.risk_control.desc')}
               </p>
               <div className="space-y-3">
                 <button className="w-full bg-pepe-black text-white py-4 rounded-2xl font-black uppercase italic text-xs shadow-[4px_4px_0_0_#fff]">
-                  Pause Presale
+                  {t('admin.risk_control.pause_presale')}
                 </button>
                 <button className="w-full bg-white border-4 border-pepe-black py-4 rounded-2xl font-black uppercase italic text-xs shadow-[4px_4px_0_0_#000]">
-                  Withdraw to Multisig
+                  {t('admin.risk_control.withdraw_multisig')}
                 </button>
               </div>
             </div>

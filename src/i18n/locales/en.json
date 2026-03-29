@@ -58,6 +58,15 @@
     "category_team": "Team",
     "category_marketing": "Marketing",
     "table_header_category": "Category",
+    "table_header_percentage": "Percentage",
+    "table_header_amount": "Amount",
+    "details_button": "Detailed Tokenomics",
+    "desc_detailed": "Pepe Wife features a sustainable economic model designed for long-term growth and community rewards. Our zero-tax policy ensures maximum efficiency for traders.",
+    "total_supply_label": "Total Supply",
+    "total_supply_value": "1 BILLION",
+    "zero_tax_value": "0% BUY / 0% SELL",
+    "active": "Active",
+    "total_supply": "Total Supply: 1,000,000,000 $PWIFE",
     "zero_tax": "Zero Tax",
     "liquidity_lock": "Liquidity Locked",
     "team_lock": "Team Share Locked",
@@ -138,7 +147,18 @@
     "community_title": "Community",
     "legal_title": "Legal",
     "rights": "© 2026 PEPE WIFE PROJECT. ALL RIGHTS RESERVED.",
-    "built_with": "BUILT WITH LOVE FOR THE CRYPTO QUEEN."
+    "built_with": "BUILT WITH LOVE FOR THE CRYPTO QUEEN.",
+    "community_links": {
+      "x": "Twitter (X)",
+      "telegram": "Telegram",
+      "instagram": "Instagram",
+      "discord": "Discord"
+    },
+    "legal_links": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "risk": "Risk"
+    }
   },
   "ticker": {
     "m1": "JOIN THE $PWIFE REVOLUTION NOW!",
@@ -166,9 +186,12 @@
   },
   "calculator": {
     "title": "Profit Calculator",
+    "subtitle": "Calculate your moon potential",
     "input_amount": "Investment (USDT)",
+    "amount_placeholder": "0.00",
     "buy_price": "Buy Price ($)",
     "sell_price": "Target Sell Price ($)",
+    "sell_placeholder": "0.001",
     "trading_fees": "Trading Fees (%)",
     "calculate": "Calculate Results",
     "reset": "Reset",
@@ -184,5 +207,213 @@
   "view_mode": {
     "switch_to_desktop": "Desktop Version",
     "switch_to_mobile": "Mobile Version"
+  },
+  "dashboard_pro": {
+    "sidebar": {
+      "overview": "Overview",
+      "buy": "Buy Token",
+      "referral": "Referral",
+      "claim": "Claim",
+      "staking": "Staking",
+      "support": "Support",
+      "wallet": "Wallet"
+    },
+    "logout": "Logout",
+    "soon": "Coming Soon",
+    "soon_desc": "This section is disabled for now and will be launched in a future update.",
+    "notifications": {
+      "invalid_amount": "Enter a valid token amount before buying.",
+      "require_solana": "To pay with SOL, connect a Solana wallet like Phantom.",
+      "require_evm": "To pay with USDT, connect an EVM wallet like MetaMask.",
+      "signature_failed": "Signature verification failed.",
+      "buy_success": "Buy request was confirmed successfully.",
+      "buy_failed": "Failed to process buy request."
+    },
+    "overview": {
+      "total_supply": "Total Supply",
+      "presale_available": "Presale Available",
+      "token_price": "Token Price",
+      "roi_calculator": "ROI Calculator",
+      "investment_placeholder": "Investment (USDT)",
+      "target_placeholder": "Target Price",
+      "invalid_roi": "Enter valid values for ROI calculation.",
+      "profit": "Profit",
+      "stats_title": "General Statistics",
+      "market_cap": "Market Cap",
+      "total_liquidity": "Total Liquidity",
+      "holders": "Holders",
+      "pairs": "SOL / USDT",
+      "roi": "ROI"
+    },
+    "buy": {
+      "title": "Buy Token",
+      "current_price": "Current Token Price",
+      "payment_currency": "Payment Currency",
+      "token_amount": "Requested Token Amount (PWIFE)",
+      "token_amount_placeholder": "0",
+      "total_cost": "Total Cost",
+      "security_title": "Validation & Security",
+      "security_1": "Wallet address is validated by wallet network type before submit.",
+      "security_2": "Wallet signature is required before submitting buy intent.",
+      "security_3": "Disabled sections remain clearly inactive until future activation.",
+      "processing": "Processing transaction...",
+      "confirm": "Confirm Purchase"
+    },
+    "support": {
+      "title": "Support",
+      "desc": "Open a direct support chat or create a support ticket.",
+      "open": "Open Support"
+    },
+    "wallet": {
+      "title": "Wallet",
+      "connected_address": "Connected Address",
+      "copy": "Copy Address",
+      "copied": "Copied",
+      "explorer": "Explorer",
+      "sol_balance": "SOL Balance",
+      "usdt_balance": "USDT Balance (Ethereum)"
+    }
+  },
+  "brand": {
+    "name": "Pepe Wife",
+    "symbol": "$PWIFE"
+  },
+  "home_buy_house": {
+    "open_door": "Click to open the door",
+    "opened_hint": "Door is open — buy box is now visible",
+    "closed_hint": "Click the door to reveal the buy box"
+  },
+  "buy_modal": {
+    "phase_live": "Phase 1 is Live!",
+    "pay_sol": "Pay with SOL",
+    "pay_usdt": "Pay with USDT",
+    "you_will_get": "You will get:",
+    "processing": "Processing...",
+    "secure_tx": "Secure Transaction by Smart Contract",
+    "success": "Transaction successful! Your $PWIFE tokens will be sent shortly.",
+    "errors": {
+      "invalid_network_config": "Network configuration is invalid.",
+      "invalid_amount": "Please enter a valid amount",
+      "require_evm": "Please connect an EVM wallet to pay with USDT on Ethereum.",
+      "require_solana": "Please connect a Solana wallet to pay with SOL.",
+      "user_cancelled": "Transaction cancelled by user.",
+      "failed": "Transaction failed. Please ensure you have enough balance and try again."
+    }
+  },
+  "loading_page": {
+    "keep_open": "Please do not close this window",
+    "almost_there": "Almost there, get ready for $PWIFE!",
+    "steps": {
+      "initializing": "Initializing secure connection...",
+      "encrypting": "Encrypting wallet data...",
+      "verifying": "Verifying permissions...",
+      "success": "Connection successful!"
+    }
+  },
+  "connect_page": {
+    "secure_badge": "Secure Login",
+    "title_line1": "Connect",
+    "title_line2": "Your Wallet",
+    "subtitle": "Choose your preferred wallet to access your dashboard securely.",
+    "popular_wallets": "Popular Wallets",
+    "recommended": "Recommended",
+    "establishing": "Establishing secure connection...",
+    "verified": "Verified Wallet Flow",
+    "footer": "wallet authentication powered by secure providers",
+    "features": {
+      "security_title": "Security",
+      "security_desc": "Connection requests are verified before session approval.",
+      "multichain_title": "Multi-chain",
+      "multichain_desc": "Supports Solana and EVM wallets in one flow.",
+      "selfcustody_title": "Self-custody",
+      "selfcustody_desc": "You stay in control of your private keys."
+    },
+    "errors": {
+      "connection_failed": "Connection failed",
+      "binance_missing": "Binance wallet provider is not available on this device."
+    }
+  },
+  "error_boundary": {
+    "title": "CRITICAL ERROR CAUGHT",
+    "unknown_error": "Unknown error",
+    "something_wrong": "Something went wrong.",
+    "reload": "Reload Page"
+  },
+  "buybox_widget": {
+    "title": "Presale Buy Box",
+    "you_pay": "You Pay",
+    "balance": "Balance: 0.00",
+    "amount_placeholder": "0.00",
+    "you_receive": "You Receive",
+    "price": "Price: $0.00012",
+    "exchange_rate": "Exchange Rate",
+    "network_fee": "Network Fee",
+    "processing": "Processing...",
+    "success": "Success!",
+    "failed": "Failed",
+    "buy_now": "Buy $PWIFE",
+    "secured": "Secured by Smart Contract",
+    "select_token": "Select Token",
+    "tokens": {
+      "sol_name": "Solana",
+      "usdt_name": "Tether",
+      "eth_name": "Ethereum",
+      "bnb_name": "BNB"
+    }
+  },
+  "admin": {
+    "hub_title": "Admin Hub",
+    "node_status_online": "Node Status: Online",
+    "emergency_stop": "Emergency Stop",
+    "publish_changes": "Publish Changes",
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "presale_settings": "Presale Settings",
+      "whitelist_management": "Whitelist Management",
+      "security_access": "Security & Access",
+      "system_logs": "System Logs"
+    },
+    "header": {
+      "presale_management": "Presale Management",
+      "control_center": "Control center for Pepe Wife decentralized protocol"
+    },
+    "stats": {
+      "total_raised": "Total Raised",
+      "total_participants": "Total Participants",
+      "token_supply_sold": "Token Supply Sold",
+      "vault_balance": "Vault Balance",
+      "trend_today": "+48 today",
+      "trend_phase_1": "Phase 1",
+      "trend_secured": "Secured"
+    },
+    "phase": {
+      "active_seed_round": "Active Phase: Seed Round",
+      "running": "Running",
+      "token_price_sol": "Token Price (SOL)",
+      "hard_cap_sol": "Hard Cap (SOL)",
+      "start_date": "Start Date",
+      "end_date": "End Date"
+    },
+    "vesting": {
+      "title": "Vesting Control",
+      "desc": "Manage token release schedule",
+      "configure": "Configure Vesting"
+    },
+    "security_checks": {
+      "title": "Security Checks",
+      "multisig_check": "Multisig Check",
+      "contract_audit": "Contract Audit",
+      "liquidity_lock": "Liquidity Lock",
+      "passed": "Passed",
+      "verified": "Verified",
+      "active": "Active",
+      "run_audit": "Run Security Audit"
+    },
+    "risk_control": {
+      "title": "Risk Control",
+      "desc": "Emergency functions to protect investors in case of protocol anomalies.",
+      "pause_presale": "Pause Presale",
+      "withdraw_multisig": "Withdraw to Multisig"
+    }
   }
 }

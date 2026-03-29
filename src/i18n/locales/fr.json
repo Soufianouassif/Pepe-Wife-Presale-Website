@@ -58,6 +58,15 @@
     "category_team": "Équipe",
     "category_marketing": "Marketing",
     "table_header_category": "Catégorie",
+    "table_header_percentage": "Pourcentage",
+    "table_header_amount": "Montant",
+    "details_button": "Tokenomics détaillé",
+    "desc_detailed": "Pepe Wife propose un modèle économique durable conçu pour la croissance à long terme et les récompenses de la communauté. Notre politique zéro taxe garantit une efficacité maximale pour les traders.",
+    "total_supply_label": "Offre Totale",
+    "total_supply_value": "1 MILLIARD",
+    "zero_tax_value": "0% ACHAT / 0% VENTE",
+    "active": "Actif",
+    "total_supply": "Offre Totale : 1,000,000,000 $PWIFE",
     "zero_tax": "Zéro Taxe",
     "liquidity_lock": "Liquidité Verrouillée",
     "team_lock": "Part Équipe Verrouillée",
@@ -138,7 +147,18 @@
     "community_title": "Communauté",
     "legal_title": "Juridique",
     "rights": "© 2026 PROJET PEPE WIFE. TOUS DROITS RÉSERVÉS.",
-    "built_with": "CONSTRUIT AVEC AMOUR POUR LA REINE DU CRYPTO."
+    "built_with": "CONSTRUIT AVEC AMOUR POUR LA REINE DU CRYPTO.",
+    "community_links": {
+      "x": "Twitter (X)",
+      "telegram": "Telegram",
+      "instagram": "Instagram",
+      "discord": "Discord"
+    },
+    "legal_links": {
+      "terms": "Conditions",
+      "privacy": "Confidentialité",
+      "risk": "Risques"
+    }
   },
   "ticker": {
     "m1": "REJOIGNEZ LA RÉVOLUTION $PWIFE MAINTENANT !",
@@ -166,9 +186,12 @@
   },
   "calculator": {
     "title": "Calculateur de Profit",
+    "subtitle": "Calculez votre potentiel lunaire",
     "input_amount": "Investissement (USDT)",
+    "amount_placeholder": "0.00",
     "buy_price": "Prix d'Achat ($)",
     "sell_price": "Prix de Vente Cible ($)",
+    "sell_placeholder": "0.001",
     "trading_fees": "Frais de Transaction (%)",
     "calculate": "Calculer les Résultats",
     "reset": "Réinitialiser",
@@ -184,5 +207,152 @@
   "view_mode": {
     "switch_to_desktop": "Version Bureau",
     "switch_to_mobile": "Version Mobile"
+  },
+  "dashboard_pro": {
+    "overview": {
+      "roi": "ROI"
+    }
+  },
+  "brand": {
+    "name": "Pepe Wife",
+    "symbol": "$PWIFE"
+  },
+  "home_buy_house": {
+    "open_door": "Cliquez pour ouvrir la porte",
+    "opened_hint": "La porte est ouverte — la boîte d'achat est visible",
+    "closed_hint": "Cliquez sur la porte pour afficher la boîte d'achat"
+  },
+  "buy_modal": {
+    "phase_live": "La Phase 1 est en direct !",
+    "pay_sol": "Payer en SOL",
+    "pay_usdt": "Payer en USDT",
+    "you_will_get": "Vous recevrez :",
+    "processing": "Traitement...",
+    "secure_tx": "Transaction sécurisée par smart contract",
+    "success": "Transaction réussie ! Vos jetons $PWIFE seront envoyés sous peu.",
+    "errors": {
+      "invalid_network_config": "La configuration réseau est invalide.",
+      "invalid_amount": "Veuillez entrer un montant valide",
+      "require_evm": "Veuillez connecter un wallet EVM pour payer en USDT sur Ethereum.",
+      "require_solana": "Veuillez connecter un wallet Solana pour payer en SOL.",
+      "user_cancelled": "Transaction annulée par l'utilisateur.",
+      "failed": "Échec de la transaction. Vérifiez votre solde et réessayez."
+    }
+  },
+  "loading_page": {
+    "keep_open": "Veuillez ne pas fermer cette fenêtre",
+    "almost_there": "Presque prêt, préparez-vous pour $PWIFE !",
+    "steps": {
+      "initializing": "Initialisation de la connexion sécurisée...",
+      "encrypting": "Chiffrement des données du wallet...",
+      "verifying": "Vérification des autorisations...",
+      "success": "Connexion réussie !"
+    }
+  },
+  "connect_page": {
+    "secure_badge": "Connexion sécurisée",
+    "title_line1": "Connectez",
+    "title_line2": "votre wallet",
+    "subtitle": "Choisissez votre wallet préféré pour accéder au tableau de bord en toute sécurité.",
+    "popular_wallets": "Wallets populaires",
+    "recommended": "Recommandé",
+    "establishing": "Établissement d'une connexion sécurisée...",
+    "verified": "Flux wallet vérifié",
+    "footer": "authentification wallet propulsée par des fournisseurs sécurisés",
+    "features": {
+      "security_title": "Sécurité",
+      "security_desc": "Les demandes de connexion sont vérifiées avant validation de session.",
+      "multichain_title": "Multi-chaînes",
+      "multichain_desc": "Prend en charge les wallets Solana et EVM dans un flux unique.",
+      "selfcustody_title": "Auto-conservation",
+      "selfcustody_desc": "Vous gardez le contrôle total de vos clés privées."
+    },
+    "errors": {
+      "connection_failed": "Échec de connexion",
+      "binance_missing": "Le fournisseur Binance Wallet n'est pas disponible sur cet appareil."
+    }
+  },
+  "error_boundary": {
+    "title": "ERREUR CRITIQUE DÉTECTÉE",
+    "unknown_error": "Erreur inconnue",
+    "something_wrong": "Une erreur est survenue.",
+    "reload": "Recharger la page"
+  },
+  "buybox_widget": {
+    "title": "Boîte d'achat prévente",
+    "you_pay": "Vous payez",
+    "balance": "Solde : 0.00",
+    "amount_placeholder": "0.00",
+    "you_receive": "Vous recevez",
+    "price": "Prix : $0.00012",
+    "exchange_rate": "Taux de change",
+    "network_fee": "Frais réseau",
+    "processing": "Traitement...",
+    "success": "Succès !",
+    "failed": "Échec",
+    "buy_now": "Acheter $PWIFE",
+    "secured": "Sécurisé par smart contract",
+    "select_token": "Sélectionner un token",
+    "tokens": {
+      "sol_name": "Solana",
+      "usdt_name": "Tether",
+      "eth_name": "Ethereum",
+      "bnb_name": "BNB"
+    }
+  },
+  "admin": {
+    "hub_title": "Centre Admin",
+    "node_status_online": "Statut nœud : En ligne",
+    "emergency_stop": "Arrêt d'urgence",
+    "publish_changes": "Publier les changements",
+    "sidebar": {
+      "dashboard": "Tableau de bord",
+      "presale_settings": "Paramètres prévente",
+      "whitelist_management": "Gestion whitelist",
+      "security_access": "Sécurité & accès",
+      "system_logs": "Journaux système"
+    },
+    "header": {
+      "presale_management": "Gestion de la prévente",
+      "control_center": "Centre de contrôle du protocole décentralisé Pepe Wife"
+    },
+    "stats": {
+      "total_raised": "Total levé",
+      "total_participants": "Total participants",
+      "token_supply_sold": "Offre vendue",
+      "vault_balance": "Solde du coffre",
+      "trend_today": "+48 aujourd'hui",
+      "trend_phase_1": "Phase 1",
+      "trend_secured": "Sécurisé"
+    },
+    "phase": {
+      "active_seed_round": "Phase active : Seed Round",
+      "running": "En cours",
+      "token_price_sol": "Prix token (SOL)",
+      "hard_cap_sol": "Hard Cap (SOL)",
+      "start_date": "Date de début",
+      "end_date": "Date de fin"
+    },
+    "vesting": {
+      "title": "Contrôle vesting",
+      "desc": "Gérer le calendrier de libération des tokens",
+      "configure": "Configurer le vesting"
+    },
+    "security_checks": {
+      "title": "Contrôles de sécurité",
+      "multisig_check": "Vérification multisig",
+      "contract_audit": "Audit du contrat",
+      "liquidity_lock": "Verrouillage de liquidité",
+      "passed": "Validé",
+      "verified": "Vérifié",
+      "active": "Actif",
+      "run_audit": "Lancer l'audit de sécurité"
+    },
+    "risk_control": {
+      "title": "Contrôle des risques",
+      "desc": "Fonctions d'urgence pour protéger les investisseurs en cas d'anomalies du protocole.",
+      "pause_presale": "Mettre la prévente en pause",
+      "withdraw_multisig": "Retirer vers multisig"
+    }
   }
 }

@@ -92,3 +92,8 @@ npx lighthouse http://127.0.0.1:4173 --only-categories=performance --chrome-flag
 - React DevTools:
   - verify `WalletProvider` updates only on real wallet/session changes.
   - verify no repeated mounts/unmounts in connect/disconnect loops.
+
+## Dashboard Integration Docs
+
+- Smart contract integration guide for dashboard buy flow:
+  - `docs/dashboard-contract-integration.md`

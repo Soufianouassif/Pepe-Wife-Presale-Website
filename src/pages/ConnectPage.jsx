@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
-  AlertCircle, X, Zap, Mail
+  AlertCircle, X
 } from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
@@ -78,13 +78,12 @@ const BackgroundDecor = React.memo(() => (
 
 const ConnectPage = () => {
   const { t, i18n } = useTranslation();
-  const { loginWithSocial, connectEVMWallet, connectSolanaWallet, connectWalletConnect, isInitializing } = useWallet();
+  const { connectEVMWallet, connectSolanaWallet, connectWalletConnect } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
+  const brandParts = t('brand.name').split(' ');
   const [status, setStatus] = useState('idle'); 
   const [error, setError] = useState(null);
-  const [showEmailOtpDialog, setShowEmailOtpDialog] = useState(false);
-  const [emailOtpInput, setEmailOtpInput] = useState('');
 
 
   const walletOptions = useMemo(() => [
@@ -94,13 +93,6 @@ const ConnectPage = () => {
     { id: 'Binance', name: 'Binance', icon: <Icons.Binance />, color: 'bg-[#F3BA2F]/10', borderColor: 'border-[#F3BA2F]' },
     { id: 'Trust Wallet', name: 'Trust Wallet', icon: <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust" className="w-full h-full object-contain" />, color: 'bg-[#3375BB]/10', borderColor: 'border-[#3375BB]' },
     { id: 'WalletConnect', name: 'WalletConnect', isWC: true, color: 'bg-[#3396FF]/10', borderColor: 'border-[#3396FF]' },
-  ], []);
-
-  const socialOptions = useMemo(() => [
-    { id: 'google', name: 'Google', icon: <Icons.Google />, color: 'bg-white', borderColor: 'border-gray-200' },
-    { id: 'twitter', name: 'X (Twitter)', icon: <Icons.X />, color: 'bg-black', borderColor: 'border-black' },
-    { id: 'telegram', name: 'Telegram', icon: <Globe className="text-[#229ED9]" />, color: 'bg-[#229ED9]/10', borderColor: 'border-[#229ED9]' },
-    { id: 'email_passwordless', name: 'Email OTP', icon: <Mail className="text-pepe-pink" />, color: 'bg-pepe-pink/5', borderColor: 'border-pepe-pink' },
   ], []);
 
   const handleWalletConnect = useCallback(async (walletId) => {
@@ -133,78 +125,18 @@ const ConnectPage = () => {
       console.error(`ConnectPage: ${walletId} error:`, err);
       setStatus('idle');
       
-      const errMsg = err?.userMessage || err?.message || 'Connection failed';
+      const errMsg = err?.userMessage || err?.message || t('connect_page.errors.connection_failed');
       if (walletId === 'Binance' && (errMsg.includes('not found') || errMsg.includes('provider'))) {
-        setError(i18n.language === 'ar' ? 'يرجى تثبيت إضافة بايننس أو استخدام QR Code.' : 'Please install Binance extension or use QR Code.');
+        setError(t('connect_page.errors.binance_missing'));
       } else {
         setError(errMsg);
       }
     }
-  }, [connectEVMWallet, connectSolanaWallet, connectWalletConnect, navigate, i18n.language]);
-
-  const handleSocialConnect = useCallback(async (loginProvider, extraOptions = {}) => {
-    if (isInitializing) {
-      console.warn("ConnectPage: System still initializing...");
-      return;
-    }
-
-    setStatus('connecting');
-    setError(null);
-    try {
-      console.log(`ConnectPage: Initiating ${loginProvider} login...`, extraOptions);
-      const addr = await loginWithSocial(loginProvider, extraOptions);
-
-      console.log(`ConnectPage: loginWithSocial returned: '${addr}'`);
-
-      if (addr) {
-        console.log("ConnectPage: Login successful, navigating to dashboard...");
-        navigate('/loading', { replace: true, state: { fromConnect: true, walletId: loginProvider } });
-      } else {
-        console.warn("ConnectPage: loginWithSocial returned a null or empty value. This might be due to user cancellation. Not navigating.");
-        setStatus('idle');
-      }
-    } catch (err) {
-      console.error(`ConnectPage: Social login error (${loginProvider}):`, err);
-      setStatus('idle');
-      
-      // Detailed error messages based on common Privy/social issues
-      let friendlyMsg = err.message || `${loginProvider} login failed.`;
-      if (friendlyMsg.toLowerCase().includes('email_required')) friendlyMsg = "Please enter a valid email before Email OTP login.";
-      if (friendlyMsg.toLowerCase().includes('sdk is not ready')) friendlyMsg = "Privy is still initializing. Try again in a few seconds.";
-      if (friendlyMsg.toLowerCase().includes('origin')) friendlyMsg = "Domain mismatch. Verify Allowed Origins in Privy dashboard.";
-      if (friendlyMsg.toLowerCase().includes('timeout')) friendlyMsg = "Login timed out. Verify Privy setup and Allowed Origins.";
-      if (friendlyMsg.toLowerCase().includes('solana embedded wallet')) friendlyMsg = "Enable Solana embedded wallet in Privy dashboard.";
-      if (friendlyMsg.includes('Duplicate')) friendlyMsg = "An account already exists with this method.";
-      
-      setError(friendlyMsg);
-    }
-  }, [loginWithSocial, navigate, isInitializing]);
-
-  const handleEmailOtpStart = useCallback(() => {
-    const normalized = emailOtpInput.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normalized)) {
-      setError(i18n.language === 'ar' ? 'أدخل بريدًا إلكترونيًا صالحًا قبل المتابعة.' : 'Enter a valid email address before continue.');
-      return;
-    }
-    setShowEmailOtpDialog(false);
-    setError(null);
-    handleSocialConnect('email_passwordless', { login_hint: normalized });
-  }, [emailOtpInput, handleSocialConnect, i18n.language]);
+  }, [connectEVMWallet, connectSolanaWallet, connectWalletConnect, navigate, t]);
 
   const handleConnect = useCallback((walletId) => {
-    const socialProviders = ['google', 'twitter', 'telegram', 'email_passwordless'];
-    if (socialProviders.includes(walletId)) {
-      if (walletId === 'email_passwordless') {
-        setShowEmailOtpDialog(true);
-        setError(null);
-      } else {
-        handleSocialConnect(walletId);
-      }
-    } else {
-      handleWalletConnect(walletId);
-    }
-  }, [handleWalletConnect, handleSocialConnect]);
+    handleWalletConnect(walletId);
+  }, [handleWalletConnect]);
 
   return (
     <div className={`min-h-screen bg-[#F8FAFC] text-pepe-black font-sans relative overflow-hidden flex flex-col ${isRTL ? 'rtl' : 'ltr'}`}>
@@ -216,7 +148,7 @@ const ConnectPage = () => {
         </button>
         <div className="flex items-center gap-2">
           <img src="/assets/hero-character.png" alt="Logo" className="w-10 h-10 object-contain" />
-          <span className="text-xl font-black italic">PEPE<span className="text-pepe-pink">WIFE</span></span>
+          <span className="text-xl font-black italic">{brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span></span>
         </div>
       </header>
 
@@ -226,21 +158,21 @@ const ConnectPage = () => {
           <div className="lg:col-span-2 space-y-8 hidden lg:block py-12">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
               <span className="bg-pepe-green/20 text-pepe-green border-2 border-pepe-green/30 px-4 py-1 rounded-full font-black uppercase text-xs tracking-wider">
-                Web3 Secure Login
+                {t('connect_page.secure_badge')}
               </span>
               <h1 className="text-5xl font-black uppercase italic leading-[0.9] animate-title-gradient">
-                Connect Your <br /> Wallet
+                {t('connect_page.title_line1')} <br /> {t('connect_page.title_line2')}
               </h1>
               <p className="text-lg font-bold text-gray-500 leading-relaxed">
-                Choose from our supported providers to safely access your dashboard and manage your $PWIFE assets.
+                {t('connect_page.subtitle')}
               </p>
             </motion.div>
 
             <div className="space-y-4">
               {[
-                { icon: <Shield className="text-pepe-green" />, title: 'Security First', desc: 'Industry-standard encryption' },
-                { icon: <Globe className="text-pepe-pink" />, title: 'Multi-Chain', desc: 'Support for ETH, SOL & BNB' },
-                { icon: <Lock className="text-pepe-yellow" />, title: 'Self-Custody', desc: 'You own your private keys' }
+                { icon: <Shield className="text-pepe-green" />, title: t('connect_page.features.security_title'), desc: t('connect_page.features.security_desc') },
+                { icon: <Globe className="text-pepe-pink" />, title: t('connect_page.features.multichain_title'), desc: t('connect_page.features.multichain_desc') },
+                { icon: <Lock className="text-pepe-yellow" />, title: t('connect_page.features.selfcustody_title'), desc: t('connect_page.features.selfcustody_desc') }
               ].map((item, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * i }} className="flex items-center gap-4 bg-white border-2 border-pepe-black/5 p-4 rounded-2xl shadow-sm">
                   <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">{item.icon}</div>
@@ -256,7 +188,7 @@ const ConnectPage = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-3 bg-white border-4 border-pepe-black rounded-[2.5rem] shadow-[12px_12px_0_0_#000] p-6 sm:p-10 space-y-8 relative">
 
             <div className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Popular Wallets</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">{t('connect_page.popular_wallets')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {walletOptions.map((wallet) => (
                   <button
@@ -274,85 +206,14 @@ const ConnectPage = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-black uppercase text-sm leading-none">{wallet.name}</p>
-                      {wallet.recommended && <p className="text-[8px] font-black text-pepe-pink uppercase mt-1">Recommended</p>}
+                      {wallet.recommended && <p className="text-[8px] font-black text-pepe-pink uppercase mt-1">{t('connect_page.recommended')}</p>}
                     </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 border-b-2 border-gray-100 pb-2">Social & Direct Login</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {socialOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleConnect(option.id)}
-                    disabled={status === 'connecting' || isInitializing}
-                    className={`
-                      relative group flex flex-col items-center gap-3 p-4 rounded-2xl border-2 
-                      transition-all duration-300 active:scale-95
-                      ${option.borderColor} ${option.color}
-                      ${status === 'connecting' || isInitializing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[6px_6px_0_0_#000] hover:-translate-y-1'}
-                    `}
-                  >
-                    <div className="w-8 h-8 flex items-center justify-center">
-                      {isInitializing ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                        >
-                          <Zap size={16} className="text-gray-400" />
-                        </motion.div>
-                      ) : option.icon}
-                    </div>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-center text-pepe-black">
-                      {isInitializing ? (i18n.language === 'ar' ? 'تحميل...' : 'Loading...') : option.name}
-                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
             <AnimatePresence>
-              {showEmailOtpDialog && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  className="bg-pepe-pink/5 border-2 border-pepe-pink p-4 sm:p-5 rounded-2xl space-y-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-black text-xs sm:text-sm uppercase tracking-wide text-pepe-black">
-                      {i18n.language === 'ar' ? 'أدخل بريدك لاستلام رمز OTP' : 'Enter your email to receive OTP'}
-                    </p>
-                    <button
-                      onClick={() => setShowEmailOtpDialog(false)}
-                      className="p-1 rounded-lg hover:bg-pepe-pink/10"
-                      disabled={status === 'connecting'}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={emailOtpInput}
-                      onChange={(e) => setEmailOtpInput(e.target.value)}
-                      placeholder="name@email.com"
-                      className="flex-1 px-4 py-3 rounded-xl border-2 border-pepe-black bg-white font-bold outline-none focus:ring-2 focus:ring-pepe-pink/40"
-                      disabled={status === 'connecting'}
-                    />
-                    <button
-                      onClick={handleEmailOtpStart}
-                      disabled={status === 'connecting'}
-                      className="px-5 py-3 rounded-xl border-2 border-pepe-black bg-pepe-yellow font-black uppercase text-xs hover:translate-y-[-1px] transition-transform disabled:opacity-60"
-                    >
-                      {i18n.language === 'ar' ? 'إرسال OTP' : 'Send OTP'}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
               {error && (
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-red-50 border-2 border-red-200 p-4 rounded-2xl flex items-center gap-3 text-red-500 font-bold text-sm">
                   <AlertCircle size={18} />
@@ -367,14 +228,14 @@ const ConnectPage = () => {
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
                   <Rocket size={32} className="text-pepe-pink" />
                 </motion.div>
-                <p className="font-black uppercase text-[10px] animate-pulse">Establishing Secure Connection...</p>
+                <p className="font-black uppercase text-[10px] animate-pulse">{t('connect_page.establishing')}</p>
               </div>
             )}
 
             <div className="pt-6 border-t-2 border-gray-100 flex flex-col items-center gap-4 text-center opacity-40">
               <div className="flex items-center gap-2">
                 <Check size={14} className="text-pepe-green" strokeWidth={4} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Verified by Pepe Wife Security Team</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{t('connect_page.verified')}</span>
               </div>
             </div>
           </motion.div>
@@ -382,7 +243,7 @@ const ConnectPage = () => {
       </main>
 
       <footer className="p-8 text-center text-[10px] font-black uppercase tracking-[0.4em] opacity-20">
-        &copy; 2026 PEPE WIFE - DECENTRALIZED PROTOCOL
+        {t('connect_page.footer')}
       </footer>
     </div>
   );

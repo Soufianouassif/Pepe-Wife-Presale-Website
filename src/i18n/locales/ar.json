@@ -68,7 +68,12 @@
     "marketing_lock": "قفل حصة التسويق",
     "linear_vesting": "فك حصة التسويق تدريجيًا",
     "freeze": "التجميد (معطل)",
-    "mint": "سك العملات (معطل)"
+    "mint": "سك العملات (معطل)",
+    "desc_detailed": "يعتمد Pepe Wife نموذجاً اقتصادياً مستداماً للنمو طويل المدى ومكافآت المجتمع. سياسة الصفر ضريبة تضمن كفاءة أعلى للمتداولين.",
+    "total_supply_label": "إجمالي المعروض",
+    "total_supply_value": "1 مليار",
+    "zero_tax_value": "0% شراء / 0% بيع",
+    "active": "نشط"
   },
   "roadmap": {
     "badge": "رحلتنا",
@@ -142,7 +147,18 @@
     "community_title": "المجتمع",
     "legal_title": "قانوني",
     "rights": "© ٢٠٢٦ مشروع PEPE WIFE. جميع الحقوق محفوظة.",
-    "built_with": "صنع بكل حب لملكة الكريبتو."
+    "built_with": "صنع بكل حب لملكة الكريبتو.",
+    "community_links": {
+      "x": "تويتر (X)",
+      "telegram": "تيليغرام",
+      "instagram": "إنستغرام",
+      "discord": "ديسكورد"
+    },
+    "legal_links": {
+      "terms": "الشروط",
+      "privacy": "الخصوصية",
+      "risk": "المخاطر"
+    }
   },
   "ticker": {
     "m1": "انضم إلى ثورة $PWIFE الآن!",
@@ -170,9 +186,12 @@
   },
   "calculator": {
     "title": "حاسبة الأرباح",
+    "subtitle": "احسب فرصة الصعود المحتملة",
     "input_amount": "مبلغ الاستثمار (USDT)",
+    "amount_placeholder": "0.00",
     "buy_price": "سعر الشراء ($)",
     "sell_price": "سعر البيع المستهدف ($)",
+    "sell_placeholder": "0.001",
     "trading_fees": "رسوم التداول (%)",
     "calculate": "احسب النتائج",
     "reset": "إعادة تعيين",
@@ -188,5 +207,213 @@
   "view_mode": {
     "switch_to_desktop": "إصدار سطح المكتب",
     "switch_to_mobile": "إصدار الهاتف"
+  },
+  "dashboard_pro": {
+    "sidebar": {
+      "overview": "نظرة عامة",
+      "buy": "شراء التوكن",
+      "referral": "الإحالة",
+      "claim": "المطالبة",
+      "staking": "التخثين",
+      "support": "الدعم",
+      "wallet": "المحفظة"
+    },
+    "logout": "تسجيل الخروج",
+    "soon": "قريبًا",
+    "soon_desc": "هذا القسم غير مفعل حالياً وسيتم إطلاقه في تحديث قادم.",
+    "notifications": {
+      "invalid_amount": "أدخل كمية صالحة قبل الشراء.",
+      "require_solana": "لشراء مقابل SOL يجب ربط محفظة Solana مثل Phantom.",
+      "require_evm": "لشراء مقابل USDT يجب ربط محفظة EVM مثل MetaMask.",
+      "signature_failed": "فشل التحقق من التوقيع.",
+      "buy_success": "تم تأكيد طلب الشراء بنجاح.",
+      "buy_failed": "فشل تنفيذ الشراء."
+    },
+    "overview": {
+      "total_supply": "إجمالي المعروض",
+      "presale_available": "المتوفر في البيع",
+      "token_price": "سعر التوكن",
+      "roi_calculator": "آلة تقدير العائد",
+      "investment_placeholder": "الاستثمار (USDT)",
+      "target_placeholder": "السعر المستهدف",
+      "invalid_roi": "أدخل بيانات صحيحة للحساب.",
+      "profit": "الربح",
+      "stats_title": "لوحة الإحصائيات العامة",
+      "market_cap": "القيمة السوقية",
+      "total_liquidity": "إجمالي السيولة",
+      "holders": "عدد الحائزين",
+      "pairs": "SOL / USDT",
+      "roi": "العائد ROI"
+    },
+    "buy": {
+      "title": "شراء التوكن",
+      "current_price": "سعر التوكن الحالي",
+      "payment_currency": "عملة الدفع",
+      "token_amount": "كمية التوكن المطلوبة (PWIFE)",
+      "token_amount_placeholder": "0",
+      "total_cost": "التكلفة الإجمالية",
+      "security_title": "التحقق والأمان",
+      "security_1": "يتم التحقق من العنوان وفق نوع المحفظة قبل الإرسال.",
+      "security_2": "يتم طلب توقيع المحفظة قبل تسجيل عملية الشراء.",
+      "security_3": "الأقسام غير المفعلة تبقى معطلة بوضوح حتى التفعيل.",
+      "processing": "جاري معالجة المعاملة...",
+      "confirm": "تأكيد الشراء"
+    },
+    "support": {
+      "title": "التواصل مع الدعم",
+      "desc": "يمكنك فتح محادثة مباشرة أو إنشاء تذكرة دعم.",
+      "open": "فتح الدعم"
+    },
+    "wallet": {
+      "title": "المحفظة",
+      "connected_address": "العنوان المتصل",
+      "copy": "نسخ العنوان",
+      "copied": "تم النسخ",
+      "explorer": "مستكشف الشبكة",
+      "sol_balance": "رصيد SOL",
+      "usdt_balance": "رصيد USDT (Ethereum)"
+    }
+  },
+  "brand": {
+    "name": "Pepe Wife",
+    "symbol": "$PWIFE"
+  },
+  "home_buy_house": {
+    "open_door": "اضغط لتفتح الباب",
+    "opened_hint": "الباب مفتوح - صندوق البيع ظاهر الآن",
+    "closed_hint": "انقر على الباب لعرض صندوق البيع"
+  },
+  "buy_modal": {
+    "phase_live": "المرحلة الأولى مباشرة الآن!",
+    "pay_sol": "الدفع بـ SOL",
+    "pay_usdt": "الدفع بـ USDT",
+    "you_will_get": "سوف تحصل على:",
+    "processing": "جاري المعالجة...",
+    "secure_tx": "معاملة آمنة عبر العقد الذكي",
+    "success": "تمت المعاملة بنجاح! سيتم إرسال توكنات $PWIFE قريباً.",
+    "errors": {
+      "invalid_network_config": "إعداد الشبكة غير صالح.",
+      "invalid_amount": "يرجى إدخال كمية صالحة",
+      "require_evm": "يرجى ربط محفظة EVM للدفع بـ USDT على شبكة Ethereum.",
+      "require_solana": "يرجى ربط محفظة Solana للدفع بـ SOL.",
+      "user_cancelled": "تم إلغاء المعاملة من طرف المستخدم.",
+      "failed": "فشلت المعاملة. تأكد من الرصيد وحاول مرة أخرى."
+    }
+  },
+  "loading_page": {
+    "keep_open": "يرجى عدم إغلاق هذه النافذة",
+    "almost_there": "بقي القليل، استعد لـ $PWIFE!",
+    "steps": {
+      "initializing": "جاري تهيئة الاتصال الآمن...",
+      "encrypting": "جاري تشفير بيانات المحفظة...",
+      "verifying": "جاري التحقق من الصلاحيات...",
+      "success": "تم الاتصال بنجاح!"
+    }
+  },
+  "connect_page": {
+    "secure_badge": "اتصال آمن",
+    "title_line1": "اربط",
+    "title_line2": "محفظتك",
+    "subtitle": "اختر محفظتك المفضلة للوصول إلى لوحة التحكم بشكل آمن.",
+    "popular_wallets": "المحافظ الشائعة",
+    "recommended": "موصى بها",
+    "establishing": "جاري إنشاء اتصال آمن...",
+    "verified": "مسار محفظة موثّق",
+    "footer": "مصادقة المحافظ مدعومة بمزودات آمنة",
+    "features": {
+      "security_title": "الأمان",
+      "security_desc": "يتم التحقق من طلبات الاتصال قبل اعتماد الجلسة.",
+      "multichain_title": "متعدد السلاسل",
+      "multichain_desc": "يدعم محافظ Solana وEVM ضمن تدفق واحد.",
+      "selfcustody_title": "حفظ ذاتي",
+      "selfcustody_desc": "أنت المتحكم الكامل في مفاتيحك الخاصة."
+    },
+    "errors": {
+      "connection_failed": "فشل الاتصال",
+      "binance_missing": "مزود محفظة Binance غير متاح على هذا الجهاز."
+    }
+  },
+  "error_boundary": {
+    "title": "تم التقاط خطأ حرج",
+    "unknown_error": "خطأ غير معروف",
+    "something_wrong": "حدث خطأ ما.",
+    "reload": "إعادة تحميل الصفحة"
+  },
+  "buybox_widget": {
+    "title": "صندوق شراء البيع المسبق",
+    "you_pay": "أنت تدفع",
+    "balance": "الرصيد: 0.00",
+    "amount_placeholder": "0.00",
+    "you_receive": "أنت تستلم",
+    "price": "السعر: $0.00012",
+    "exchange_rate": "سعر الصرف",
+    "network_fee": "رسوم الشبكة",
+    "processing": "جاري المعالجة...",
+    "success": "نجاح!",
+    "failed": "فشل",
+    "buy_now": "شراء $PWIFE",
+    "secured": "مؤمّن عبر العقد الذكي",
+    "select_token": "اختر العملة",
+    "tokens": {
+      "sol_name": "سولانا",
+      "usdt_name": "تيذر",
+      "eth_name": "إيثريوم",
+      "bnb_name": "BNB"
+    }
+  },
+  "admin": {
+    "hub_title": "لوحة الإدارة",
+    "node_status_online": "حالة العقدة: متصلة",
+    "emergency_stop": "إيقاف طارئ",
+    "publish_changes": "نشر التغييرات",
+    "sidebar": {
+      "dashboard": "لوحة الإحصائيات",
+      "presale_settings": "إعدادات البيع المسبق",
+      "whitelist_management": "إدارة القائمة البيضاء",
+      "security_access": "الأمان والصلاحيات",
+      "system_logs": "سجلات النظام"
+    },
+    "header": {
+      "presale_management": "إدارة البيع المسبق",
+      "control_center": "مركز التحكم لبروتوكول Pepe Wife اللامركزي"
+    },
+    "stats": {
+      "total_raised": "إجمالي المبلغ المحصل",
+      "total_participants": "إجمالي المشاركين",
+      "token_supply_sold": "نسبة المعروض المباع",
+      "vault_balance": "رصيد الخزنة",
+      "trend_today": "+48 اليوم",
+      "trend_phase_1": "المرحلة 1",
+      "trend_secured": "مؤمّن"
+    },
+    "phase": {
+      "active_seed_round": "المرحلة النشطة: الجولة التمهيدية",
+      "running": "قيد التشغيل",
+      "token_price_sol": "سعر التوكن (SOL)",
+      "hard_cap_sol": "الحد الأقصى (SOL)",
+      "start_date": "تاريخ البداية",
+      "end_date": "تاريخ النهاية"
+    },
+    "vesting": {
+      "title": "التحكم في الاستحقاق",
+      "desc": "إدارة جدول تحرير التوكنات",
+      "configure": "إعداد الاستحقاق"
+    },
+    "security_checks": {
+      "title": "فحوصات الأمان",
+      "multisig_check": "فحص التوقيع المتعدد",
+      "contract_audit": "تدقيق العقد",
+      "liquidity_lock": "قفل السيولة",
+      "passed": "ناجح",
+      "verified": "موثّق",
+      "active": "نشط",
+      "run_audit": "تشغيل تدقيق الأمان"
+    },
+    "risk_control": {
+      "title": "التحكم بالمخاطر",
+      "desc": "وظائف طارئة لحماية المستثمرين عند حدوث أي سلوك غير طبيعي في البروتوكول.",
+      "pause_presale": "إيقاف البيع المسبق",
+      "withdraw_multisig": "سحب إلى محفظة متعددة التوقيع"
+    }
   }
 }

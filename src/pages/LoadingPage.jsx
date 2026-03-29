@@ -14,10 +14,10 @@ const LoadingPage = () => {
   const [minDelayPassed, setMinDelayPassed] = useState(false);
 
   const steps = [
-    { icon: <Globe className="text-blue-400" />, text: 'Initializing secure connection...' },
-    { icon: <Lock className="text-pepe-pink" />, text: 'Encrypting wallet data...' },
-    { icon: <ShieldCheck className="text-pepe-green" />, text: 'Verifying permissions...' },
-    { icon: <CheckCircle2 className="text-pepe-yellow" />, text: 'Connection successful!' }
+    { icon: <Globe className="text-blue-400" />, text: t('loading_page.steps.initializing') },
+    { icon: <Lock className="text-pepe-pink" />, text: t('loading_page.steps.encrypting') },
+    { icon: <ShieldCheck className="text-pepe-green" />, text: t('loading_page.steps.verifying') },
+    { icon: <CheckCircle2 className="text-pepe-yellow" />, text: t('loading_page.steps.success') }
   ];
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const LoadingPage = () => {
             <h2 className="text-4xl font-black uppercase italic animate-title-gradient">
               {t('nav.wallet.connecting')}
             </h2>
-            <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Please do not close this window</p>
+            <p className="text-gray-400 font-black uppercase tracking-widest text-xs">{t('loading_page.keep_open')}</p>
           </div>
 
           {/* Progress Bar */}
@@ -134,7 +134,7 @@ const LoadingPage = () => {
           className="flex items-center justify-center space-x-3 space-x-reverse text-pepe-pink font-black uppercase italic tracking-tighter"
         >
           <Rocket size={32} strokeWidth={3} className="animate-bounce" />
-          <span className="text-xl">Almost there, get ready for $PWIFE!</span>
+          <span className="text-xl">{t('loading_page.almost_there')}</span>
         </motion.div>
       </div>
 
@@ -142,7 +142,7 @@ const LoadingPage = () => {
       <div className="fixed bottom-10 left-0 w-full flex justify-center opacity-20 pointer-events-none">
         <div className="flex space-x-10 space-x-reverse">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="text-6xl font-black uppercase italic">$PWIFE</div>
+            <div key={i} className="text-6xl font-black uppercase italic">{t('brand.symbol')}</div>
           ))}
         </div>
       </div>

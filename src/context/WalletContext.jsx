@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useContext, useRef, useCallback, useMemo } from 'react';
-import { useLogin, usePrivy } from '@privy-io/react-auth';
 import { detectWalletProviders, selectWalletProvider } from '../wallet/detector';
 import { createWalletAdapter, handleWalletAdapterError, isValidEvmAddress, isValidSolAddress } from '../wallet/adapters';
 import { WalletOperationError } from '../wallet/errors';
@@ -41,8 +40,6 @@ const STORAGE_KEYS = {
 
 const SOLANA_WALLET_TYPES = new Set(['Social', 'Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet']);
 const EVM_WALLET_TYPES = new Set(['MetaMask', 'Binance', 'Coinbase', 'WalletConnect']);
-const SOCIAL_LOGIN_PROVIDERS = new Set(['google', 'twitter', 'telegram', 'email_passwordless']);
-const SOCIAL_FLOW_TIMEOUT_MS = 30000;
 
 /**
  * Wallet provider that exposes unified wallet operations for UI and business logic.
@@ -57,17 +54,9 @@ export const WalletProvider = ({ children }) => {
   const [activeChainId, setActiveChainId] = useState('');
   const [requiredEvmChainId, setRequiredEvmChainIdState] = useState(DEFAULT_EVM_CHAIN_ID);
 
-  const { ready: privyReady, user: privyUser, logout: privyLogout } = usePrivy();
-  const { login: privyLogin } = useLogin();
-
-  const privyUserRef = useRef(null);
   const adapterRef = useRef(null);
   const providerRef = useRef(null);
   const walletTypeRef = useRef('');
-
-  useEffect(() => {
-    privyUserRef.current = privyUser || null;
-  }, [privyUser]);
 
   /**
    * @param {'info'|'warn'|'error'} level
@@ -82,103 +71,6 @@ export const WalletProvider = ({ children }) => {
     }
     logger(`[Wallet] ${message}`, payload);
   }, []);
-
-  const withTimeout = useCallback(async (promise, ms, userMessage) => {
-    let timer = null;
-    try {
-      return await Promise.race([
-        promise,
-        new Promise((_, reject) => {
-          timer = setTimeout(() => {
-            reject(new WalletOperationError('Operation timed out.', {
-              code: 'OPERATION_TIMEOUT',
-              userMessage,
-              retriable: true
-            }));
-          }, ms);
-        })
-      ]);
-    } finally {
-      if (timer) clearTimeout(timer);
-    }
-  }, []);
-
-  const normalizeSocialAccount = useCallback((value) => {
-    if (!value) return null;
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      return trimmed || null;
-    }
-    if (typeof value === 'object') {
-      const fromAddress = typeof value.address === 'string' ? value.address.trim() : '';
-      if (fromAddress) return fromAddress;
-      const fromPublicKeyString = typeof value.publicKey === 'string' ? value.publicKey.trim() : '';
-      if (fromPublicKeyString) return fromPublicKeyString;
-      if (value.publicKey?.toBase58) {
-        const base58 = value.publicKey.toBase58();
-        if (typeof base58 === 'string' && base58.trim()) return base58.trim();
-      }
-      if (value.publicKey?.toString) {
-        const key = value.publicKey.toString();
-        if (typeof key === 'string' && key.trim() && key !== '[object Object]') return key.trim();
-      }
-      if (value.toBase58) {
-        const base58 = value.toBase58();
-        if (typeof base58 === 'string' && base58.trim()) return base58.trim();
-      }
-      if (value.toString) {
-        const asString = value.toString();
-        if (typeof asString === 'string' && asString.trim() && asString !== '[object Object]') return asString.trim();
-      }
-    }
-    return null;
-  }, []);
-
-  const resolveSocialAccount = useCallback(async (socialProvider) => {
-    if (!socialProvider) return null;
-    const requestMethods = ['solana_getAccounts', 'solana_accounts', 'solana_requestAccounts'];
-    for (const method of requestMethods) {
-      try {
-        const response = await withTimeout(
-          socialProvider.request({ method }),
-          12000,
-          'تعذر قراءة حسابات المحفظة الاجتماعية.'
-        );
-        const items = Array.isArray(response) ? response : [response];
-        for (const item of items) {
-          const candidate = normalizeSocialAccount(item);
-          if (candidate && isValidSolAddress(candidate)) return candidate;
-        }
-      } catch {}
-    }
-    const directCandidates = [
-      normalizeSocialAccount(socialProvider.publicKey),
-      normalizeSocialAccount(socialProvider.address),
-      normalizeSocialAccount(socialProvider.selectedAddress),
-    ];
-    for (const candidate of directCandidates) {
-      if (candidate && isValidSolAddress(candidate)) return candidate;
-    }
-    try {
-      const evmAccounts = await withTimeout(
-        socialProvider.request({ method: 'eth_accounts' }),
-        7000,
-        'تعذر قراءة حسابات EVM من المزود الاجتماعي.'
-      );
-      const firstEvm = Array.isArray(evmAccounts) ? evmAccounts[0] : evmAccounts;
-      const normalizedEvm = normalizeSocialAccount(firstEvm);
-      if (normalizedEvm && isValidEvmAddress(normalizedEvm)) {
-        throw new WalletOperationError('Social provider returned EVM account on Solana flow.', {
-          code: 'SOCIAL_CHAIN_MISMATCH',
-          userMessage: 'تمت مصادقة اجتماعية لكن الاتصال مُعدّ على EVM بدل Solana. راجع إعداد Social Connection في Web3Auth Dashboard.',
-          retriable: false
-        });
-      }
-    } catch (error) {
-      if (error instanceof WalletOperationError) throw error;
-    }
-    return null;
-  }, [isValidEvmAddress, isValidSolAddress, normalizeSocialAccount, withTimeout]);
 
   const normalizeChainId = useCallback((chainId) => {
     if (typeof chainId !== 'string') return '';
@@ -213,44 +105,6 @@ export const WalletProvider = ({ children }) => {
     }
     return normalized;
   }, [normalizeChainId, requiredEvmChainId]);
-
-  const resolvePrivyUserPayload = useCallback(async (payload) => {
-    const directUser = payload?.user || payload || null;
-    if (directUser?.linkedAccounts || directUser?.wallet?.address) return directUser;
-    for (let i = 0; i < 12; i += 1) {
-      const current = privyUserRef.current;
-      if (current?.linkedAccounts || current?.wallet?.address) return current;
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-    return privyUserRef.current || null;
-  }, []);
-
-  const resolvePrivySocialAddress = useCallback((userPayload) => {
-    const directCandidates = [
-      userPayload?.wallet?.address,
-      ...(Array.isArray(userPayload?.wallets) ? userPayload.wallets.map((w) => w?.address) : [])
-    ];
-    for (const value of directCandidates) {
-      const candidate = normalizeSocialAccount(value);
-      if (candidate && isValidSolAddress(candidate)) return candidate;
-    }
-    const linkedAccounts = Array.isArray(userPayload?.linkedAccounts) ? userPayload.linkedAccounts : [];
-    for (const account of linkedAccounts) {
-      const candidate = normalizeSocialAccount(account?.address || account?.publicKey || account);
-      if (candidate && isValidSolAddress(candidate)) return candidate;
-    }
-    for (const account of linkedAccounts) {
-      const evmCandidate = normalizeSocialAccount(account?.address || account);
-      if (evmCandidate && isValidEvmAddress(evmCandidate)) {
-        throw new WalletOperationError('Privy returned EVM address for Solana social flow.', {
-          code: 'SOCIAL_CHAIN_MISMATCH',
-          userMessage: 'المصادقة الاجتماعية نجحت لكن عنوان المحفظة ليس على Solana. فعّل Solana embedded wallet في Privy Dashboard.',
-          retriable: false
-        });
-      }
-    }
-    return null;
-  }, [isValidEvmAddress, isValidSolAddress, normalizeSocialAccount]);
 
   /**
    * @param {string} walletAddress
@@ -349,7 +203,6 @@ export const WalletProvider = ({ children }) => {
    */
   const disconnect = useCallback(async () => {
     try {
-      await privyLogout?.();
       const currentProvider = providerRef.current;
       if (currentProvider && typeof currentProvider.disconnect === 'function') {
         await currentProvider.disconnect();
@@ -368,7 +221,7 @@ export const WalletProvider = ({ children }) => {
       safeSessionRemove(STORAGE_KEYS.type);
       safeSessionSet(STORAGE_KEYS.explicitLogout, 'true');
     }
-  }, [logWallet, privyLogout]);
+  }, [logWallet]);
 
   /**
    * @returns {{ MetaMask: boolean, Phantom: boolean }}
@@ -492,74 +345,13 @@ export const WalletProvider = ({ children }) => {
    * @param {{ login_hint?: string }} [extraOptions]
    * @returns {Promise<string|null>}
    */
-  const loginWithSocial = useCallback(async (loginProvider, extraOptions = {}) => {
-    try {
-      if (!privyReady) {
-        throw new WalletOperationError('Privy SDK is not ready.', {
-          code: 'SOCIAL_SDK_NOT_READY',
-          userMessage: 'تهيئة مزود الدخول الاجتماعي ما زالت جارية. حاول بعد ثوانٍ.',
-          retriable: true
-        });
-      }
-      if (!SOCIAL_LOGIN_PROVIDERS.has(loginProvider)) {
-        throw new WalletOperationError('Unsupported social login provider.', {
-          code: 'SOCIAL_PROVIDER_UNSUPPORTED',
-          userMessage: 'مزود تسجيل الدخول الاجتماعي غير مسموح.',
-          retriable: false
-        });
-      }
-      const privyMethodMap = {
-        google: 'google',
-        twitter: 'twitter',
-        telegram: 'telegram',
-        email_passwordless: 'email'
-      };
-      const loginMethod = privyMethodMap[loginProvider];
-      if (!loginMethod) {
-        throw new WalletOperationError('Unsupported Privy social method.', {
-          code: 'SOCIAL_PROVIDER_UNSUPPORTED',
-          userMessage: 'طريقة تسجيل الدخول غير مدعومة.',
-          retriable: false
-        });
-      }
-      const sanitizedLoginHint = typeof extraOptions.login_hint === 'string'
-        ? extraOptions.login_hint.trim()
-        : '';
-      if (loginProvider === 'email_passwordless' && !sanitizedLoginHint) {
-        throw new WalletOperationError('Missing email for email otp login.', {
-          code: 'EMAIL_REQUIRED',
-          userMessage: 'أدخل بريدًا إلكترونيًا صحيحًا قبل متابعة Email OTP.',
-          retriable: true
-        });
-      }
-      const loginPayload = await withTimeout(
-        privyLogin({
-          loginMethods: [loginMethod],
-          ...(loginProvider === 'email_passwordless' && sanitizedLoginHint
-            ? { prefill: { type: 'email', value: sanitizedLoginHint } }
-            : {})
-        }),
-        SOCIAL_FLOW_TIMEOUT_MS,
-        'انتهت مهلة تسجيل الدخول الاجتماعي. تحقق من إعدادات Privy والـ allowed origins.'
-      );
-      const resolvedUser = await resolvePrivyUserPayload(loginPayload);
-      const account = resolvePrivySocialAddress(resolvedUser);
-      if (!isValidSolAddress(account)) {
-        throw new WalletOperationError('Social wallet account is invalid.', {
-          code: 'ADDRESS_INVALID',
-          userMessage: 'لا يمكن استخراج عنوان Solana من حساب Privy. فعّل Solana embedded wallet داخل Privy Dashboard.',
-          retriable: false
-        });
-      }
-      connect(account, 'Social', null, null);
-      return account;
-    } catch (error) {
-      if (error?.code === 4011) {
-        return null;
-      }
-      throw handleWalletAdapterError(error, 'social_connect');
-    }
-  }, [connect, isValidSolAddress, privyLogin, privyReady, resolvePrivySocialAddress, resolvePrivyUserPayload, withTimeout]);
+  const loginWithSocial = useCallback(async () => {
+    throw new WalletOperationError('Social login is disabled.', {
+      code: 'SOCIAL_DISABLED',
+      userMessage: 'تم تعطيل تسجيل الدخول الاجتماعي مؤقتًا. استخدم المحافظ المتاحة.',
+      retriable: false
+    });
+  }, []);
 
   /**
    * @param {'MetaMask'|'Binance'|'Coinbase'} walletName

@@ -85,7 +85,7 @@ const createEvmAdapter = (config) => {
         await adapter.ensureChain();
         return account;
       }, {
-        retries,
+        retries: 0,
         shouldRetry: (error) => error.retriable && error.code !== 'CHAIN_MISMATCH'
       });
     },

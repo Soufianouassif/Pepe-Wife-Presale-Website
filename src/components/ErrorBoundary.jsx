@@ -1,4 +1,5 @@
 import React from 'react';
+import i18n from '../i18n/config';
 
 const IS_DEV = import.meta?.env?.DEV;
 
@@ -39,9 +40,9 @@ class ErrorBoundary extends React.Component {
           right: 0,
           bottom: 0
         }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>CRITICAL ERROR CAUGHT</h1>
+          <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>{i18n.t('error_boundary.title')}</h1>
           <pre style={{ backgroundColor: 'rgba(0,0,0,0.5)', padding: '20px', borderRadius: '10px', maxWidth: '90%', overflow: 'auto' }}>
-            {IS_DEV ? (this.state.error?.stack || this.state.error?.message || "Unknown error") : "Something went wrong."}
+            {IS_DEV ? (this.state.error?.stack || this.state.error?.message || i18n.t('error_boundary.unknown_error')) : i18n.t('error_boundary.something_wrong')}
           </pre>
           <button 
             onClick={() => window.location.reload()}
@@ -57,7 +58,7 @@ class ErrorBoundary extends React.Component {
               fontSize: '1.2rem'
             }}
           >
-            Reload Page
+            {i18n.t('error_boundary.reload')}
           </button>
         </div>
       );

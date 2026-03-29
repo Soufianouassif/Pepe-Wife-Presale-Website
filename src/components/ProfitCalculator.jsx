@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { calculateProfit } from '../utils/calculator';
 import { Calculator, RotateCcw, TrendingUp, TrendingDown, Info } from 'lucide-react';
 
-const ProfitCalculator = ({ t }) => {
+const ProfitCalculator = ({ t: tProp }) => {
+  const { t: i18nT } = useTranslation();
+  const t = tProp || i18nT;
   const [inputs, setInputs] = useState({
     amount: '',
     buyPrice: '0.00012', // Default PWIFE price
@@ -47,8 +50,8 @@ const ProfitCalculator = ({ t }) => {
             <Calculator className="text-pepe-black" size={24} strokeWidth={3} />
           </div>
           <div>
-            <h4 className="text-xl font-black uppercase italic tracking-tight">{t('calculator.title', 'Profit Estimator')}</h4>
-            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none">Calculate your moon potential</p>
+            <h4 className="text-xl font-black uppercase italic tracking-tight">{t('calculator.title')}</h4>
+            <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none">{t('calculator.subtitle')}</p>
           </div>
         </div>
         <button 
@@ -61,19 +64,19 @@ const ProfitCalculator = ({ t }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.input_amount', 'Investment ($)')}</label>
+          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.input_amount')}</label>
           <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-3 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
             <input 
               type="number" 
               value={inputs.amount}
               onChange={(e) => setInputs({...inputs, amount: e.target.value})}
               className="w-full bg-transparent font-black text-lg outline-none placeholder:text-gray-300"
-              placeholder="0.00"
+              placeholder={t('calculator.amount_placeholder')}
             />
           </div>
         </div>
         <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.buy_price', 'Buy Price')}</label>
+          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.buy_price')}</label>
           <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-3 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
             <input 
               type="number" 
@@ -84,19 +87,19 @@ const ProfitCalculator = ({ t }) => {
           </div>
         </div>
         <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.sell_price', 'Sell Price')}</label>
+          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.sell_price')}</label>
           <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-3 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
             <input 
               type="number" 
               value={inputs.sellPrice}
               onChange={(e) => setInputs({...inputs, sellPrice: e.target.value})}
               className="w-full bg-transparent font-black text-lg outline-none placeholder:text-gray-300"
-              placeholder="0.001"
+              placeholder={t('calculator.sell_placeholder')}
             />
           </div>
         </div>
         <div className="space-y-3">
-          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.trading_fees', 'Fees %')}</label>
+          <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-2">{t('calculator.trading_fees')}</label>
           <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-3 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
             <input 
               type="number" 
@@ -112,7 +115,7 @@ const ProfitCalculator = ({ t }) => {
         onClick={handleCalculate}
         className="w-full bg-pepe-pink text-white border-4 border-pepe-black rounded-2xl py-5 font-black uppercase italic text-lg shadow-[8px_8px_0_0_#000] hover:translate-y-1 active:shadow-none transition-all"
       >
-        {t('calculator.calculate', 'Calculate Profit')}
+        {t('calculator.calculate')}
       </button>
 
       {error && (
@@ -133,11 +136,11 @@ const ProfitCalculator = ({ t }) => {
             
             <div className="grid grid-cols-2 gap-8 relative z-10">
               <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.tokens', 'Tokens Received')}</p>
+                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.tokens')}</p>
                 <p className="text-2xl font-black text-pepe-yellow italic">{parseFloat(results.tokensBought).toLocaleString()} $PWIFE</p>
               </div>
               <div className="text-right space-y-1">
-                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.roi', 'Return on Investment')}</p>
+                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.roi')}</p>
                 <p className={`text-2xl font-black italic ${results.isProfit ? 'text-pepe-green' : 'text-red-500'}`}>
                   {results.isProfit ? '+' : ''}{results.roi}%
                 </p>
@@ -147,7 +150,7 @@ const ProfitCalculator = ({ t }) => {
             <div className="border-t-2 border-white/10 pt-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.profit', 'Estimated Profit')}</p>
+                  <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">{t('calculator.results.profit')}</p>
                   <span className={`text-5xl font-black italic tracking-tighter ${results.isProfit ? 'text-pepe-green animate-pulse' : 'text-red-500'}`}>
                     ${parseFloat(results.profit).toLocaleString()}
                   </span>

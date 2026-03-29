@@ -36,8 +36,25 @@ export const normalizeWalletError = (error, fallbackCode, fallbackUserMessage) =
   if (error instanceof WalletOperationError) {
     return error;
   }
+  const errorCode = typeof error === 'object' && error !== null ? error.code : undefined;
   const message = error instanceof Error ? error.message : String(error);
   const lower = message.toLowerCase();
+  if (errorCode === 4001 || errorCode === '4001') {
+    return new WalletOperationError(message, {
+      code: 'USER_REJECTED',
+      userMessage: 'تم إلغاء العملية من طرف المستخدم.',
+      cause: error,
+      retriable: false
+    });
+  }
+  if (errorCode === -32002 || errorCode === '-32002' || lower.includes('already processing') || lower.includes('already pending')) {
+    return new WalletOperationError(message, {
+      code: 'REQUEST_PENDING',
+      userMessage: 'يوجد طلب معلّق في المحفظة. أغلق الطلب السابق ثم حاول مرة واحدة.',
+      cause: error,
+      retriable: false
+    });
+  }
   const isRejected = lower.includes('reject') || lower.includes('denied') || lower.includes('cancel');
   if (isRejected) {
     return new WalletOperationError(message, {

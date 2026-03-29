@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   ChevronDown, Info, ArrowDown, 
   ShieldCheck, Zap, Settings2, 
@@ -16,9 +17,14 @@ const TOKENS = [
 
 const PWIFE_PRICE = 0.00012; // 1 $PWIFE = 0.00012 USDT
 
-const BuyBox = ({ t, onSuccess }) => {
+const BuyBox = ({ t: tProp, onSuccess }) => {
+  const { t: i18nT } = useTranslation();
+  const t = tProp || i18nT;
   const { isConnected, sendTransaction } = useWallet();
-  const [fromToken, setFromToken] = useState(TOKENS[0]);
+  const [fromToken, setFromToken] = useState({
+    ...TOKENS[0],
+    name: t('buybox_widget.tokens.sol_name')
+  });
   const [amount, setAmount] = useState('');
   const [showTokenList, setShowTokenList] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
@@ -68,7 +74,7 @@ const BuyBox = ({ t, onSuccess }) => {
           <div className="w-10 h-10 bg-pepe-yellow rounded-xl border-2 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000]">
             <Zap size={20} className="text-pepe-black" fill="currentColor" />
           </div>
-          <h3 className="text-xl font-black uppercase italic tracking-tight">Presale Buy Box</h3>
+          <h3 className="text-xl font-black uppercase italic tracking-tight">{t('buybox_widget.title')}</h3>
         </div>
         <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <Settings2 size={20} className="text-gray-400" />
@@ -78,15 +84,15 @@ const BuyBox = ({ t, onSuccess }) => {
       {/* From Input */}
       <div className="space-y-3">
         <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-400 px-2">
-          <span>You Pay</span>
-          <span>Balance: 0.00</span>
+          <span>{t('buybox_widget.you_pay')}</span>
+          <span>{t('buybox_widget.balance')}</span>
         </div>
         <div className="bg-gray-50 border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-4 focus-within:ring-4 ring-pepe-yellow/20 transition-all">
           <input 
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
+            placeholder={t('buybox_widget.amount_placeholder')}
             className="flex-1 bg-transparent text-2xl font-black outline-none placeholder:text-gray-300"
           />
           <button 
@@ -110,8 +116,8 @@ const BuyBox = ({ t, onSuccess }) => {
       {/* To Output */}
       <div className="space-y-3">
         <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-400 px-2">
-          <span>You Receive</span>
-          <span>Price: $0.00012</span>
+          <span>{t('buybox_widget.you_receive')}</span>
+          <span>{t('buybox_widget.price')}</span>
         </div>
         <div className="bg-pepe-black border-4 border-pepe-black rounded-2xl p-4 flex items-center gap-4 shadow-[4px_4px_0_0_#FF69B4]">
           <div className="flex-1 text-2xl font-black text-pepe-yellow">
@@ -128,13 +134,13 @@ const BuyBox = ({ t, onSuccess }) => {
       <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border-2 border-pepe-black/5">
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            Exchange Rate <Info size={12} />
+            {t('buybox_widget.exchange_rate')} <Info size={12} />
           </div>
           <span className="font-black text-pepe-black">1 {fromToken.symbol} ≈ {(fromToken.price / PWIFE_PRICE).toLocaleString()} PWIFE</span>
         </div>
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            Network Fee <Info size={12} />
+            {t('buybox_widget.network_fee')} <Info size={12} />
           </div>
           <span className="font-black text-pepe-black">~$0.25</span>
         </div>
@@ -157,27 +163,27 @@ const BuyBox = ({ t, onSuccess }) => {
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
               <Zap size={24} fill="currentColor" />
             </motion.div>
-            Processing...
+            {t('buybox_widget.processing')}
           </div>
         ) : txStatus === 'success' ? (
           <div className="flex items-center justify-center gap-3">
             <Check size={24} strokeWidth={4} />
-            Success!
+            {t('buybox_widget.success')}
           </div>
         ) : txStatus === 'error' ? (
           <div className="flex items-center justify-center gap-3">
             <AlertCircle size={24} strokeWidth={4} />
-            Failed
+            {t('buybox_widget.failed')}
           </div>
         ) : (
-          `Buy $PWIFE`
+          t('buybox_widget.buy_now')
         )}
       </button>
 
       {/* Footer Security */}
       <div className="flex items-center justify-center gap-2 opacity-30 text-[10px] font-black uppercase tracking-widest">
         <ShieldCheck size={14} />
-        Secured by Smart Contract
+        {t('buybox_widget.secured')}
       </div>
 
       {/* Token Selector Modal */}
@@ -190,7 +196,7 @@ const BuyBox = ({ t, onSuccess }) => {
             className="absolute inset-0 z-20 bg-white p-6 rounded-[2.5rem] border-4 border-pepe-black flex flex-col"
           >
             <div className="flex justify-between items-center mb-6">
-              <h4 className="font-black uppercase italic text-lg">Select Token</h4>
+              <h4 className="font-black uppercase italic text-lg">{t('buybox_widget.select_token')}</h4>
               <button onClick={() => setShowTokenList(false)} className="p-2 hover:bg-gray-100 rounded-lg">
                 <Settings2 size={20} className="rotate-45" />
               </button>
@@ -212,7 +218,7 @@ const BuyBox = ({ t, onSuccess }) => {
                     <img src={token.icon} alt={token.name} className="w-8 h-8 rounded-full" />
                     <div className="text-left">
                       <p className="font-black text-sm">{token.symbol}</p>
-                      <p className="text-[10px] font-bold text-gray-400">{token.name}</p>
+                      <p className="text-[10px] font-bold text-gray-400">{token.id === 'SOL' ? t('buybox_widget.tokens.sol_name') : token.id === 'USDT' ? t('buybox_widget.tokens.usdt_name') : token.id === 'ETH' ? t('buybox_widget.tokens.eth_name') : t('buybox_widget.tokens.bnb_name')}</p>
                     </div>
                   </div>
                   <div className="text-right">

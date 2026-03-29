@@ -1,736 +1,484 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { useWallet } from '../context/WalletContext';
-import { formatAddress } from '../utils/format';
-import { 
-  Rocket, Shield, Globe, Copy, Check, Lock, 
-  ExternalLink, TrendingUp, TrendingDown, 
-  ArrowLeft, LogOut, LayoutDashboard, Wallet,
-  Flame, ShieldCheck, Droplets, History, Settings,
-  HelpCircle, User, Menu, X, Bell, Zap,
-  ChevronRight, ArrowUpRight, Plus, Minus
-} from 'lucide-react';
-import ProfitCalculator from '../components/ProfitCalculator';
-import BuyBox from '../components/BuyBox';
+import React, { useMemo, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import { ethers } from 'ethers'
+import { Connection, PublicKey } from '@solana/web3.js'
+import { useWallet } from '../context/WalletContext'
+import { formatAddress } from '../utils/format'
+import { calculateProfit } from '../utils/calculator'
+import { getDashboardStats, submitPresaleIntent } from '../services/dashboardApi'
+import { isValidEvmAddress, isValidSolAddress } from '../wallet/adapters'
+import {
+  LayoutDashboard, ShoppingCart, Users, HandCoins, Lock, LifeBuoy, Wallet, LogOut,
+  Menu, X, Copy, ExternalLink, Sun, Moon, CheckCircle2, AlertTriangle, Loader2
+} from 'lucide-react'
+
+const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+const ERC20_ABI = ['function balanceOf(address owner) view returns (uint256)']
+
+const navLinks = [
+  { href: '/#tokenomics', labelKey: 'nav.tokenomics' },
+  { href: '/#roadmap', labelKey: 'nav.roadmap' },
+  { href: '/#faq', labelKey: 'nav.faq' },
+  { href: '/#about', labelKey: 'nav.about' }
+]
+
+const sidebarItems = [
+  { id: 'overview', labelKey: 'dashboard_pro.sidebar.overview', icon: LayoutDashboard, enabled: true },
+  { id: 'buy', labelKey: 'dashboard_pro.sidebar.buy', icon: ShoppingCart, enabled: true },
+  { id: 'referral', labelKey: 'dashboard_pro.sidebar.referral', icon: Users, enabled: false },
+  { id: 'claim', labelKey: 'dashboard_pro.sidebar.claim', icon: HandCoins, enabled: false },
+  { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking', icon: Lock, enabled: false },
+  { id: 'support', labelKey: 'dashboard_pro.sidebar.support', icon: LifeBuoy, enabled: true },
+  { id: 'wallet', labelKey: 'dashboard_pro.sidebar.wallet', icon: Wallet, enabled: true }
+]
 
 const DashboardPage = () => {
-  const { t, i18n } = useTranslation();
-  const { isConnected, address, disconnect, walletType } = useWallet();
-  const navigate = useNavigate();
-  const isRTL = i18n.language === 'ar';
-  const [copied, setCopied] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [balance, setBalance] = useState(500000);
-  const [stakedBalance, setStakedBalance] = useState(0);
-  const [stakingAmount, setStakingAmount] = useState('');
-  const [isStaking, setIsStaking] = useState(false);
-  const [isBuyHouseOpen, setIsBuyHouseOpen] = useState(false);
-  const [history, setHistory] = useState([
-    { id: 1, date: 'March 24, 2026', type: 'Presale Purchase', amount: 100000, status: 'Confirmed' },
-    { id: 2, date: 'March 22, 2026', type: 'Referral Reward', amount: 5000, status: 'Confirmed' },
-    { id: 3, date: 'March 20, 2026', type: 'Presale Purchase', amount: 395000, status: 'Confirmed' },
-  ]);
+  const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const {
+    isConnected,
+    address,
+    walletType,
+    disconnect,
+    signMessage
+  } = useWallet()
+  const isRTL = i18n.language === 'ar'
+  const brandParts = t('brand.name').split(' ')
+
+  const [activeSection, setActiveSection] = useState('overview')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('dashboard-theme') || 'light')
+  const [stats, setStats] = useState({
+    tokenPriceUsd: 0.00012,
+    totalSupply: 1_000_000_000,
+    presaleAvailable: 400_000_000,
+    marketCapUsd: 120_000,
+    liquidityUsd: 2_450_000,
+    holders: 12489,
+    solUsd: 185,
+    usdtUsd: 1
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [notification, setNotification] = useState(null)
+  const [copied, setCopied] = useState(false)
+  const [walletBalances, setWalletBalances] = useState({ sol: null, usdt: null })
+  const [walletBalancesLoading, setWalletBalancesLoading] = useState(false)
+
+  const [roiInvestment, setRoiInvestment] = useState('1000')
+  const [roiTargetPrice, setRoiTargetPrice] = useState('0.0003')
+
+  const [buyCurrency, setBuyCurrency] = useState('SOL')
+  const [buyTokenAmount, setBuyTokenAmount] = useState('')
+  const [txProcessing, setTxProcessing] = useState(false)
+
+  const supportUrl = import.meta?.env?.VITE_SUPPORT_URL || 'mailto:support@pepewife.io'
+  const explorerUrl = useMemo(() => {
+    if (!address) return '#'
+    if (isValidSolAddress(address)) return `https://explorer.solana.com/address/${address}`
+    if (isValidEvmAddress(address)) return `https://etherscan.io/address/${address}`
+    return '#'
+  }, [address])
 
   useEffect(() => {
-    if (!isConnected) {
-      navigate('/connect');
+    if (!isConnected) navigate('/connect')
+  }, [isConnected, navigate])
+
+  useEffect(() => {
+    localStorage.setItem('dashboard-theme', theme)
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
+  useEffect(() => {
+    let mounted = true
+    const loadStats = async () => {
+      try {
+        setStatsLoading(true)
+        const data = await getDashboardStats()
+        if (mounted) setStats(data)
+      } finally {
+        if (mounted) setStatsLoading(false)
+      }
     }
-  }, [isConnected, navigate]);
-
-  const handleStake = async () => {
-    const amount = parseFloat(stakingAmount);
-    if (amount > 0 && amount <= balance) {
-      setIsStaking(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setBalance(prev => prev - amount);
-      setStakedBalance(prev => prev + amount);
-      setHistory(prev => [{
-        id: Date.now(),
-        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        type: 'Staking Deposit',
-        amount: -amount,
-        status: 'Confirmed'
-      }, ...prev]);
-      setStakingAmount('');
-      setIsStaking(false);
-      return true;
+    loadStats()
+    return () => {
+      mounted = false
     }
-    return false;
-  };
+  }, [])
 
-  const handleBuySuccess = (pwifeAmount) => {
-    setBalance(prev => prev + pwifeAmount);
-    setHistory(prev => [{
-      id: Date.now(),
-      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-      type: 'Presale Purchase',
-      amount: pwifeAmount,
-      status: 'Confirmed'
-    }, ...prev]);
-  };
-
-  const handleDisconnect = async () => {
-    await disconnect();
-    navigate('/');
-  };
-
-  const copyAddress = () => {
-    if (address) {
-      navigator.clipboard.writeText(address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  useEffect(() => {
+    let mounted = true
+    const loadBalances = async () => {
+      if (!address) return
+      try {
+        setWalletBalancesLoading(true)
+        const next = { sol: null, usdt: null }
+        if (isValidSolAddress(address)) {
+          const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed')
+          const lamports = await connection.getBalance(new PublicKey(address))
+          next.sol = lamports / 1_000_000_000
+        }
+        if (isValidEvmAddress(address) && typeof window !== 'undefined' && window.ethereum) {
+          const provider = new ethers.BrowserProvider(window.ethereum)
+          const usdtContract = new ethers.Contract(USDT_MAINNET, ERC20_ABI, provider)
+          const usdtRaw = await usdtContract.balanceOf(address)
+          next.usdt = Number(ethers.formatUnits(usdtRaw, 6))
+        }
+        if (mounted) setWalletBalances(next)
+      } catch {
+        if (mounted) setWalletBalances({ sol: null, usdt: null })
+      } finally {
+        if (mounted) setWalletBalancesLoading(false)
+      }
     }
-  };
+    loadBalances()
+    return () => {
+      mounted = false
+    }
+  }, [address, walletType, isConnected])
 
-  const sidebarItems = useMemo(() => [
-    { id: 'overview', icon: <LayoutDashboard size={22} />, label: t('dashboard.tabs.overview', 'Overview') },
-    { id: 'history', icon: <History size={22} />, label: t('dashboard.tabs.history', 'History') },
-    { id: 'referrals', icon: <Globe size={22} />, label: t('dashboard.tabs.referrals', 'Referrals') },
-    { id: 'staking', icon: <Lock size={22} />, label: t('dashboard.tabs.staking', 'Staking') },
-    { id: 'settings', icon: <Settings size={22} />, label: t('dashboard.tabs.settings', 'Settings') },
-  ], [t]);
+  const notify = (type, message) => {
+    setNotification({ type, message, id: Date.now() })
+    setTimeout(() => setNotification(null), 3800)
+  }
 
-  const BackgroundDecor = useMemo(() => () => (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-pepe-yellow/10 blur-[150px] rounded-full" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-pepe-pink/5 blur-[120px] rounded-full" />
-      <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] bg-pepe-green/5 blur-[100px] rounded-full" />
-    </div>
-  ), []);
+  const handleLogout = async () => {
+    await disconnect()
+    navigate('/')
+  }
+
+  const handleCopy = async () => {
+    if (!address) return
+    await navigator.clipboard.writeText(address)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1800)
+  }
+
+  const roiResult = useMemo(() => {
+    return calculateProfit(roiInvestment, stats.tokenPriceUsd, roiTargetPrice, 0)
+  }, [roiInvestment, roiTargetPrice, stats.tokenPriceUsd])
+
+  const buyTotalCost = useMemo(() => {
+    const qty = Number(buyTokenAmount || 0)
+    if (!qty || qty <= 0) return 0
+    return qty * stats.tokenPriceUsd
+  }, [buyTokenAmount, stats.tokenPriceUsd])
+
+  const buyCostInSelectedCurrency = useMemo(() => {
+    if (!buyTotalCost) return 0
+    if (buyCurrency === 'SOL') return buyTotalCost / Math.max(stats.solUsd, 1)
+    return buyTotalCost / Math.max(stats.usdtUsd, 1)
+  }, [buyTotalCost, buyCurrency, stats.solUsd, stats.usdtUsd])
+
+  const handleBuy = async () => {
+    const qty = Number(buyTokenAmount || 0)
+    if (!address || qty <= 0) {
+      notify('error', t('dashboard_pro.notifications.invalid_amount'))
+      return
+    }
+    if (buyCurrency === 'SOL' && !isValidSolAddress(address)) {
+      notify('error', t('dashboard_pro.notifications.require_solana'))
+      return
+    }
+    if (buyCurrency === 'USDT' && !isValidEvmAddress(address)) {
+      notify('error', t('dashboard_pro.notifications.require_evm'))
+      return
+    }
+    try {
+      setTxProcessing(true)
+      const nonce = Date.now()
+      const payload = `PWIFE_PRESALE_BUY|address=${address}|token=${qty}|currency=${buyCurrency}|nonce=${nonce}`
+      const signature = await signMessage(payload)
+      if (!signature) {
+        notify('error', t('dashboard_pro.notifications.signature_failed'))
+        return
+      }
+      await submitPresaleIntent({
+        address,
+        tokenAmount: qty,
+        paymentCurrency: buyCurrency,
+        quoteUsd: buyTotalCost,
+        signature
+      })
+      notify('success', t('dashboard_pro.notifications.buy_success'))
+      setBuyTokenAmount('')
+    } catch (error) {
+      notify('error', error?.userMessage || error?.message || t('dashboard_pro.notifications.buy_failed'))
+    } finally {
+      setTxProcessing(false)
+    }
+  }
+
+  const cardBase = theme === 'dark'
+    ? 'bg-[#0f172a] border-gray-700 text-white'
+    : 'bg-white border-pepe-black text-pepe-black'
 
   return (
-    <div className={`min-h-screen bg-[#F8FAFC] text-pepe-black font-sans relative flex overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
-      <BackgroundDecor />
-
-      {/* Modern Sidebar */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-80 bg-white border-r-4 border-pepe-black transition-transform duration-500 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
-        lg:translate-x-0
-      `}>
-        <div className="h-full flex flex-col p-6 space-y-8">
-          {/* Logo Section */}
-          <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group px-2" onClick={() => navigate('/')}>
-            <div className="w-12 h-12 bg-white rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:rotate-6 transition-transform overflow-hidden">
-              <img src="/assets/hero-character.png" alt="Logo" className="w-10 h-10 object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black uppercase italic tracking-tighter">
-                PEPE<span className="text-pepe-pink">WIFE</span>
-              </span>
-              <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none">
-                PRE-SALE HUB
-              </span>
-            </div>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-[#F8FAFC] text-pepe-black'} ${isRTL ? 'rtl' : 'ltr'}`}>
+      <header className={`sticky top-0 z-40 border-b-2 ${theme === 'dark' ? 'bg-[#0b1224]/90 border-gray-800' : 'bg-white/95 border-gray-100'} backdrop-blur`}>
+        <div className="px-4 lg:px-8 h-20 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen((v) => !v)} className={`lg:hidden p-2 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <button onClick={() => navigate('/')} className="font-black italic text-2xl">
+              {brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span>
+            </button>
           </div>
-
-          {/* Navigation Links */}
-          <nav className="flex-1 space-y-2">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  if (window.innerWidth < 1024) setIsSidebarOpen(false);
-                }}
-                className={`
-                  w-full flex items-center justify-between p-4 rounded-2xl transition-all group
-                  ${activeTab === item.id 
-                    ? 'bg-pepe-black text-white shadow-[8px_8px_0_0_#FF69B4] -translate-y-1' 
-                    : 'text-gray-400 hover:bg-gray-100 hover:text-pepe-black'}
-                `}
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`${activeTab === item.id ? 'text-pepe-yellow' : 'group-hover:text-pepe-pink'}`}>
-                    {item.icon}
-                  </div>
-                  <span className="font-black uppercase italic text-sm tracking-tight">
-                    {item.label}
-                  </span>
-                </div>
-                {activeTab === item.id && <ChevronRight size={18} className="text-white/20" />}
-              </button>
+          <nav className="hidden lg:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <a key={link.href} href={link.href} className={`font-black text-sm ${theme === 'dark' ? 'text-gray-200 hover:text-pepe-yellow' : 'text-gray-700 hover:text-pepe-pink'}`}>
+                {t(link.labelKey)}
+              </a>
             ))}
           </nav>
-
-          {/* User Profile Card Mini */}
-          <div className="pt-6 border-t-2 border-gray-100 space-y-4">
-            <div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/5 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-pepe-yellow rounded-xl border-2 border-pepe-black flex items-center justify-center">
-                  <User size={20} strokeWidth={3} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-gray-400">Connected via</span>
-                  <span className="text-xs font-black uppercase">{walletType || 'Wallet'}</span>
-                </div>
-              </div>
-              <button 
-                onClick={handleDisconnect}
-                className="w-full flex items-center justify-center gap-2 bg-white border-2 border-red-500/20 py-2 rounded-xl text-[10px] font-black uppercase text-red-500 hover:bg-red-500 hover:text-white transition-all"
-              >
-                <LogOut size={14} strokeWidth={3} />
-                <span>{t('dashboard.disconnect')}</span>
-              </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+              <span className="font-black text-xs">{formatAddress(address)}</span>
             </div>
           </div>
         </div>
-      </aside>
+      </header>
 
-      {/* Main Layout */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Modern Top Header */}
-        <header className="h-24 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 bg-white/50 backdrop-blur-md border-b-2 border-gray-100">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-3 bg-white border-2 border-pepe-black rounded-xl hover:bg-pepe-yellow transition-colors"
-            >
-              <Menu size={24} strokeWidth={3} />
-            </button>
-            <div className="hidden lg:block">
-              <h2 className="text-3xl font-black uppercase italic animate-title-gradient">
-                {sidebarItems.find(i => i.id === activeTab)?.label}
-              </h2>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Network Indicator */}
-            <div className="hidden md:flex items-center gap-2 bg-pepe-green/10 px-4 py-2 rounded-full border-2 border-pepe-green/20">
-              <div className="w-2 h-2 bg-pepe-green rounded-full animate-pulse" />
-              <span className="text-[10px] font-black uppercase text-pepe-green">Mainnet Alpha</span>
-            </div>
-
-            {/* Notification & Wallet */}
-            <div className="flex items-center gap-3">
-              <button className="w-12 h-12 bg-white border-2 border-gray-100 rounded-2xl flex items-center justify-center hover:border-pepe-black transition-all relative">
-                <Bell size={20} />
-                <span className="absolute top-3 right-3 w-2 h-2 bg-pepe-pink rounded-full border-2 border-white" />
-              </button>
-              
-              <div className="flex items-center bg-pepe-black text-white px-5 h-12 rounded-2xl border-2 border-pepe-black shadow-[4px_4px_0_0_#FF69B4] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer">
-                <Wallet size={18} className="mr-3 rtl:mr-0 rtl:ml-3 text-pepe-yellow" />
-                <span className="font-black text-xs tracking-wider">{formatAddress(address)}</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Scrollable Main Content */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10 bg-transparent">
-          <AnimatePresence mode="wait">
-            {activeTab === 'overview' && (
-              <motion.div
-                key="overview"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="max-w-7xl mx-auto space-y-10 pb-10"
-              >
-                {/* Hero Section: Balance & Buy Box */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                  
-                  {/* Premium Balance Card */}
-                  <div className="lg:col-span-3 flex flex-col gap-8">
-                    <div className="bg-pepe-black text-white p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#FF69B4] relative overflow-hidden flex flex-col justify-between min-h-[420px] group">
-                      {/* Decorative Background */}
-                      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-pepe-pink opacity-5 rounded-full -mr-[250px] -mt-[250px] blur-[100px] group-hover:opacity-20 transition-opacity duration-1000" />
-                      <div className="absolute bottom-0 left-0 w-80 h-80 bg-pepe-yellow opacity-5 rounded-full -ml-40 -mb-40 blur-[80px]" />
-                      
-                      <div className="relative z-10 space-y-10">
-                        <div className="flex justify-between items-start">
-                          <div className="bg-white/10 px-6 py-2 rounded-full border-2 border-white/20 flex items-center space-x-3 space-x-reverse backdrop-blur-md">
-                            <Rocket className="text-pepe-yellow" size={20} />
-                            <span className="text-xs font-black uppercase tracking-[0.2em]">{t('dashboard.balance')}</span>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="bg-pepe-green/20 text-pepe-green px-4 py-1 rounded-full text-[10px] font-black uppercase border border-pepe-green/20">
-                              Stage 1: LIVE
-                            </span>
-                            <span className="text-[10px] font-bold text-white/40 uppercase">Presale ending in 12d 4h</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.4em] ml-2">Estimated Balance</p>
-                          <div className="flex items-baseline gap-4">
-                            <p className="text-8xl lg:text-[10rem] font-black italic text-pepe-yellow leading-none tracking-tighter animate-title-gradient drop-shadow-[8px_8px_0px_#000]">
-                              {balance >= 1000000 ? `${(balance / 1000000).toFixed(1)}M` : balance >= 1000 ? `${(balance / 1000).toFixed(0)}K` : balance}
-                            </p>
-                            <span className="text-4xl font-black text-white/20 uppercase tracking-tighter">$PWIFE</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="relative z-10 grid grid-cols-2 gap-10 mt-10">
-                        <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase text-gray-500">Current Value</p>
-                            <p className="text-3xl font-black text-white italic">${(balance * 0.00012 + stakedBalance * 0.00012).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                          </div>
-                          <div className="w-10 h-10 bg-pepe-green rounded-xl flex items-center justify-center rotate-[-10deg] group-hover/card:rotate-0 transition-transform">
-                            <TrendingUp size={20} className="text-pepe-black" strokeWidth={3} />
-                          </div>
-                        </div>
-                        <div className="bg-white/5 p-6 rounded-[2rem] border-2 border-white/10 flex items-center justify-between group/card hover:bg-white/10 transition-colors">
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase text-gray-500">Staked Balance</p>
-                            <p className="text-3xl font-black text-pepe-pink italic">{stakedBalance > 0 ? (stakedBalance >= 1000 ? `${(stakedBalance / 1000).toFixed(0)}K` : stakedBalance) : '0'}</p>
-                          </div>
-                          <div className="w-10 h-10 bg-pepe-pink/20 rounded-xl flex items-center justify-center rotate-[10deg] group-hover/card:rotate-0 transition-transform">
-                            <Lock size={20} className="text-pepe-pink" strokeWidth={3} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Staking Banner Mini */}
-                    <div 
-                      onClick={() => setActiveTab('staking')}
-                      className="bg-pepe-yellow p-8 rounded-[3rem] border-4 border-pepe-black shadow-[10px_10px_0_0_#000] flex items-center justify-between group hover:translate-y-[-4px] transition-transform cursor-pointer"
-                    >
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 bg-white rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000] group-hover:scale-110 transition-transform">
-                          <Lock size={32} strokeWidth={3} className="text-pepe-pink" />
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="text-xl font-black uppercase italic leading-none">High-Yield Staking</h4>
-                          <p className="text-sm font-bold text-pepe-black/60">Earn up to 450% APR by staking your $PWIFE</p>
-                        </div>
-                      </div>
-                      <div className="hidden sm:flex items-center gap-2 bg-pepe-black text-white px-6 py-3 rounded-2xl font-black uppercase italic text-sm">
-                        Go Stake <ChevronRight size={18} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Professional Buy Box Component */}
-                  <div className="lg:col-span-2">
-                    <div className="relative w-full min-h-[640px] rounded-[3rem] border-4 border-pepe-black bg-gradient-to-b from-[#B6E6FF] via-[#DDF5FF] to-[#F2FBFF] shadow-[15px_15px_0_0_#000] overflow-hidden">
-                      <div className="absolute inset-x-0 bottom-0 h-[72%] bg-[#FFE6A7] border-t-4 border-pepe-black" />
-                      <div className="absolute left-1/2 -translate-x-1/2 top-[11%] w-[92%] h-[33%] bg-[#FF6B6B] border-4 border-pepe-black rounded-[3rem] shadow-[0_8px_0_0_#000]" />
-                      <div className="absolute left-[6%] right-[6%] top-[38%] bottom-[5%] bg-[#FFD58A] border-4 border-pepe-black rounded-[2.5rem] shadow-[0_10px_0_0_#000]" />
-                      <motion.button
-                        type="button"
-                        onClick={() => setIsBuyHouseOpen((prev) => !prev)}
-                        whileTap={{ scale: 0.98 }}
-                        animate={{ rotateY: isBuyHouseOpen ? -105 : 0, x: isBuyHouseOpen ? -16 : 0 }}
-                        transition={{ type: 'spring', stiffness: 220, damping: 24 }}
-                        className="absolute left-[14%] top-[48%] w-[34%] h-[44%] origin-left bg-[#8B4513] border-4 border-pepe-black rounded-[1.5rem] shadow-[8px_8px_0_0_#000] z-20"
-                        style={{ transformStyle: 'preserve-3d' }}
-                      >
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-pepe-black bg-pepe-yellow" />
-                        <div className="absolute inset-x-5 top-5 h-3 rounded-full bg-[#6E3310]" />
-                        <div className="absolute inset-x-5 top-11 h-3 rounded-full bg-[#6E3310]" />
-                      </motion.button>
-                      <button
-                        type="button"
-                        onClick={() => setIsBuyHouseOpen((prev) => !prev)}
-                        className="absolute left-[56%] top-[50%] w-[22%] h-[20%] bg-[#8ED1FC] border-4 border-pepe-black rounded-[1.5rem] shadow-[6px_6px_0_0_#000] z-20 flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:scale-[1.02] transition-transform"
-                      >
-                        {isBuyHouseOpen ? 'Close Window' : 'Open Window'}
-                      </button>
-                      <div className="absolute left-[56%] top-[50%] w-[22%] h-[20%] border-x-4 border-pepe-black z-30 pointer-events-none" />
-                      <AnimatePresence mode="wait">
-                        {isBuyHouseOpen ? (
-                          <motion.div
-                            key="buybox-visible"
-                            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                            transition={{ duration: 0.35 }}
-                            className="absolute inset-x-[10%] bottom-[8%] z-10"
-                          >
-                            <BuyBox t={t} onSuccess={handleBuySuccess} />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="buybox-hidden"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-x-[16%] bottom-[14%] z-10 bg-white/70 border-4 border-pepe-black rounded-[2rem] p-6 text-center shadow-[8px_8px_0_0_#000]"
-                          >
-                            <p className="text-sm font-black uppercase tracking-wider">{t('dashboard.buy_box_locked', 'Buy Box Hidden')}</p>
-                            <p className="text-xs font-bold text-gray-600 mt-2">{t('dashboard.open_door_hint', 'Click the house door or window to reveal the buy box')}</p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Second Grid: Referral & Calculator */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                  
-                  {/* Modern Referral System */}
-                  <div className="bg-white p-10 rounded-[3.5rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#000] flex flex-col justify-between group overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-pepe-yellow opacity-5 rounded-full -mr-32 -mt-32" />
-                    
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 bg-pepe-yellow rounded-2xl border-4 border-pepe-black flex items-center justify-center shadow-[6px_6px_0_0_#000]">
-                          <Globe size={32} strokeWidth={3} />
-                        </div>
-                        <div>
-                          <h4 className="text-3xl font-black uppercase italic leading-none">{t('dashboard.referral')}</h4>
-                          <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mt-1">Earn 5% instantly</p>
-                        </div>
-                      </div>
-                      <p className="text-lg font-bold text-gray-600 mb-10 leading-relaxed max-w-md">
-                        {t('dashboard.referral_desc')}
-                      </p>
-                    </div>
-
-                    <div className="space-y-6 relative z-10">
-                      <div className="bg-gray-50 border-4 border-pepe-black/5 rounded-[2rem] p-6 space-y-4">
-                        <p className="text-[10px] font-black uppercase text-gray-400 px-2 tracking-widest">Your unique referral link</p>
-                        <div className="bg-white border-2 border-pepe-black/10 rounded-2xl p-4 flex items-center justify-between gap-4">
-                          <code className="text-sm font-black text-pepe-black truncate">
-                            {address ? `pepewife.com/?ref=${formatAddress(address)}` : 'Connect Wallet'}
-                          </code>
-                          <button 
-                            onClick={copyAddress}
-                            className={`
-                              p-4 rounded-xl transition-all active:scale-95
-                              ${copied ? 'bg-pepe-green text-pepe-black' : 'bg-pepe-black text-white hover:bg-pepe-pink'}
-                            `}
-                          >
-                            {copied ? <Check size={20} strokeWidth={4} /> : <Copy size={20} strokeWidth={2} />}
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-pepe-green/5 border-2 border-pepe-green/10 p-6 rounded-3xl text-center">
-                          <p className="text-[10px] font-black uppercase text-pepe-green/60 mb-1">Total Referrals</p>
-                          <p className="text-4xl font-black italic text-pepe-black">24</p>
-                        </div>
-                        <div className="bg-pepe-pink/5 border-2 border-pepe-pink/10 p-6 rounded-3xl text-center">
-                          <p className="text-[10px] font-black uppercase text-pepe-pink/60 mb-1">Earned Rewards</p>
-                          <p className="text-4xl font-black italic text-pepe-pink">5.2 SOL</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Profit Calculator with High-end Styling */}
-                  <div className="relative">
-                    <div className="absolute -top-6 -right-6 w-32 h-32 bg-pepe-pink opacity-5 blur-[40px] rounded-full" />
-                    <ProfitCalculator t={t} />
-                  </div>
-                </div>
-
-                {/* Trust & Security Section */}
-                <div className="bg-pepe-black text-white p-10 lg:p-14 rounded-[4rem] border-4 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] space-y-12 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,105,180,0.1)_0%,transparent_100%)]" />
-                  
-                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                    <div className="flex items-center space-x-8 space-x-reverse">
-                      <div className="w-24 h-24 bg-pepe-green rounded-[2rem] border-4 border-pepe-black flex items-center justify-center shadow-[8px_8px_0_0_#000] rotate-[-5deg] group-hover:rotate-0 transition-transform">
-                        <ShieldCheck className="text-pepe-black" size={56} strokeWidth={3} />
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-4xl font-black uppercase italic leading-none">Protocol Integrity</h4>
-                        <p className="text-white/40 font-bold text-lg">Smart contracts audited by industry-leading security firms</p>
-                      </div>
-                    </div>
-                    <button className="bg-pepe-yellow text-pepe-black border-4 border-pepe-black px-12 py-5 rounded-2xl font-black uppercase italic text-xl shadow-[8px_8px_0_0_#fff] hover:translate-y-1 transition-all active:shadow-none">
-                      Audit Report
-                    </button>
-                  </div>
-                  
-                  <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {[
-                      { icon: <Flame className="text-pepe-yellow" />, label: t('tokenomics.zero_tax'), status: 'Active', desc: 'No tax on trades' },
-                      { icon: <Lock className="text-pepe-pink" />, label: t('tokenomics.liquidity_lock'), status: 'Verified', desc: 'Locked for 2 years' },
-                      { icon: <ShieldCheck className="text-pepe-green" />, label: t('tokenomics.team_lock'), status: 'Locked', desc: 'Vesting implemented' },
-                      { icon: <Droplets className="text-blue-400" />, label: t('tokenomics.linear_vesting'), status: 'Enabled', desc: 'Secure distribution' }
-                    ].map((item, idx) => (
-                      <div key={idx} className="bg-white/5 p-8 rounded-[2.5rem] border-2 border-white/10 flex flex-col items-center text-center space-y-5 hover:bg-white/10 transition-all hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-white/10 rounded-2xl border-2 border-white/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          {item.icon}
-                        </div>
-                        <div className="space-y-1">
-                          <span className="font-black uppercase italic text-sm block">{item.label}</span>
-                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.desc}</p>
-                        </div>
-                        <span className="bg-pepe-green text-pepe-black px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter">
-                          {item.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'history' && (
-              <motion.div
-                key="history"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="max-w-5xl mx-auto bg-white border-4 border-pepe-black rounded-[3.5rem] p-10 shadow-[15px_15px_0_0_#000] space-y-10"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-4xl font-black uppercase italic">Activity Log</h3>
-                  <button className="p-4 bg-gray-50 border-2 border-pepe-black/5 rounded-2xl hover:bg-pepe-yellow transition-colors">
-                    <Plus size={24} />
+      <div className="flex">
+        <aside className={`${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')} lg:translate-x-0 fixed lg:static inset-y-0 top-20 ${isRTL ? 'right-0' : 'left-0'} z-30 w-72 p-4 transition-transform duration-300`}>
+          <div className={`h-full rounded-3xl border-4 p-4 ${cardBase}`}>
+            <div className="space-y-2">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id)
+                      setSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
+                      activeSection === item.id
+                        ? 'bg-pepe-black text-white border-pepe-black'
+                        : `${theme === 'dark' ? 'border-gray-700 text-gray-200' : 'border-pepe-black/20 text-pepe-black'}`
+                    } ${!item.enabled ? 'opacity-60' : ''}`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon size={18} />
+                      <span className="font-black text-sm">{t(item.labelKey)}</span>
+                    </span>
+                    {!item.enabled && <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span>}
                   </button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right border-collapse">
-                    <thead>
-                      <tr className="bg-gray-50/50 border-b-4 border-pepe-black">
-                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Date & Time</th>
-                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Transaction Type</th>
-                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Amount ($PWIFE)</th>
-                        <th className="p-8 font-black uppercase italic text-sm text-gray-400">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y-2 divide-gray-100">
-                      {history.map(item => (
-                        <tr key={item.id} className="group hover:bg-gray-50 transition-colors">
-                          <td className="p-8 font-bold text-gray-500 text-sm">{item.date}</td>
-                          <td className="p-8">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.amount > 0 ? 'bg-pepe-green/10' : 'bg-pepe-pink/10'}`}>
-                                {item.amount > 0 ? <Plus size={14} className="text-pepe-green" strokeWidth={4} /> : <Minus size={14} className="text-pepe-pink" strokeWidth={4} />}
-                              </div>
-                              <span className="font-black uppercase text-sm">{item.type}</span>
-                            </div>
-                          </td>
-                          <td className={`p-8 font-black text-lg ${item.amount > 0 ? 'text-pepe-green' : 'text-pepe-pink'}`}>
-                            {item.amount > 0 ? '+' : ''}{item.amount.toLocaleString()}
-                          </td>
-                          <td className="p-8">
-                            <div className="flex items-center gap-2 bg-pepe-green/10 w-fit px-4 py-1.5 rounded-full border-2 border-pepe-green/10">
-                              <Check size={12} className="text-pepe-green" strokeWidth={4} />
-                              <span className="text-[10px] font-black uppercase text-pepe-green">{item.status}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </motion.div>
-            )}
+                )
+              })}
+            </div>
+            <button
+              onClick={handleLogout}
+              className={`mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-black ${theme === 'dark' ? 'border-red-500/40 text-red-300' : 'border-red-500/30 text-red-600'}`}
+            >
+              <LogOut size={16} />
+              {t('dashboard_pro.logout')}
+            </button>
+          </div>
+        </aside>
 
-            {activeTab === 'referrals' && (
+        <main className="flex-1 p-4 lg:p-8">
+          <AnimatePresence>
+            {notification && (
               <motion.div
-                key="referrals"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="max-w-6xl mx-auto space-y-10"
-              >
-                <div className="bg-pepe-yellow p-12 rounded-[4rem] border-4 border-pepe-black shadow-[15px_15px_0_0_#000] relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-20 rounded-full -mr-40 -mt-40" />
-                  <div className="relative z-10 space-y-8">
-                    <h3 className="text-5xl font-black uppercase italic leading-none">Partner Program</h3>
-                    <p className="text-xl font-bold text-pepe-black/70 max-w-2xl">
-                      Become a Pepe Wife ambassador. Share your link and earn <span className="text-pepe-pink underline">5% of every purchase</span> made by your referrals, instantly paid in SOL/ETH.
-                    </p>
-                    <div className="bg-white border-4 border-pepe-black rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[10px_10px_0_0_#000]">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Share this link to earn</span>
-                        <code className="text-xl font-black text-pepe-black tracking-tight">
-                            {address ? `pepewife.com/?ref=${address}` : '...'}
-                          </code>
-                      </div>
-                      <button onClick={copyAddress} className="w-full md:w-auto px-10 py-5 bg-pepe-pink text-white rounded-2xl border-4 border-pepe-black shadow-[6px_6px_0_0_#000] hover:translate-y-1 transition-all flex items-center justify-center gap-3">
-                        <Copy size={24} strokeWidth={3} />
-                        <span className="font-black uppercase italic">{copied ? 'Copied!' : 'Copy Link'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {[
-                    { label: 'Total Referrals', value: '42', icon: <User className="text-pepe-pink" /> },
-                    { label: 'Rewards Earned', value: '8.4 SOL', icon: <Zap className="text-pepe-yellow" fill="currentColor" /> },
-                    { label: 'Network Level', value: 'Diamond', icon: <Shield className="text-pepe-green" /> }
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-white border-4 border-pepe-black p-10 rounded-[3rem] shadow-[12px_12px_0_0_#000] flex flex-col items-center text-center gap-4 hover:-translate-y-2 transition-transform">
-                      <div className="w-16 h-16 bg-gray-50 rounded-2xl border-2 border-gray-100 flex items-center justify-center">
-                        {stat.icon}
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] mb-1">{stat.label}</p>
-                        <p className="text-4xl font-black italic">{stat.value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'staking' && (
-              <motion.div
-                key="staking"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="max-w-6xl mx-auto space-y-10"
+                exit={{ opacity: 0, y: -10 }}
+                className={`mb-5 p-4 rounded-2xl border-2 flex items-center gap-3 ${
+                  notification.type === 'success'
+                    ? 'bg-green-50 border-green-300 text-green-700'
+                    : 'bg-red-50 border-red-300 text-red-700'
+                }`}
               >
-                <div className="bg-pepe-black text-white p-12 rounded-[4rem] border-4 border-pepe-black shadow-[20px_20px_0_0_#FF69B4] relative overflow-hidden flex flex-col lg:flex-row items-center gap-12">
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-pepe-pink opacity-10 rounded-full blur-[100px]" />
-                  
-                  <div className="flex-1 space-y-8 relative z-10">
-                    <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border-2 border-white/10 backdrop-blur-md">
-                      <Lock size={18} className="text-pepe-pink" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Locked Staking v2</span>
-                    </div>
-                    <h3 className="text-5xl font-black uppercase italic text-pepe-yellow leading-none tracking-tighter">
-                      Maximize Your <br /> $PWIFE Rewards
-                    </h3>
-                    <p className="text-xl font-bold text-white/60 leading-relaxed max-w-xl">
-                      Stake your tokens in our high-yield pools and earn passive income daily. Join over 15,000 holders securing the network.
-                    </p>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="bg-white/5 p-6 rounded-3xl border-2 border-white/10">
-                        <p className="text-[10px] font-black uppercase text-white/40 mb-2">Current APR</p>
-                        <p className="text-4xl font-black text-pepe-green italic">450%</p>
-                      </div>
-                      <div className="bg-white/5 p-6 rounded-3xl border-2 border-white/10">
-                        <p className="text-[10px] font-black uppercase text-white/40 mb-2">Total Staked</p>
-                        <p className="text-4xl font-black italic">15.4M</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full lg:w-96 bg-white border-4 border-pepe-black p-8 rounded-[3rem] shadow-[12px_12px_0_0_#000] text-pepe-black space-y-8 relative z-10">
-                    <div className="space-y-4">
-                      <div className="flex justify-between px-2">
-                        <span className="text-[10px] font-black uppercase text-gray-400">Amount to stake</span>
-                        <span className="text-[10px] font-black uppercase text-pepe-pink">Balance: {balance >= 1000 ? `${(balance / 1000).toFixed(0)}K` : balance}</span>
-                      </div>
-                      <div className="relative">
-                        <input 
-                          type="number" 
-                          value={stakingAmount}
-                          onChange={(e) => setStakingAmount(e.target.value)}
-                          placeholder="0.00" 
-                          className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black text-2xl outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" 
-                        />
-                        <button 
-                          onClick={() => setStakingAmount(balance.toString())}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-pepe-black text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-pepe-pink transition-colors"
-                        >
-                          MAX
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/5">
-                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
-                        <span>Lock Period</span>
-                        <span className="text-pepe-black">30 Days</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-bold text-gray-500">
-                        <span>Expected Rewards</span>
-                        <span className="text-pepe-green font-black">+{stakingAmount ? (parseFloat(stakingAmount) * 0.025).toLocaleString() : '0'} $PWIFE</span>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={handleStake}
-                      disabled={isStaking || !stakingAmount || parseFloat(stakingAmount) <= 0 || parseFloat(stakingAmount) > balance}
-                      className="w-full bg-pepe-yellow border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-xl shadow-[6px_6px_0_0_#000] hover:translate-y-1 active:shadow-none transition-all disabled:opacity-50"
-                    >
-                      {isStaking ? 'Staking...' : 'Stake Now'}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'settings' && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="max-w-4xl mx-auto bg-white border-4 border-pepe-black rounded-[3.5rem] p-12 shadow-[20px_20px_0_0_#000] space-y-12 relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-pepe-pink/5 rounded-full blur-[60px]" />
-                
-                <div className="relative z-10 space-y-2">
-                  <h3 className="text-4xl font-black uppercase italic">Profile Settings</h3>
-                  <p className="text-gray-400 font-bold">Manage your account and preferences</p>
-                </div>
-
-                <div className="relative z-10 space-y-10">
-                  <div className="grid md:grid-cols-2 gap-10">
-                    <div className="space-y-4">
-                      <label className="font-black uppercase italic text-xs tracking-widest text-gray-400 ml-2">Display Name</label>
-                      <div className="relative">
-                        <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
-                        <input type="text" placeholder="Pepe Enjoyer" className="w-full border-4 border-pepe-black p-5 pl-14 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <label className="font-black uppercase italic text-xs tracking-widest text-gray-400 ml-2">Email Address</label>
-                      <input type="email" placeholder="pepe@crypto.com" className="w-full border-4 border-pepe-black p-5 rounded-2xl font-black outline-none focus:ring-4 ring-pepe-yellow/20 transition-all" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-6 bg-gray-50 p-8 rounded-[2.5rem] border-4 border-pepe-black/5">
-                    <h4 className="font-black uppercase italic text-sm">Notifications</h4>
-                    <div className="space-y-4">
-                      {[
-                        { label: 'Presale Phase Updates', desc: 'Get notified when a new stage begins', checked: true },
-                        { label: 'Referral Rewards', desc: 'Alert when someone uses your link', checked: true },
-                        { label: 'Security Alerts', desc: 'Critical account security notifications', checked: false }
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center justify-between group">
-                          <div className="space-y-1">
-                            <p className="font-black uppercase text-xs">{item.label}</p>
-                            <p className="text-[10px] font-bold text-gray-400">{item.desc}</p>
-                          </div>
-                          <div className={`w-14 h-8 rounded-full border-4 border-pepe-black relative cursor-pointer transition-colors ${item.checked ? 'bg-pepe-green' : 'bg-gray-200'}`}>
-                            <div className={`absolute top-1 w-4 h-4 bg-white border-2 border-pepe-black rounded-full transition-all ${item.checked ? 'right-1' : 'left-1'}`} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-6 flex flex-col sm:flex-row gap-4">
-                    <button className="flex-1 bg-pepe-black text-white border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-lg shadow-[8px_8px_0_0_#FF69B4] hover:translate-y-1 active:shadow-none transition-all">
-                      Save Profile
-                    </button>
-                    <button className="px-10 border-4 border-pepe-black py-5 rounded-2xl font-black uppercase italic text-lg hover:bg-gray-50 transition-all">
-                      Cancel
-                    </button>
-                  </div>
-                </div>
+                {notification.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                <span className="font-black text-sm">{notification.message}</span>
               </motion.div>
             )}
           </AnimatePresence>
+
+          {activeSection === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_supply')}</p>
+                  <p className="text-3xl font-black mt-2">{stats.totalSupply.toLocaleString()} PWIFE</p>
+                </div>
+                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.presale_available')}</p>
+                  <p className="text-3xl font-black mt-2">{stats.presaleAvailable.toLocaleString()} PWIFE</p>
+                </div>
+                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.token_price')}</p>
+                  <p className="text-3xl font-black mt-2">${stats.tokenPriceUsd.toFixed(6)}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                  <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.roi_calculator')}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className={`p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                    <input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className={`p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                  </div>
+                  {'error' in roiResult ? (
+                    <p className="text-sm font-black text-red-500 mt-4">{t('dashboard_pro.overview.invalid_roi')}</p>
+                  ) : (
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.profit')}</p>
+                        <p className="text-xl font-black mt-1">${Number(roiResult.profit).toLocaleString()}</p>
+                      </div>
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.roi')}</p>
+                        <p className="text-xl font-black mt-1">{roiResult.roi}%</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                  <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.stats_title')}</h3>
+                  {statsLoading ? (
+                    <div className="h-40 flex items-center justify-center">
+                      <Loader2 className="animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.market_cap')}</p>
+                        <p className="text-xl font-black mt-1">${Math.round(stats.marketCapUsd).toLocaleString()}</p>
+                      </div>
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_liquidity')}</p>
+                        <p className="text-xl font-black mt-1">${Math.round(stats.liquidityUsd).toLocaleString()}</p>
+                      </div>
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.holders')}</p>
+                        <p className="text-xl font-black mt-1">{stats.holders.toLocaleString()}</p>
+                      </div>
+                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.pairs')}</p>
+                        <p className="text-xl font-black mt-1">${stats.solUsd.toFixed(2)} / ${stats.usdtUsd.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'buy' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-6 ${cardBase}`}>
+              <h3 className="text-2xl font-black">{t('dashboard_pro.buy.title')}</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.current_price')}</p>
+                    <p className="text-2xl font-black mt-1">${stats.tokenPriceUsd.toFixed(6)}</p>
+                  </div>
+                  <label className="text-sm font-black">{t('dashboard_pro.buy.payment_currency')}</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['SOL', 'USDT'].map((currency) => (
+                      <button key={currency} onClick={() => setBuyCurrency(currency)} className={`p-3 rounded-xl border-2 font-black ${buyCurrency === currency ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
+                        {currency}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="text-sm font-black">{t('dashboard_pro.buy.token_amount')}</label>
+                  <input value={buyTokenAmount} onChange={(e) => setBuyTokenAmount(e.target.value)} type="number" placeholder={t('dashboard_pro.buy.token_amount_placeholder')} className={`w-full p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                  <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.total_cost')}</p>
+                    <p className="text-xl font-black mt-1">${buyTotalCost.toFixed(2)} ≈ {buyCostInSelectedCurrency.toFixed(4)} {buyCurrency}</p>
+                  </div>
+                </div>
+                <div className={`rounded-2xl border-2 p-5 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
+                  <h4 className="font-black text-lg mb-3">{t('dashboard_pro.buy.security_title')}</h4>
+                  <ul className="space-y-2 text-sm font-bold">
+                    <li>{t('dashboard_pro.buy.security_1')}</li>
+                    <li>{t('dashboard_pro.buy.security_2')}</li>
+                    <li>{t('dashboard_pro.buy.security_3')}</li>
+                  </ul>
+                  <button
+                    onClick={handleBuy}
+                    disabled={txProcessing || !buyTokenAmount || Number(buyTokenAmount) <= 0}
+                    className="mt-5 w-full p-4 rounded-xl border-2 border-pepe-black bg-pepe-pink text-white font-black disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {txProcessing && <Loader2 className="animate-spin" size={18} />}
+                    {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {['referral', 'claim', 'staking'].includes(activeSection) && (
+            <div className={`rounded-3xl border-4 p-8 text-center ${cardBase}`}>
+              <p className="text-3xl font-black">{t('dashboard_pro.soon')}</p>
+              <p className="text-sm font-bold opacity-70 mt-2">{t('dashboard_pro.soon_desc')}</p>
+            </div>
+          )}
+
+          {activeSection === 'support' && (
+            <div className={`rounded-3xl border-4 p-8 ${cardBase}`}>
+              <h3 className="text-2xl font-black mb-3">{t('dashboard_pro.support.title')}</h3>
+              <p className="text-sm font-bold opacity-80 mb-6">{t('dashboard_pro.support.desc')}</p>
+              <a href={supportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-pepe-black bg-pepe-yellow font-black">
+                {t('dashboard_pro.support.open')}
+                <ExternalLink size={16} />
+              </a>
+            </div>
+          )}
+
+          {activeSection === 'wallet' && (
+            <div className={`rounded-3xl border-4 p-6 space-y-6 ${cardBase}`}>
+              <h3 className="text-2xl font-black">{t('dashboard_pro.wallet.title')}</h3>
+              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.connected_address')}</p>
+                <p className="font-black break-all mt-1">{address || '---'}</p>
+                <div className="flex flex-wrap gap-3 mt-4">
+                  <button onClick={handleCopy} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                    <Copy size={14} />
+                    {copied ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy')}
+                  </button>
+                  <a href={explorerUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                    {t('dashboard_pro.wallet.explorer')}
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
+                  <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
+                </div>
+                <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
+                  <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
-      {/* Modern Mobile Sidebar Overlay */}
       <AnimatePresence>
-        {isSidebarOpen && (
+        {sidebarOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 z-40 bg-pepe-black/40 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/40 lg:hidden z-20"
           />
         )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardPage;
+export default DashboardPage

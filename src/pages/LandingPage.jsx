@@ -315,7 +315,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
                         </div>
                         <div>
                           <div className="text-[8px] sm:text-[10px] text-pepe-black font-black uppercase tracking-[0.2em]">{t('buybox.current_price')}</div>
-                          <div className="text-sm sm:text-xl font-black text-pepe-black tracking-tight whitespace-nowrap">1 $PWIFE = 0.00012 USDT</div>
+                          <div className="text-sm sm:text-xl font-black text-pepe-black tracking-tight whitespace-nowrap">{t('buybox.price_line')}</div>
                         </div>
                       </div>
                     </div>
@@ -373,7 +373,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
                   className="absolute inset-0 bg-[#A06B37] border-4 border-pepe-black rounded-t-[2rem] shadow-[5px_5px_0_0_#000] cursor-pointer"
                 >
                   <span className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 bg-pepe-yellow border-4 border-pepe-black rounded-xl px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-xs font-black text-pepe-black whitespace-nowrap">
-                    اضغط لتفتح الباب
+                    {t('home_buy_house.open_door')}
                   </span>
                   <span className="absolute top-1/2 right-4 sm:right-5 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 bg-pepe-yellow border-4 border-pepe-black rounded-full" />
                 </motion.button>
@@ -386,7 +386,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
           </motion.div>
           <div className="text-center mt-8">
             <p className="inline-flex items-center bg-white border-4 border-pepe-black rounded-full px-5 py-2 text-xs sm:text-sm font-black text-pepe-black shadow-[4px_4px_0_0_#000]">
-              {isDoorOpen ? 'الباب مفتوح - صندوق البيع ظاهر الآن' : 'انقر على الباب لعرض صندوق البيع'}
+              {isDoorOpen ? t('home_buy_house.opened_hint') : t('home_buy_house.closed_hint')}
             </p>
           </div>
         </div>
@@ -464,7 +464,7 @@ const TokenomicsSection = ({ t, openModal }) => {
                   <Flame size={20} className="text-pepe-yellow" />
                   <span className="font-semibold uppercase tracking-tight text-xs sm:text-base text-pepe-black">{t('tokenomics.zero_tax')}</span>
                 </div>
-                <div className="bg-pepe-green text-pepe-black px-2 sm:px-3 py-1 rounded-full text-[10px] font-semibold uppercase">Active</div>
+                <div className="bg-pepe-green text-pepe-black px-2 sm:px-3 py-1 rounded-full text-[10px] font-semibold uppercase">{t('tokenomics.active')}</div>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div className="flex items-center space-x-2 space-x-reverse bg-white p-2 sm:p-3 rounded-xl border-2 border-pepe-black">
@@ -664,9 +664,9 @@ const WhitepaperSection = ({ t, openModal }) => {
                 <div className="text-center relative z-10">
                   <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Logo" className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 sm:mb-8 object-contain drop-shadow-2xl animate-float" />
                   <h3 className="text-2xl sm:text-4xl font-black text-pepe-black uppercase italic tracking-tighter leading-none mb-2">
-                    Pepe Wife
+                    {t('brand.name')}
                   </h3>
-                  <p className="text-xs sm:text-sm font-black text-pepe-black/60 uppercase tracking-[0.3em]">Official Document</p>
+                  <p className="text-xs sm:text-sm font-black text-pepe-black/60 uppercase tracking-[0.3em]">{t('whitepaper.cover_subtitle')}</p>
                 </div>
                 <div className="w-full h-1 bg-pepe-black mt-4 opacity-20" />
               </div>
@@ -707,7 +707,7 @@ const Footer = ({ t }) => (
         <div className="sm:col-span-2 md:col-span-1 space-y-6 sm:space-y-8">
           <div className="flex items-center justify-center md:justify-start space-x-3 space-x-reverse">
             <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" loading="lazy" />
-            <span className="text-3xl sm:text-4xl font-black uppercase text-white">Pepe Wife</span>
+            <span className="text-3xl sm:text-4xl font-black uppercase text-white">{t('brand.name')}</span>
           </div>
           <p className="text-lg sm:text-xl font-bold text-white/60">{t('footer.desc')}</p>
         </div>
@@ -716,8 +716,8 @@ const Footer = ({ t }) => (
             <h4 className="text-xl sm:text-2xl font-black uppercase italic text-pepe-pink mb-6 sm:mb-10 drop-shadow-[2px_2px_0px_rgba(255,255,255,0.1)]">{t(`footer.${cat}_title`)}</h4>
             <ul className="space-y-4 sm:space-y-6 text-base sm:text-lg font-black uppercase text-white/80">
               {cat === 'links' ? ['presale', 'tokenomics', 'roadmap', 'whitepaper'].map(l => <li key={l}><a href={`#${l === 'presale' ? '' : l}`} className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{t(`nav.${l}` === 'nav.presale' ? 'nav.home' : `nav.${l}`)}</a></li>) :
-               cat === 'community' ? ['Twitter (X)', 'Telegram', 'Instagram', 'Discord'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{l}</a></li>) :
-               ['Terms', 'Privacy', 'Risk'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{l}</a></li>)}
+               cat === 'community' ? ['x', 'telegram', 'instagram', 'discord'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{t(`footer.community_links.${l}`)}</a></li>) :
+               ['terms', 'privacy', 'risk'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{t(`footer.legal_links.${l}`)}</a></li>)}
             </ul>
           </div>
         ))}
@@ -742,10 +742,10 @@ const Navbar = ({ isOpen, setIsOpen, changeLanguage, t, currentLng, openModal })
             <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" />
             <div className="flex flex-col justify-center">
               <span className="text-sm sm:text-xl font-black uppercase leading-none bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                Pepe Wife
+                {t('brand.name')}
               </span>
               <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                $PWIFE
+                {t('brand.symbol')}
               </span>
             </div>
           </div>
@@ -788,7 +788,7 @@ const BuyModal = ({ isOpen, onClose, t }) => {
       try {
         setRequiredEvmChainId(targetChainId);
       } catch (error) {
-        alert(error?.userMessage || 'Network configuration is invalid.');
+        alert(error?.userMessage || t('buy_modal.errors.invalid_network_config'));
         return;
       }
     }
@@ -798,17 +798,17 @@ const BuyModal = ({ isOpen, onClose, t }) => {
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
+      alert(t('buy_modal.errors.invalid_amount'));
       return;
     }
 
     setIsLoading(true);
     try {
       if (paymentCurrency === 'USDT' && !['MetaMask', 'Coinbase', 'Binance', 'WalletConnect'].includes(walletType)) {
-        throw new Error('يرجى ربط محفظة EVM للدفع بـ USDT على شبكة Ethereum.');
+        throw new Error(t('buy_modal.errors.require_evm'));
       }
       if (paymentCurrency === 'SOL' && !['Phantom', 'Solflare', 'Backpack', 'OKX', 'Trust Wallet', 'Social'].includes(walletType)) {
-        throw new Error('يرجى ربط محفظة Solana للدفع بـ SOL.');
+        throw new Error(t('buy_modal.errors.require_solana'));
       }
       const tx = await sendTransaction({
         to: paymentCurrency === 'USDT'
@@ -820,16 +820,16 @@ const BuyModal = ({ isOpen, onClose, t }) => {
         amount
       });
       console.log('Transaction success:', tx);
-      alert('Transaction successful! Your $PWIFE tokens will be sent shortly.');
+      alert(t('buy_modal.success'));
       onClose();
     } catch (error) {
       if (error.message === 'USER_REJECTED') {
-        alert('Transaction cancelled by user.');
+        alert(t('buy_modal.errors.user_cancelled'));
       } else if (error.message.includes('Invalid')) {
         alert(error.message);
       } else {
         console.error('Transaction error:', error);
-        alert('Transaction failed. Please ensure you have enough balance and try again.');
+        alert(t('buy_modal.errors.failed'));
       }
     } finally {
       setIsLoading(false);
@@ -840,8 +840,8 @@ const BuyModal = ({ isOpen, onClose, t }) => {
     <Modal isOpen={isOpen} onClose={onClose} title={t('hero.join_presale')} headerColor="bg-pepe-green">
       <div className="space-y-6 sm:space-y-8">
         <div className="text-center space-y-2 sm:space-y-4">
-          <h4 className="text-xl sm:text-3xl font-black uppercase italic animate-title-gradient">Phase 1 is Live!</h4>
-          <p className="text-base sm:text-xl font-bold text-gray-600">1 $PWIFE = 0.00012 USDT</p>
+          <h4 className="text-xl sm:text-3xl font-black uppercase italic animate-title-gradient">{t('buy_modal.phase_live')}</h4>
+          <p className="text-base sm:text-xl font-bold text-gray-600">{t('buybox.price_line')}</p>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
@@ -850,13 +850,13 @@ const BuyModal = ({ isOpen, onClose, t }) => {
               onClick={() => setSolCurrency('SOL')}
               className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all text-sm sm:text-base ${currency === 'SOL' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
             >
-              Pay with SOL
+              {t('buy_modal.pay_sol')}
             </button>
             <button 
               onClick={() => setSolCurrency('USDT')}
               className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border-4 border-pepe-black font-black uppercase italic transition-all text-sm sm:text-base ${currency === 'USDT' ? 'bg-pepe-yellow shadow-[4px_4px_0_0_#000]' : 'bg-gray-100'}`}
             >
-              Pay with USDT
+              {t('buy_modal.pay_usdt')}
             </button>
           </div>
 
@@ -872,7 +872,7 @@ const BuyModal = ({ isOpen, onClose, t }) => {
           </div>
 
           <div className="bg-pepe-black text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border-4 border-pepe-black flex justify-between items-center">
-            <span className="font-black uppercase text-xs sm:text-base">You will get:</span>
+            <span className="font-black uppercase text-xs sm:text-base">{t('buy_modal.you_will_get')}</span>
             <span className="text-lg sm:text-2xl font-black text-pepe-yellow">{amount ? (amount * 8333).toLocaleString() : '0'} $PWIFE</span>
           </div>
 
@@ -881,13 +881,13 @@ const BuyModal = ({ isOpen, onClose, t }) => {
             disabled={isLoading}
             className={`w-full bg-pepe-green text-pepe-black border-4 border-pepe-black py-4 sm:py-6 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black uppercase italic shadow-[6px_6px_0_0_#000] sm:shadow-[8px_8px_0_0_#000] hover:translate-y-1 transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isLoading ? 'Processing...' : t('buybox.buy_now')}
+            {isLoading ? t('buy_modal.processing') : t('buybox.buy_now')}
           </button>
         </div>
 
         <div className="flex items-center justify-center gap-2 opacity-60">
           <Shield size={16} className="text-pepe-green" />
-          <span className="text-[10px] sm:text-xs font-black uppercase">Secure Transaction by Smart Contract</span>
+          <span className="text-[10px] sm:text-xs font-black uppercase">{t('buy_modal.secure_tx')}</span>
         </div>
       </div>
     </Modal>
@@ -993,19 +993,19 @@ const LandingPage = () => {
           </div>
         </Modal>
 
-        <Modal isOpen={activeModal === 'tokenomics'} onClose={() => setActiveModal(null)} title={t('tokenomics.distribution_title', 'Detailed Tokenomics')} headerColor="bg-pepe-green">
+        <Modal isOpen={activeModal === 'tokenomics'} onClose={() => setActiveModal(null)} title={t('tokenomics.distribution_title')} headerColor="bg-pepe-green">
           <div className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <div className="relative rounded-3xl border-4 border-pepe-black overflow-hidden shadow-[8px_8px_0_0_#000]"><img src={ASSETS.HERO_CHARACTER_IMAGE} alt="Tokenomics" className="w-full h-full object-cover" /></div>
-              <div className="space-y-6"><h4 className="text-3xl font-black uppercase italic text-pepe-green">{t('tokenomics.title')}</h4><p className="text-lg font-bold text-gray-700 leading-relaxed">{t('tokenomics.desc_detailed', 'Pepe Wife features a sustainable economic model designed for long-term growth and community rewards. Our zero-tax policy ensures maximum efficiency for traders.')}</p><div className="grid grid-cols-2 gap-4"><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.zero_tax')}</div><div className="text-xl font-black text-pepe-green">0% BUY / 0% SELL</div></div><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.total_supply_label', 'Total Supply')}</div><div className="text-xl font-black text-pepe-pink">1 BILLION</div></div></div></div>
+              <div className="space-y-6"><h4 className="text-3xl font-black uppercase italic text-pepe-green">{t('tokenomics.title')}</h4><p className="text-lg font-bold text-gray-700 leading-relaxed">{t('tokenomics.desc_detailed')}</p><div className="grid grid-cols-2 gap-4"><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.zero_tax')}</div><div className="text-xl font-black text-pepe-green">{t('tokenomics.zero_tax_value')}</div></div><div className="bg-gray-50 p-4 rounded-2xl border-2 border-pepe-black/10"><div className="text-xs font-black text-gray-400 uppercase">{t('tokenomics.total_supply_label')}</div><div className="text-xl font-black text-pepe-pink">{t('tokenomics.total_supply_value')}</div></div></div></div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left rtl:text-right border-collapse">
-                <thead><tr className="bg-pepe-green/20"><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_category', 'Category')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_percentage', 'Percentage')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_amount', 'Amount')}</th></tr></thead>
-                <tbody>{[{ cat: t('tokenomics.category_presale', 'Presale'), pct: '40%', amt: '400,000,000' }, { cat: t('tokenomics.category_liquidity', 'Liquidity'), pct: '30%', amt: '300,000,000' }, { cat: t('tokenomics.category_staking', 'Staking'), pct: '15%', amt: '150,000,000' }, { cat: t('tokenomics.category_team', 'Team'), pct: '10%', amt: '100,000,000' }, { cat: t('tokenomics.category_marketing', 'Marketing'), pct: '5%', amt: '50,000,000' }].map((row, i) => (<tr key={i} className="border-4 border-pepe-black font-bold"><td className="p-4 border-4 border-pepe-black uppercase">{row.cat}</td><td className="p-4 border-4 border-pepe-black text-pepe-pink">{row.pct}</td><td className="p-4 border-4 border-pepe-black">{row.amt}</td></tr>))}</tbody>
+                <thead><tr className="bg-pepe-green/20"><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_category')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_percentage')}</th><th className="p-4 border-4 border-pepe-black font-black uppercase italic">{t('tokenomics.table_header_amount')}</th></tr></thead>
+                <tbody>{[{ cat: t('tokenomics.category_presale'), pct: '40%', amt: '400,000,000' }, { cat: t('tokenomics.category_liquidity'), pct: '30%', amt: '300,000,000' }, { cat: t('tokenomics.category_staking'), pct: '15%', amt: '150,000,000' }, { cat: t('tokenomics.category_team'), pct: '10%', amt: '100,000,000' }, { cat: t('tokenomics.category_marketing'), pct: '5%', amt: '50,000,000' }].map((row, i) => (<tr key={i} className="border-4 border-pepe-black font-bold"><td className="p-4 border-4 border-pepe-black uppercase">{row.cat}</td><td className="p-4 border-4 border-pepe-black text-pepe-pink">{row.pct}</td><td className="p-4 border-4 border-pepe-black">{row.amt}</td></tr>))}</tbody>
               </table>
             </div>
-            <div className="text-center text-xl font-black uppercase italic py-4 bg-pepe-yellow/10 border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">{t('tokenomics.total_supply', 'Total Supply: 1,000,000,000 $PWIFE')}</div>
+            <div className="text-center text-xl font-black uppercase italic py-4 bg-pepe-yellow/10 border-4 border-pepe-black rounded-2xl shadow-[4px_4px_0_0_#000]">{t('tokenomics.total_supply')}</div>
           </div>
         </Modal>
 
@@ -1030,7 +1030,7 @@ const LandingPage = () => {
     );
   } catch (error) {
     console.error("LandingPage CRITICAL RENDER ERROR:", error);
-    return <div style={{ padding: 50, color: 'red' }}>LandingPage Error: {error.message}</div>;
+    return <div style={{ padding: 50, color: 'red' }}>{t('error_boundary.title')}: {error.message}</div>;
   }
 };
 
