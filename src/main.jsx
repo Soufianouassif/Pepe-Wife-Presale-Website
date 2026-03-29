@@ -1,10 +1,13 @@
 import './polyfills';
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { PrivyProvider } from '@privy-io/react-auth'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './index.css'
 import './i18n/config'
+
+const PRIVY_APP_ID = import.meta?.env?.VITE_PRIVY_APP_ID || 'cmmotgl8z01t20clb428rweyu'
 
 try {
   const rootElement = document.getElementById('root');
@@ -15,9 +18,20 @@ try {
   const root = ReactDOM.createRoot(rootElement);
   
   root.render(
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <PrivyProvider
+      appId={PRIVY_APP_ID}
+      config={{
+        loginMethods: ['google', 'twitter', 'telegram', 'email'],
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+        },
+        appName: 'Pepe Wife Presale',
+      }}
+    >
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </PrivyProvider>
   )
 } catch (e) {
   console.error("Main.jsx: CRITICAL RENDER FAILURE", e);

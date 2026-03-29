@@ -167,14 +167,13 @@ const ConnectPage = () => {
       console.error(`ConnectPage: Social login error (${loginProvider}):`, err);
       setStatus('idle');
       
-      // Detailed error messages based on common Web3Auth issues
+      // Detailed error messages based on common Privy/social issues
       let friendlyMsg = err.message || `${loginProvider} login failed.`;
-      if (friendlyMsg.includes('clientId')) friendlyMsg = "Web3Auth Client ID is invalid or for wrong network.";
-      if (friendlyMsg.includes('whitelist')) friendlyMsg = "This domain is not whitelisted in Web3Auth Dashboard.";
-      if (friendlyMsg.includes('origin')) friendlyMsg = "Domain mismatch. Check Web3Auth Dashboard settings.";
-      if (friendlyMsg.toLowerCase().includes('timeout')) friendlyMsg = "Login timed out. Verify Web3Auth Allowed Origins and social Connection IDs in dashboard.";
-      if (friendlyMsg.toLowerCase().includes('connection id')) friendlyMsg = "Missing social Connection ID in Web3Auth dashboard/env settings.";
-      if (friendlyMsg.toLowerCase().includes('invalid auth connection')) friendlyMsg = "Invalid social connection config. Verify provider type and Connection ID for Google/X/Telegram/Email in Web3Auth dashboard.";
+      if (friendlyMsg.toLowerCase().includes('email_required')) friendlyMsg = "Please enter a valid email before Email OTP login.";
+      if (friendlyMsg.toLowerCase().includes('sdk is not ready')) friendlyMsg = "Privy is still initializing. Try again in a few seconds.";
+      if (friendlyMsg.toLowerCase().includes('origin')) friendlyMsg = "Domain mismatch. Verify Allowed Origins in Privy dashboard.";
+      if (friendlyMsg.toLowerCase().includes('timeout')) friendlyMsg = "Login timed out. Verify Privy setup and Allowed Origins.";
+      if (friendlyMsg.toLowerCase().includes('solana embedded wallet')) friendlyMsg = "Enable Solana embedded wallet in Privy dashboard.";
       if (friendlyMsg.includes('Duplicate')) friendlyMsg = "An account already exists with this method.";
       
       setError(friendlyMsg);
