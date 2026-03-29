@@ -453,8 +453,14 @@ const DashboardPage = () => {
                 <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
                   <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.roi_calculator')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className={`p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
-                    <input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className={`p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                    <div className="space-y-2">
+                      <label className="text-sm font-black">{t('dashboard_pro.overview.investment_label')}</label>
+                      <input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className={`p-3 rounded-xl border-2 font-bold w-full ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-black">{t('dashboard_pro.overview.target_label')}</label>
+                      <input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className={`p-3 rounded-xl border-2 font-bold w-full ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                    </div>
                   </div>
                   {'error' in roiResult ? (
                     <p className="text-sm font-black text-red-500 mt-4">{t('dashboard_pro.overview.invalid_roi')}</p>

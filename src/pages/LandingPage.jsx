@@ -237,7 +237,7 @@ const HeroSection = ({ t, openBuyModal }) => {
           <span className="bg-pepe-pink text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[4px_4px_0_0_#000] sm:shadow-[6px_6px_0_0_#000] rotate-[-2deg] inline-block mb-6 sm:mb-8 text-xs sm:text-base">
             {t('hero.badge')}
           </span>
-          <h1 className="text-3xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter leading-[1] sm:leading-[0.85] mb-8 sm:mb-12 text-pepe-black drop-shadow-[4px_4px_0px_rgba(255,255,255,1)] sm:drop-shadow-[10px_10px_0px_rgba(255,255,255,1)] uppercase italic animate-title-gradient break-words">
+          <h1 className="text-3xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter leading-[1] sm:leading-[0.85] mb-8 sm:mb-12 text-pepe-black uppercase italic animate-title-gradient break-words">
             {t('hero.title_meet')} {t('hero.title_pepe')}<br />
             {t('hero.title_wife')}
           </h1>
@@ -270,6 +270,7 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
   const [amount, setAmount] = useState('');
   const [isDoorOpen, setIsDoorOpen] = useState(false);
   const currentPrice = PRESALE_CONFIG.currentPhase.priceUsd.toFixed(8);
+  const landingRange = getPaymentRange('USDT');
   return (
     <section className="py-16 sm:py-24 min-h-[760px] lg:min-h-[860px] relative overflow-hidden flex items-center bg-[#78D7FF]">
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -327,13 +328,19 @@ const BuyBoxSection = ({ t, openModal, openBuyModal }) => {
                       </div>
                     </div>
                     <div className="space-y-4 sm:space-y-6 max-w-xl mx-auto">
+                      <label className="block text-xs sm:text-sm font-black uppercase tracking-wide text-pepe-black text-center">
+                        {t('buybox.input_label')}
+                      </label>
                       <input
                         type="number"
+                        min={landingRange.min}
+                        max={landingRange.max}
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder={t('buybox.input_placeholder')}
                         className="w-full bg-white border-4 border-pepe-black rounded-xl sm:rounded-[1.3rem] px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-xl font-black outline-none transition-all placeholder:text-gray-400 text-center shadow-[4px_4px_0px_0px_rgba(10,10,10,1)] sm:shadow-[6px_6px_0px_0px_rgba(10,10,10,1)] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_rgba(10,10,10,1)]"
                       />
+                      <p className="text-[11px] sm:text-xs font-bold text-gray-600 text-center">{t('buy_modal.range_hint', { min: landingRange.min, max: landingRange.max })}</p>
                       <div className="flex flex-col space-y-3 sm:space-y-4">
                         <Button
                           variant="primary"
@@ -522,7 +529,7 @@ const WhyBuySection = ({ t }) => (
       <div className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center">
         <div className="space-y-6 sm:space-y-8 text-center lg:text-left rtl:lg:text-right">
           <span className="btn-secondary py-2 px-6 rotate-[-3deg] inline-block text-xs sm:text-base">{t('whybuy.badge')}</span>
-          <h2 className="text-2xl sm:text-5xl lg:text-7xl font-black uppercase italic leading-[1.1] lg:leading-[0.9] drop-shadow-[4px_4px_0px_rgba(10,10,10,1)] lg:drop-shadow-[8px_8px_0px_rgba(10,10,10,1)] animate-title-gradient">
+          <h2 className="text-2xl sm:text-5xl lg:text-7xl font-black uppercase italic leading-[1.1] lg:leading-[0.9] animate-title-gradient">
             {t('whybuy.title_why')} <br />{t('whybuy.title_pepewife')}
           </h2>
           <p className="text-sm sm:text-2xl font-bold text-gray-800 leading-snug max-w-2xl mx-auto lg:mx-0 drop-shadow-sm">
@@ -637,7 +644,7 @@ const WhitepaperSection = ({ t, openModal }) => {
             <span className="bg-pepe-yellow text-pepe-black px-6 py-2 rounded-full border-4 border-pepe-black font-black uppercase tracking-widest shadow-[4px_4px_0_0_#39FF14] rotate-[-2deg] inline-block text-sm">
               {t('whitepaper.badge')}
             </span>
-            <h2 className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase italic leading-none text-pepe-green drop-shadow-[4px_4px_0px_rgba(255,255,255,0.1)]">
+            <h2 className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase italic leading-none text-pepe-green">
               {t('whitepaper.title')}
             </h2>
             <p className="text-base sm:text-2xl font-bold text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -720,7 +727,7 @@ const Footer = ({ t }) => (
         </div>
         {['links', 'community', 'legal'].map(cat => (
           <div key={cat}>
-            <h4 className="text-xl sm:text-2xl font-black uppercase italic text-pepe-pink mb-6 sm:mb-10 drop-shadow-[2px_2px_0px_rgba(255,255,255,0.1)]">{t(`footer.${cat}_title`)}</h4>
+            <h4 className="text-xl sm:text-2xl font-black uppercase italic text-pepe-pink mb-6 sm:mb-10">{t(`footer.${cat}_title`)}</h4>
             <ul className="space-y-4 sm:space-y-6 text-base sm:text-lg font-black uppercase text-white/80">
               {cat === 'links' ? ['presale', 'tokenomics', 'roadmap', 'whitepaper'].map(l => <li key={l}><a href={`#${l === 'presale' ? '' : l}`} className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{t(`nav.${l}` === 'nav.presale' ? 'nav.home' : `nav.${l}`)}</a></li>) :
                cat === 'community' ? ['x', 'telegram', 'instagram', 'discord'].map(l => <li key={l}><a href="#" className="hover:text-pepe-green transition-all hover:translate-x-1 inline-block">{t(`footer.community_links.${l}`)}</a></li>) :
