@@ -499,7 +499,7 @@ export const WalletProvider = ({ children }) => {
           name: "Pepe Wife",
           description: "Pepe Wife Presale",
           url: window.location.origin,
-          icons: [window.location.origin + "/logo.png"],
+          icons: [window.location.origin + "/assets/hero-character.png"],
         },
       });
       await wcProvider.connect();

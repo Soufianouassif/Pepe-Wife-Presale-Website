@@ -11,6 +11,7 @@ import MoneyRain from '../components/MoneyRain';
 import TokenomicsBackground from '../components/TokenomicsBackground';
 import RiskWarningBackground from '../components/RiskWarningBackground';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import BrandLogo from '../components/BrandLogo';
 import { PRESALE_CONFIG, TOKENS_PER_USDT } from '../presaleConfig';
 import { validatePaymentAmount, getPaymentRange, clampPaymentAmount } from '../utils/amountValidation';
 import EthereumUsdtNotice from '../components/EthereumUsdtNotice';
@@ -719,10 +720,12 @@ const Footer = ({ t }) => (
     <div className="section-container">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 sm:gap-16 mb-16 sm:mb-24 text-center md:text-left rtl:md:text-right">
         <div className="sm:col-span-2 md:col-span-1 space-y-6 sm:space-y-8">
-          <div className="flex items-center justify-center md:justify-start space-x-3 space-x-reverse">
-            <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" loading="lazy" />
-            <span className="text-3xl sm:text-4xl font-black uppercase text-white">{t('brand.name')}</span>
-          </div>
+          <BrandLogo
+            size="lg"
+            className="justify-center md:justify-start"
+            nameClassName="text-white"
+            symbolClassName="text-white/80"
+          />
           <p className="text-lg sm:text-xl font-bold text-white/60">{t('footer.desc')}</p>
         </div>
         {['links', 'community', 'legal'].map(cat => (
@@ -751,19 +754,9 @@ const Navbar = ({ isOpen, setIsOpen, t, openModal }) => {
         {ASSETS.NAVBAR_BACKGROUND_IMAGE === '/assets/navbar-bg.png' ? <div className="w-full h-full bg-white" /> : <img src={ASSETS.NAVBAR_BACKGROUND_IMAGE} alt="Nav BG" className="w-full h-full object-cover" />}
       </div>
       <div className="relative z-10 h-full px-3 sm:px-8 flex items-center justify-between">
-        <div className="flex items-center space-x-2 sm:space-x-3 space-x-reverse cursor-pointer group shrink-0" onClick={() => openModal('home')}>
-          <div className="flex items-center space-x-2 space-x-reverse group-hover:scale-105 transition-transform">
-            <img src={ASSETS.HERO_CHARACTER_IMAGE} alt="PW" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" />
-            <div className="flex flex-col justify-center">
-              <span className="text-sm sm:text-xl font-black uppercase leading-none bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                {t('brand.name')}
-              </span>
-              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-pepe-green to-gray-400 bg-clip-text text-transparent animate-gradient-text">
-                {t('brand.symbol')}
-              </span>
-            </div>
-          </div>
-        </div>
+        <button className="cursor-pointer group shrink-0" onClick={() => openModal('home')}>
+          <BrandLogo size="md" className="group-hover:scale-105 transition-transform" />
+        </button>
 
         <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 space-x-reverse">
           {[{ id: 'home', label: t('nav.home') }, { id: 'about', label: t('nav.about') }, { id: 'tokenomics', label: t('nav.tokenomics') }, { id: 'roadmap', label: t('nav.roadmap') }, { id: 'faq', label: t('nav.faq') }].map((item) => (

@@ -7,6 +7,7 @@ import {
   Search, Download, Save, RefreshCw
 } from '../components/icons';
 import { useTranslation } from 'react-i18next';
+import BrandLogo from '../components/BrandLogo';
 
 const AdminPage = () => {
   const { t, i18n } = useTranslation();
@@ -36,7 +37,7 @@ const AdminPage = () => {
           <div className="w-10 h-10 bg-pepe-yellow rounded-xl flex items-center justify-center border-2 border-white shadow-[4px_4px_0_0_#FF69B4]">
             <ShieldCheck size={24} className="text-pepe-black" strokeWidth={3} />
           </div>
-          <span className="text-xl font-black uppercase italic tracking-tighter">{t('admin.hub_title')}</span>
+          <BrandLogo size="sm" nameClassName="text-white" symbolClassName="text-white/80" />
         </div>
 
         <nav className="flex-1 space-y-2">

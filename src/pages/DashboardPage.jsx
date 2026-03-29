@@ -10,6 +10,7 @@ import { calculateProfit } from '../utils/calculator'
 import { getDashboardStats, submitPresaleIntent } from '../services/dashboardApi'
 import { isValidEvmAddress, isValidSolAddress } from '../wallet/adapters'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import BrandLogo from '../components/BrandLogo'
 import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_PHASE_SUPPLY } from '../presaleConfig'
 import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
 import AppIcon from '../components/AppIcon'
@@ -50,9 +51,8 @@ const DashboardPage = () => {
     signMessage
   } = useWallet()
   const isRTL = i18n.language === 'ar'
-  const brandParts = t('brand.name').split(' ')
 
-  const [activeSection, setActiveSection] = useState('overview')
+  const [activeSection, setActiveSection] = useState('buy')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('dashboard-theme') || 'light')
   const [stats, setStats] = useState({
@@ -335,21 +335,21 @@ const DashboardPage = () => {
 
   const cardBase = theme === 'dark'
     ? 'bg-[#0f172a] border-gray-700 text-white'
-    : 'bg-white border-pepe-black text-pepe-black'
+    : 'bg-white/95 border-[#d6e8dc] text-[#123126]'
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-[#F8FAFC] text-pepe-black'} ${isRTL ? 'rtl' : 'ltr'}`}>
-      <header className={`sticky top-0 z-40 border-b-2 ${theme === 'dark' ? 'bg-[#0b1224]/90 border-gray-800' : 'bg-white/95 border-gray-100'} backdrop-blur`}>
+    <div
+      className={`min-h-screen ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-[#F3F8F3] text-[#123126]'} ${isRTL ? 'rtl' : 'ltr'}`}
+      style={theme === 'dark' ? undefined : { backgroundImage: "linear-gradient(rgba(243,248,243,0.92), rgba(243,248,243,0.92)), url('/assets/bab.box')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
+    >
+      <header className={`sticky top-0 z-40 border-b ${theme === 'dark' ? 'bg-[#0b1224]/90 border-gray-800' : 'bg-white/95 border-[#d7e7dd]'} backdrop-blur`}>
         <div className="px-4 lg:px-8 h-20 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button onClick={() => setSidebarOpen((v) => !v)} className={`lg:hidden p-2 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
               {sidebarOpen ? <AppIcon name="close" fallback="close menu" className="text-lg" /> : <AppIcon name="menu" fallback="open menu" className="text-lg" />}
             </button>
-            <button onClick={() => navigate('/')} className="flex items-center gap-2 min-w-0">
-              <img src="/assets/hero-character.png" alt={t('brand.name')} className="w-10 h-10 object-contain shrink-0" />
-              <span className="font-black italic text-2xl leading-none truncate">
-                {brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span>
-              </span>
+            <button onClick={() => navigate('/')} className="min-w-0">
+              <BrandLogo size="md" />
             </button>
           </div>
           <nav className="hidden lg:flex items-center gap-6 min-w-0">
@@ -361,13 +361,17 @@ const DashboardPage = () => {
           </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher className="hidden md:flex" />
-            <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+            <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`hidden sm:flex w-11 h-11 rounded-xl border items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
               {theme === 'dark' ? <AppIcon name="light_mode" fallback="light mode" className="text-base" /> : <AppIcon name="dark_mode" fallback="dark mode" className="text-base" />}
             </button>
-            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border-2 max-w-[240px] ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+            <button className="hidden md:flex h-11 px-5 rounded-xl bg-gradient-to-r from-[#42c96f] to-[#0f7a4d] text-white font-black items-center gap-2">
+              <AppIcon name="rocket_launch" fallback="buy now" className="text-sm" />
+              {t('hero.join_presale')}
+            </button>
+            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border max-w-[240px] ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
               <span className="font-black text-xs truncate">{formatAddress(address)}</span>
             </div>
-            <button onClick={() => handleCopy(address, 'navbar')} className={`h-11 px-3 rounded-xl border-2 font-black text-xs flex items-center gap-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+            <button onClick={() => handleCopy(address, 'navbar')} className={`h-11 px-3 rounded-xl border font-black text-xs flex items-center gap-2 ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
               <AppIcon name="content_copy" fallback="copy address" className={`text-sm ${copied === 'navbar' ? 'text-pepe-pink' : ''}`} />
               {copied === 'navbar' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}
             </button>
@@ -377,7 +381,7 @@ const DashboardPage = () => {
 
       <div className="flex">
         <aside className={`${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')} lg:translate-x-0 fixed lg:static inset-y-0 top-20 ${isRTL ? 'right-0' : 'left-0'} z-30 w-72 p-4 transition-transform duration-300`}>
-          <div className={`h-full rounded-3xl border-4 p-4 ${cardBase}`}>
+          <div className={`h-full rounded-3xl border p-4 ${cardBase}`}>
             <div className="space-y-2">
               {sidebarItems.map((item) => {
                 return (
@@ -387,25 +391,23 @@ const DashboardPage = () => {
                       setActiveSection(item.id)
                       setSidebarOpen(false)
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
                       activeSection === item.id
-                        ? 'bg-pepe-black text-white border-pepe-black'
-                        : `${theme === 'dark' ? 'border-gray-700 text-gray-200' : 'border-pepe-black/20 text-pepe-black'}`
+                        ? 'bg-gradient-to-r from-[#0f7a4d] to-[#0a5d3b] text-white border-transparent'
+                        : `${theme === 'dark' ? 'border-gray-700 text-gray-200' : 'border-[#d7e7dd] text-[#123126] bg-white'}`
                     } ${!item.enabled ? 'opacity-60' : ''}`}
                   >
                       <span className="flex items-center gap-3 min-w-0">
-                      <AppIcon name={item.icon} fallback={t(item.labelKey)} className="text-lg" />
+                        <AppIcon name={item.icon} fallback={t(item.labelKey)} className="text-lg" />
                         <span className="font-black text-sm truncate">{t(item.labelKey)}</span>
-                    </span>
+                      </span>
+                    {item.id === 'tokens' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e8f8ee] text-[#0f7a4d] font-black">NEW</span>}
                     {!item.enabled && <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span>}
                   </button>
                 )
               })}
             </div>
-            <button
-              onClick={handleLogout}
-              className={`mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-black ${theme === 'dark' ? 'border-red-500/40 text-red-300' : 'border-red-500/30 text-red-600'}`}
-            >
+            <button onClick={handleLogout} className={`mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border font-black ${theme === 'dark' ? 'border-red-500/40 text-red-300' : 'border-red-500/30 text-red-600 bg-white'}`}>
               <AppIcon name="logout" fallback="logout" className="text-base" />
               {t('dashboard_pro.logout')}
             </button>
@@ -528,55 +530,119 @@ const DashboardPage = () => {
           )}
 
           {activeSection === 'buy' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-6 ${cardBase}`}>
-              <h3 className="text-2xl font-black">{t('dashboard_pro.buy.title')}</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.current_price')}</p>
-                    <p className="text-2xl font-black mt-1">${stats.tokenPriceUsd.toFixed(8)}</p>
-                    <p className="text-[11px] font-black opacity-60 mt-1">{t('dashboard_pro.buy.phase_supply', { supply: Number(stats.presaleAvailable || 0).toLocaleString() })}</p>
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+              <div className={`xl:col-span-8 rounded-3xl border p-5 md:p-6 ${cardBase}`}>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">🔥</span>
+                  <h3 className="text-3xl font-black tracking-tight">{t('dashboard_pro.buy.title')}</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet_overview.total_value')}</p>
+                    <p className="text-3xl font-black text-[#0f7a4d]">${totalWalletUsd.toFixed(0)}</p>
                   </div>
-                  <label className="text-sm font-black">{t('dashboard_pro.buy.payment_currency')}</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.pairs')}</p>
+                    <p className="text-3xl font-black">${Math.round(buyTotalCost).toLocaleString()}</p>
+                  </div>
+                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.tokens.total_bought')}</p>
+                    <p className="text-3xl font-black text-[#0f7a4d]">{totalBoughtTokens.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-[#d7e7dd] bg-white p-4 md:p-5 space-y-4">
+                  <div>
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.current_price')}</p>
+                    <p className="text-4xl font-black text-[#0f7a4d]">${stats.tokenPriceUsd.toFixed(8)} <span className="text-xl text-[#4b6b5c]">{PROJECT_CURRENCY_NAME}</span></p>
+                    <p className="text-sm font-black opacity-70">{t('dashboard_pro.buy.phase_supply', { supply: Number(stats.presaleAvailable || 0).toLocaleString() })}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 rounded-2xl p-1 border border-[#d7e7dd] bg-[#f6fbf8]">
                     {['SOL', 'USDT'].map((currency) => (
-                      <button key={currency} onClick={() => {
-                        setBuyCurrency(currency)
-                        if (buyPaymentAmount) {
-                          const v = validatePaymentAmount(buyPaymentAmount, currency)
-                          setBuyAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }))
-                        }
-                      }} className={`p-3 rounded-xl border-2 font-black ${buyCurrency === currency ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
+                      <button
+                        key={currency}
+                        onClick={() => {
+                          setBuyCurrency(currency)
+                          if (buyPaymentAmount) {
+                            const v = validatePaymentAmount(buyPaymentAmount, currency)
+                            setBuyAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }))
+                          }
+                        }}
+                        className={`h-12 rounded-xl font-black transition-all ${buyCurrency === currency ? 'bg-[#1f2d3a] text-white' : 'text-[#2e4a3c]'}`}
+                      >
                         {currency}
                       </button>
                     ))}
                   </div>
-                  <label className="text-sm font-black">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
-                  <input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} className={`w-full p-3 rounded-xl border-2 font-bold ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
-                  <p className="text-[11px] font-bold opacity-70">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
-                  {buyAmountError && <p className="text-xs font-black text-red-500">{buyAmountError}</p>}
-                  {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
-                  <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.total_cost')}</p>
-                    <p className="text-xl font-black mt-1">${buyTotalCost.toFixed(2)} ≈ {buyCostInSelectedCurrency.toFixed(4)} {buyCurrency}</p>
-                    <p className="text-xs font-black opacity-60 mt-1">{t('dashboard_pro.buy.estimated_receive', { amount: buyTokenAmount.toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-black">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
+                    <input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} className="w-full h-14 rounded-2xl border border-[#d7e7dd] bg-white px-4 text-2xl font-black text-[#123126]" />
+                    <p className="text-[11px] font-bold opacity-70">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
+                    {buyAmountError && <p className="text-xs font-black text-red-500">{buyAmountError}</p>}
+                    {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
                   </div>
-                </div>
-                <div className={`rounded-2xl border-2 p-5 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
-                  <h4 className="font-black text-lg mb-3">{t('dashboard_pro.buy.security_title')}</h4>
-                  <ul className="space-y-2 text-sm font-bold">
-                    <li>{t('dashboard_pro.buy.security_1')}</li>
-                    <li>{t('dashboard_pro.buy.security_2')}</li>
-                    <li>{t('dashboard_pro.buy.security_3')}</li>
-                  </ul>
+
+                  <div className="rounded-2xl border border-[#d7e7dd] bg-[#f6fbf8] p-3">
+                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.estimated_receive', { amount: buyTokenAmount.toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
+                    <p className="text-4xl font-black text-[#0f7a4d]">{buyTokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+                    <p className="text-lg font-black text-[#4b6b5c]">${buyTotalCost.toFixed(2)} ≈ {buyCostInSelectedCurrency.toFixed(4)} {buyCurrency}</p>
+                  </div>
+
                   <button
                     onClick={handleBuy}
                     disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError}
-                    className="mt-5 w-full p-4 rounded-xl border-2 border-pepe-black bg-pepe-pink text-white font-black disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d] text-white font-black text-2xl disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {txProcessing && <AppIcon name="progress_activity" fallback="loading" className="text-lg animate-spin" />}
                     {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
                   </button>
+                </div>
+              </div>
+
+              <div className="xl:col-span-4 space-y-4">
+                <div className={`rounded-3xl border p-5 ${cardBase}`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">🔥</span>
+                    <h4 className="text-3xl font-black tracking-tight">Phase Progress</h4>
+                  </div>
+                  <div className="h-6 rounded-full bg-[#e8f6ee] border border-[#cfe9db] overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d]" style={{ width: `${Math.min(100, Math.max(1, referralProgress))}%` }} />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-sm font-black text-[#1d5a3f]">
+                    <span>{Math.min(100, Math.max(1, referralProgress))}% SOLD</span>
+                    <span>{Math.min(100, Math.max(1, referralProgress))}%</span>
+                  </div>
+                </div>
+
+                <div className={`rounded-3xl border p-5 ${cardBase}`}>
+                  <ul className="space-y-3 text-base font-black">
+                    <li className="flex items-center gap-2">✅ Liquidity Locked</li>
+                    <li className="flex items-center gap-2">✅ Mint Revoked</li>
+                    <li className="flex items-center gap-2">✅ Contract Verified</li>
+                  </ul>
+                  <div className="mt-4 border-t border-[#d7e7dd] pt-3">
+                    <p className="text-xs font-black opacity-60">Presale Contract Address</p>
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className="font-black truncate">{formatAddress(address)}</p>
+                      <button onClick={() => handleCopy(address, 'sidebar')} className="text-[#0f7a4d] font-black text-xs">Copy</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`rounded-3xl border p-5 relative overflow-hidden ${cardBase}`}>
+                  <h4 className="text-2xl font-black mb-3">Recent Transactions</h4>
+                  <div className="space-y-2">
+                    {transactions.slice(0, 4).map((tx) => (
+                      <div key={tx.id} className="grid grid-cols-3 gap-2 text-sm font-black border-b border-[#e3efe8] pb-2">
+                        <span className="opacity-70">{new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span>{t(`dashboard_pro.transactions.types.${tx.type}`)}</span>
+                        <span className="text-right truncate">{Number(tx.tokenAmount).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-4 -right-3 w-28 h-28 object-contain opacity-95 pointer-events-none" />
                 </div>
               </div>
             </div>

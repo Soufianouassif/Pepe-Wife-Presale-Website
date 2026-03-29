@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import BrandLogo from '../components/BrandLogo';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   AlertCircle, X
@@ -82,7 +83,6 @@ const ConnectPage = () => {
   const { connectEVMWallet, connectSolanaWallet, connectWalletConnect } = useWallet();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
-  const brandParts = t('brand.name').split(' ');
   const [status, setStatus] = useState('idle'); 
   const [error, setError] = useState(null);
 
@@ -149,8 +149,7 @@ const ConnectPage = () => {
         </button>
         <div className="flex items-center gap-2">
           <LanguageSwitcher className="hidden sm:flex" />
-          <img src="/assets/hero-character.png" alt="Logo" className="w-10 h-10 object-contain" />
-          <span className="text-xl font-black italic">{brandParts[0] || 'PEPE'}<span className="text-pepe-pink">{brandParts[1] || 'WIFE'}</span></span>
+          <BrandLogo size="md" />
         </div>
       </header>
 
