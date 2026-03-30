@@ -22,6 +22,10 @@ import {
   Wallet,
   CircleCheck,
   ArrowUpRight,
+  Activity,
+  CircleDollarSign,
+  TrendingDown,
+  TrendingUp,
   BadgeCheck,
   Mail,
   HelpCircle
@@ -118,6 +122,7 @@ const DashboardPage = () => {
   const [txTypeFilter, setTxTypeFilter] = useState('all')
   const [txRangeFilter, setTxRangeFilter] = useState('30d')
   const [performanceRange, setPerformanceRange] = useState('30d')
+  const [hoveredPointIndex, setHoveredPointIndex] = useState(null)
   const [roiInvestment, setRoiInvestment] = useState('1000')
   const [roiTargetPrice, setRoiTargetPrice] = useState('0.0003')
   const [buyCurrency, setBuyCurrency] = useState('SOL')
@@ -209,6 +214,7 @@ const DashboardPage = () => {
   const buyTransactions = useMemo(() => transactions.filter((tx) => tx.type === 'buy'), [transactions])
   const totalBoughtTokens = useMemo(() => buyTransactions.reduce((sum, tx) => sum + tx.tokenAmount, 0), [buyTransactions])
   const roiResult = useMemo(() => calculateProfit(roiInvestment, stats.tokenPriceUsd, roiTargetPrice, 0), [roiInvestment, roiTargetPrice, stats.tokenPriceUsd])
+  const totalVolumeUsd = useMemo(() => transactions.reduce((sum, tx) => sum + tx.usdAmount, 0), [transactions])
 
   const performanceSeries = useMemo(() => {
     const pointsMap = { '7d': 7, '30d': 12, '90d': 20 }
@@ -221,17 +227,36 @@ const DashboardPage = () => {
     })
   }, [performanceRange, stats.tokenPriceUsd])
 
-  const chartPath = useMemo(() => {
-    if (!performanceSeries.length) return ''
+  const performanceChart = useMemo(() => {
+    const width = 760
+    const height = 280
+    const padding = { top: 20, right: 18, bottom: 24, left: 18 }
+    if (!performanceSeries.length) {
+      return { width, height, padding, points: [], linePath: '', areaPath: '' }
+    }
     const min = Math.min(...performanceSeries)
     const max = Math.max(...performanceSeries)
     const spread = Math.max(max - min, 0.000000001)
-    return performanceSeries.map((value, i) => {
-      const x = (i / Math.max(performanceSeries.length - 1, 1)) * 100
-      const y = 100 - ((value - min) / spread) * 100
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`
-    }).join(' ')
+    const innerWidth = width - padding.left - padding.right
+    const innerHeight = height - padding.top - padding.bottom
+    const points = performanceSeries.map((value, index) => {
+      const x = padding.left + (index / Math.max(performanceSeries.length - 1, 1)) * innerWidth
+      const y = padding.top + (1 - ((value - min) / spread)) * innerHeight
+      return { x, y, value, index }
+    })
+    const linePath = points.reduce((path, point, index) => {
+      if (index === 0) return `M ${point.x} ${point.y}`
+      const prev = points[index - 1]
+      const cpX = (prev.x + point.x) / 2
+      return `${path} C ${cpX} ${prev.y}, ${cpX} ${point.y}, ${point.x} ${point.y}`
+    }, '')
+    const areaPath = points.length
+      ? `${linePath} L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`
+      : ''
+    return { width, height, padding, points, linePath, areaPath }
   }, [performanceSeries])
+
+  const hoveredPoint = hoveredPointIndex === null ? null : performanceChart.points[hoveredPointIndex]
 
   const filteredTransactions = useMemo(() => {
     const now = Date.now()
@@ -454,28 +479,121 @@ const DashboardPage = () => {
   )
 
   const renderPerformance = (
-    <ContentSection>
-      <PageHeader
-        title={t('dashboard_pro.performance.title')}
-        right={
-          <div className="flex items-center gap-2">
-            {['7d', '30d', '90d'].map((range) => (
-              <SecondaryButton key={range} onClick={() => setPerformanceRange(range)} className={performanceRange === range ? 'bg-dashboard-primary text-white border-transparent' : ''}>
-                {t(`dashboard_pro.transactions.range_${range}`)}
-              </SecondaryButton>
-            ))}
+    <ContentSection className="p-6 bg-[rgba(255,255,255,0.8)] backdrop-blur-[10px]">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h3 className="text-[28px] leading-tight font-bold text-[#1F2A1F]">{t('dashboard_pro.performance.title')}</h3>
+          <p className="text-[15px] text-[#667368] mt-1">Track your token growth and performance</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {['7d', '30d', '90d'].map((range) => (
+            <button
+              key={range}
+              type="button"
+              onClick={() => { setPerformanceRange(range); setHoveredPointIndex(null) }}
+              className={`h-10 px-4 rounded-[14px] border text-sm font-semibold transition-colors ${
+                performanceRange === range
+                  ? 'bg-[#5FAE6E] text-white border-transparent'
+                  : 'bg-[rgba(255,255,255,0.9)] text-[#2F6B3E] border-[#DCECDC]'
+              }`}
+            >
+              {t(`dashboard_pro.transactions.range_${range}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 mt-5">
+        <div className="space-y-4">
+          <DashboardCard className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.85)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="relative" onMouseLeave={() => setHoveredPointIndex(null)}>
+              <svg viewBox={`0 0 ${performanceChart.width} ${performanceChart.height}`} className="w-full h-[300px]">
+                <defs>
+                  <linearGradient id="performance-area-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(95,174,110,0.22)" />
+                    <stop offset="100%" stopColor="rgba(95,174,110,0.02)" />
+                  </linearGradient>
+                </defs>
+                {[0, 1, 2, 3, 4].map((step) => {
+                  const y = performanceChart.padding.top + (step / 4) * (performanceChart.height - performanceChart.padding.top - performanceChart.padding.bottom)
+                  return <line key={step} x1={performanceChart.padding.left} y1={y} x2={performanceChart.width - performanceChart.padding.right} y2={y} stroke="rgba(31,42,31,0.07)" strokeWidth="1" />
+                })}
+                <path d={performanceChart.areaPath} fill="url(#performance-area-fill)" />
+                <path d={performanceChart.linePath} fill="none" stroke="#5FAE6E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                {hoveredPoint && <circle cx={hoveredPoint.x} cy={hoveredPoint.y} r="6" fill="#FFFFFF" stroke="#5FAE6E" strokeWidth="3" />}
+                {performanceChart.points.map((point) => (
+                  <circle
+                    key={point.index}
+                    cx={point.x}
+                    cy={point.y}
+                    r="11"
+                    fill="transparent"
+                    onMouseEnter={() => setHoveredPointIndex(point.index)}
+                  />
+                ))}
+              </svg>
+              {hoveredPoint && (
+                <div
+                  className="absolute pointer-events-none rounded-[14px] border border-[#DCECDC] bg-[rgba(255,255,255,0.94)] px-3 py-2 text-[12px] shadow-[0_10px_30px_rgba(0,0,0,0.05)] backdrop-blur-[8px]"
+                  style={{
+                    left: `${(hoveredPoint.x / performanceChart.width) * 100}%`,
+                    top: `${(hoveredPoint.y / performanceChart.height) * 100}%`,
+                    transform: 'translate(-50%, -120%)'
+                  }}
+                >
+                  <p className="font-semibold text-[#2F6B3E]">${hoveredPoint.value.toFixed(8)}</p>
+                  <p className="text-[#667368] mt-0.5">{performanceRange.toUpperCase()} · Point {hoveredPoint.index + 1}</p>
+                </div>
+              )}
+            </div>
+          </DashboardCard>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><CircleDollarSign size={19} /></span>
+                <div>
+                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${stats.tokenPriceUsd.toFixed(8)}</p>
+                  <p className="text-[13px] font-medium text-[#667368] mt-2">{t('dashboard_pro.performance.current')}</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingUp size={19} /></span>
+                <div>
+                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${Math.max(...performanceSeries).toFixed(8)}</p>
+                  <p className="text-[13px] font-medium text-[#667368] mt-2">24H High</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingDown size={19} /></span>
+                <div>
+                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${Math.min(...performanceSeries).toFixed(8)}</p>
+                  <p className="text-[13px] font-medium text-[#667368] mt-2">24H Low</p>
+                </div>
+              </div>
+            </div>
           </div>
-        }
-      />
-      <DashboardCard className="p-4 bg-white/90">
-        <svg viewBox="0 0 100 100" className="w-full h-56">
-          <path d={chartPath} fill="none" stroke="#5FAE6E" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-        </svg>
-      </DashboardCard>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <StatsCard label={t('dashboard_pro.performance.current')} value={`$${stats.tokenPriceUsd.toFixed(8)}`} />
-        <StatsCard label={t('dashboard_pro.performance.high')} value={`$${Math.max(...performanceSeries).toFixed(8)}`} />
-        <StatsCard label={t('dashboard_pro.performance.low')} value={`$${Math.min(...performanceSeries).toFixed(8)}`} />
+        </div>
+        <div className="space-y-4">
+          <GlassPanel className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.8)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <PageHeader title="Quick Insights" />
+            <div className="space-y-3 mt-1">
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Token Price</span><span className="font-semibold text-[#1F2A1F]">${stats.tokenPriceUsd.toFixed(8)}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Market Cap</span><span className="font-semibold text-[#1F2A1F]">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Holders</span><span className="font-semibold text-[#1F2A1F]">{stats.holders.toLocaleString()}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Volume</span><span className="font-semibold text-[#1F2A1F]">${Math.round(totalVolumeUsd).toLocaleString()}</span></div>
+            </div>
+          </GlassPanel>
+          <DashboardCard className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.85)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-semibold text-[#1F2A1F]">Your ROI</h4>
+              <Activity size={19} className="text-[#2F6B3E]" />
+            </div>
+            <p className="text-[44px] leading-none font-bold text-[#5FAE6E] mt-5">+32.5%</p>
+          </DashboardCard>
+        </div>
       </div>
     </ContentSection>
   )
@@ -647,26 +765,28 @@ const DashboardPage = () => {
               {currentSection}
             </main>
 
-            <aside className="hidden xl:block">
-              <div className="space-y-4 sticky top-24">
-                <GlassPanel>
-                  <PageHeader title="Quick Insights" />
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="font-semibold">${stats.tokenPriceUsd.toFixed(8)}</span></div>
-                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="font-semibold">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
-                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="font-semibold">{stats.holders.toLocaleString()}</span></div>
-                  </div>
-                </GlassPanel>
-                <DashboardCard className="relative overflow-hidden">
-                  <PageHeader title="Referral" />
-                  <p className="text-sm text-dashboard-text-secondary">Invite friends and earn rewards</p>
-                  <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm font-semibold">
-                    <ArrowUpRight size={16} /> 20% referral rate
-                  </div>
-                  <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-6 -right-3 w-28 opacity-80 pointer-events-none" />
-                </DashboardCard>
-              </div>
-            </aside>
+            {activeSection !== 'performance' && (
+              <aside className="hidden xl:block">
+                <div className="space-y-4 sticky top-24">
+                  <GlassPanel>
+                    <PageHeader title="Quick Insights" />
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="font-semibold">${stats.tokenPriceUsd.toFixed(8)}</span></div>
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="font-semibold">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="font-semibold">{stats.holders.toLocaleString()}</span></div>
+                    </div>
+                  </GlassPanel>
+                  <DashboardCard className="relative overflow-hidden">
+                    <PageHeader title="Referral" />
+                    <p className="text-sm text-dashboard-text-secondary">Invite friends and earn rewards</p>
+                    <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm font-semibold">
+                      <ArrowUpRight size={16} /> 20% referral rate
+                    </div>
+                    <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-6 -right-3 w-28 opacity-80 pointer-events-none" />
+                  </DashboardCard>
+                </div>
+              </aside>
+            )}
           </div>
         </PageContainer>
 
