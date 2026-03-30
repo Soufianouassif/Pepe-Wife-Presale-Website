@@ -353,9 +353,7 @@ const DashboardPage = () => {
     }
   }
 
-  const cardBase = theme === 'dark'
-    ? 'bg-[#0f172a] border-gray-700 text-white'
-    : 'bg-white/95 border-[#d6e8dc] text-[#123126]'
+  const cardBase = 'bg-white/90 border-[#d6e8dc] text-[#123126] shadow-[0_8px_22px_rgba(15,122,77,0.06)]'
 
   return (
     <AppShell>
@@ -372,7 +370,7 @@ const DashboardPage = () => {
           </div>
           <nav className="hidden lg:flex items-center gap-6 min-w-0">
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className={`font-black text-sm whitespace-nowrap ${theme === 'dark' ? 'text-gray-200 hover:text-pepe-yellow' : 'text-gray-700 hover:text-pepe-pink'}`}>
+              <a key={link.href} href={link.href} className="font-semibold text-sm whitespace-nowrap text-[#28493b] hover:text-[#0f7a4d]">
                 {t(link.labelKey)}
               </a>
             ))}
@@ -553,24 +551,24 @@ const DashboardPage = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                   <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet_overview.total_value')}</p>
-                    <p className="text-3xl font-black text-[#0f7a4d]">${totalWalletUsd.toFixed(0)}</p>
+                    <p className="text-xs font-semibold text-[#6c8177]">Wallet Balance</p>
+                    <p className="text-3xl font-bold text-[#0f7a4d]">$1,240</p>
                   </div>
                   <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.pairs')}</p>
-                    <p className="text-3xl font-black">${Math.round(buyTotalCost).toLocaleString()}</p>
+                    <p className="text-xs font-semibold text-[#6c8177]">Total Invested</p>
+                    <p className="text-3xl font-bold">$800</p>
                   </div>
                   <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.tokens.total_bought')}</p>
-                    <p className="text-3xl font-black text-[#0f7a4d]">{totalBoughtTokens.toLocaleString()}</p>
+                    <p className="text-xs font-semibold text-[#6c8177]">PWIFE Owned</p>
+                    <p className="text-3xl font-bold text-[#0f7a4d]">120,000,000</p>
                   </div>
                 </div>
 
                 <div className="rounded-3xl border border-[#d7e7dd] bg-white p-4 md:p-5 space-y-4">
                   <div>
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.current_price')}</p>
-                    <p className="text-4xl font-black text-[#0f7a4d]">${stats.tokenPriceUsd.toFixed(8)} <span className="text-xl text-[#4b6b5c]">{PROJECT_CURRENCY_NAME}</span></p>
-                    <p className="text-sm font-black opacity-70">{t('dashboard_pro.buy.phase_supply', { supply: Number(stats.presaleAvailable || 0).toLocaleString() })}</p>
+                    <p className="text-xs font-semibold text-[#6c8177]">Buy PWIFE</p>
+                    <p className="text-4xl font-bold text-[#0f7a4d]">$0.00000005 <span className="text-xl text-[#4b6b5c]">PWIFE</span></p>
+                    <p className="text-sm font-semibold text-[#6c8177]">Phase Balance: 1,900,000,000 PWIFE</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 rounded-2xl p-1 border border-[#d7e7dd] bg-[#f6fbf8]">
@@ -600,18 +598,18 @@ const DashboardPage = () => {
                   </div>
 
                   <div className="rounded-2xl border border-[#d7e7dd] bg-[#f6fbf8] p-3">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.buy.estimated_receive', { amount: buyTokenAmount.toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
-                    <p className="text-4xl font-black text-[#0f7a4d]">{buyTokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                    <p className="text-lg font-black text-[#4b6b5c]">${buyTotalCost.toFixed(2)} ≈ {buyCostInSelectedCurrency.toFixed(4)} {buyCurrency}</p>
+                    <p className="text-xs font-semibold text-[#6c8177]">You Receive</p>
+                    <p className="text-4xl font-bold text-[#0f7a4d]">{(buyTokenAmount || 100000000).toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+                    <p className="text-lg font-semibold text-[#4b6b5c]">~ $90 &nbsp;&nbsp;&nbsp;&nbsp; ≈ $190</p>
                   </div>
 
                   <button
                     onClick={handleBuy}
                     disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError}
-                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d] text-white font-black text-2xl disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d] text-white font-bold text-2xl disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {txProcessing && <AppIcon name="progress_activity" fallback="loading" className="text-lg animate-spin" />}
-                    {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
+                    {txProcessing ? t('dashboard_pro.buy.processing') : '🚀 BUY PWIFE NOW'}
                   </button>
                 </div>
               </div>
@@ -623,25 +621,29 @@ const DashboardPage = () => {
                     <h4 className="text-3xl font-black tracking-tight">Phase Progress</h4>
                   </div>
                   <div className="h-6 rounded-full bg-[#e8f6ee] border border-[#cfe9db] overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d]" style={{ width: `${Math.min(100, Math.max(1, referralProgress))}%` }} />
+                    <div className="h-full bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d]" style={{ width: '72%' }} />
                   </div>
                   <div className="mt-2 flex items-center justify-between text-sm font-black text-[#1d5a3f]">
-                    <span>{Math.min(100, Math.max(1, referralProgress))}% SOLD</span>
-                    <span>{Math.min(100, Math.max(1, referralProgress))}%</span>
+                    <span>72% SOLD</span>
+                    <span>72%</span>
+                  </div>
+                  <div className="mt-3 border-t border-[#d7e7dd] pt-3 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-[#6c8177]">Ends in:</span>
+                    <span className="text-3xl font-bold text-[#0f7a4d]">01:01:45</span>
                   </div>
                 </div>
 
                 <div className={`rounded-3xl border p-5 ${cardBase}`}>
-                  <ul className="space-y-3 text-base font-black">
-                    <li className="flex items-center gap-2">✅ Liquidity Locked</li>
-                    <li className="flex items-center gap-2">✅ Mint Revoked</li>
-                    <li className="flex items-center gap-2">✅ Contract Verified</li>
+                  <ul className="space-y-3 text-base font-semibold">
+                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Liquidity Locked</li>
+                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Mint Revoked</li>
+                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Contract Verified</li>
                   </ul>
                   <div className="mt-4 border-t border-[#d7e7dd] pt-3">
                     <p className="text-xs font-black opacity-60">Presale Contract Address</p>
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <p className="font-black truncate">{formatAddress(address)}</p>
-                      <button onClick={() => handleCopy(address, 'sidebar')} className="text-[#0f7a4d] font-black text-xs">Copy</button>
+                      <button onClick={() => handleCopy(address, 'sidebar')} className="text-[#0f7a4d] font-semibold text-xs">Copy</button>
                     </div>
                   </div>
                 </div>
@@ -649,11 +651,15 @@ const DashboardPage = () => {
                 <div className={`rounded-3xl border p-5 relative overflow-hidden ${cardBase}`}>
                   <h4 className="text-2xl font-black mb-3">Recent Transactions</h4>
                   <div className="space-y-2">
-                    {transactions.slice(0, 4).map((tx) => (
-                      <div key={tx.id} className="grid grid-cols-3 gap-2 text-sm font-black border-b border-[#e3efe8] pb-2">
-                        <span className="opacity-70">{new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span>{t(`dashboard_pro.transactions.types.${tx.type}`)}</span>
-                        <span className="text-right truncate">{Number(tx.tokenAmount).toLocaleString()}</span>
+                    {[
+                      { time: '11 min', type: 'Buy', amount: '200,000,000' },
+                      { time: '11 min', type: 'Buy', amount: '200,000,000' },
+                      { time: '9 min', type: 'Airdrop', amount: '750,000' }
+                    ].map((tx, index) => (
+                      <div key={`${tx.time}-${index}`} className="grid grid-cols-3 gap-2 text-sm font-semibold border-b border-[#e3efe8] pb-2">
+                        <span className="opacity-70">{tx.time}</span>
+                        <span>{tx.type}</span>
+                        <span className="text-right truncate">{tx.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -664,11 +670,11 @@ const DashboardPage = () => {
           )}
 
           {activeSection === 'transactions' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+            <ContentSection className="space-y-5">
               <div className="flex flex-wrap gap-3 items-end">
                 <div>
                   <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_type')}</p>
-                  <select value={txTypeFilter} onChange={(e) => setTxTypeFilter(e.target.value)} className={`p-2 rounded-xl border-2 font-black ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`}>
+                  <select value={txTypeFilter} onChange={(e) => setTxTypeFilter(e.target.value)} className="p-2 rounded-xl border border-[#d7e7dd] bg-white font-semibold">
                     <option value="all">{t('dashboard_pro.transactions.types.all')}</option>
                     <option value="buy">{t('dashboard_pro.transactions.types.buy')}</option>
                     <option value="referral">{t('dashboard_pro.transactions.types.referral')}</option>
@@ -677,7 +683,7 @@ const DashboardPage = () => {
                 </div>
                 <div>
                   <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_range')}</p>
-                  <select value={txRangeFilter} onChange={(e) => setTxRangeFilter(e.target.value)} className={`p-2 rounded-xl border-2 font-black ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`}>
+                  <select value={txRangeFilter} onChange={(e) => setTxRangeFilter(e.target.value)} className="p-2 rounded-xl border border-[#d7e7dd] bg-white font-semibold">
                     <option value="7d">{t('dashboard_pro.transactions.range_7d')}</option>
                     <option value="30d">{t('dashboard_pro.transactions.range_30d')}</option>
                     <option value="90d">{t('dashboard_pro.transactions.range_90d')}</option>
@@ -685,10 +691,10 @@ const DashboardPage = () => {
                   </select>
                 </div>
               </div>
-              <div className={`rounded-2xl border-2 overflow-hidden ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+              <div className="rounded-2xl border border-[#d7e7dd] overflow-hidden bg-white/85">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px]">
-                    <thead className={theme === 'dark' ? 'bg-[#0b1224]' : 'bg-gray-50'}>
+                    <thead className="bg-[#f5fbf7]">
                       <tr>
                         <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.date')}</th>
                         <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.type')}</th>
@@ -699,7 +705,7 @@ const DashboardPage = () => {
                     </thead>
                     <tbody>
                       {filteredTransactions.map((tx) => (
-                        <tr key={tx.id} className={`border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                        <tr key={tx.id} className="border-t border-[#e3efe8]">
                           <td className="p-3 text-sm font-bold whitespace-nowrap">{new Date(tx.date).toLocaleDateString()}</td>
                           <td className="p-3 text-sm font-bold">{t(`dashboard_pro.transactions.types.${tx.type}`)}</td>
                           <td className="p-3 text-sm font-bold">{Number(tx.tokenAmount).toLocaleString()} {PROJECT_CURRENCY_NAME}</td>
@@ -716,53 +722,53 @@ const DashboardPage = () => {
                   </table>
                 </div>
               </div>
-            </div>
+            </ContentSection>
           )}
 
           {activeSection === 'performance' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+            <ContentSection className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-2xl font-black">{t('dashboard_pro.performance.title')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {['7d', '30d', '90d'].map((range) => (
-                    <button key={range} onClick={() => setPerformanceRange(range)} className={`px-3 py-2 rounded-xl border-2 text-xs font-black ${performanceRange === range ? 'bg-pepe-black text-white border-pepe-black' : (theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/20')}`}>
+                    <button key={range} onClick={() => setPerformanceRange(range)} className={`px-3 py-2 rounded-xl border text-xs font-semibold ${performanceRange === range ? 'bg-[#0f7a4d] text-white border-transparent' : 'border-[#d7e7dd] bg-white text-[#2d4a3b]'}`}>
                       {t(`dashboard_pro.transactions.range_${range}`)}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
+              <div className="rounded-2xl border border-[#d7e7dd] p-4 bg-white/75">
                 <svg viewBox="0 0 100 100" className="w-full h-56">
                   <path d={chartPath} fill="none" stroke="#ec4899" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
                 </svg>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.current')}</p>
                   <p className="text-xl font-black mt-1">${stats.tokenPriceUsd.toFixed(8)}</p>
                 </div>
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.high')}</p>
                   <p className="text-xl font-black mt-1">${Math.max(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
                 </div>
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.low')}</p>
                   <p className="text-xl font-black mt-1">${Math.min(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
                 </div>
               </div>
-            </div>
+            </ContentSection>
           )}
 
           {activeSection === 'tokens' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+            <ContentSection className="space-y-5">
               <h3 className="text-2xl font-black">{t('dashboard_pro.tokens.title')}</h3>
-              <div className={`p-4 rounded-2xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+              <Card>
                 <p className="text-xs font-black opacity-60">{t('dashboard_pro.tokens.total_bought')}</p>
                 <p className="text-3xl font-black mt-1 break-words">{totalBoughtTokens.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-              </div>
+              </Card>
               <div className="space-y-3">
                 {buyTransactions.map((tx) => (
-                  <div key={tx.id} className={`p-4 rounded-xl border-2 grid grid-cols-1 md:grid-cols-4 gap-3 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <div key={tx.id} className="p-4 rounded-xl border border-[#d7e7dd] bg-white grid grid-cols-1 md:grid-cols-4 gap-3">
                     <p className="text-sm font-black">{new Date(tx.date).toLocaleDateString()}</p>
                     <p className="text-sm font-black break-words">{tx.tokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
                     <p className="text-sm font-black">{tx.usdAmount.toFixed(2)} {tx.currency}</p>
@@ -771,54 +777,54 @@ const DashboardPage = () => {
                 ))}
                 {!buyTransactions.length && <p className="text-sm font-black opacity-70">{t('dashboard_pro.tokens.empty')}</p>}
               </div>
-            </div>
+            </ContentSection>
           )}
 
           {activeSection === 'referral' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-5 ${cardBase}`}>
+            <ContentSection className="space-y-5">
               <h3 className="text-2xl font-black">{t('dashboard_pro.referral.title')}</h3>
-              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700 bg-[#111827]' : 'border-pepe-black/10 bg-gray-50'}`}>
+              <GlassCard>
                 <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.unique_link')}</p>
                 <div className="mt-2 flex flex-col sm:flex-row gap-3">
                   <p className="font-black text-sm break-all flex-1">{referralLink}</p>
-                  <button onClick={() => handleCopy(referralLink, 'referral')} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                  <SecondaryButton onClick={() => handleCopy(referralLink, 'referral')} className="px-4 py-2 font-semibold flex items-center gap-2">
                     <AppIcon name="content_copy" fallback="copy link" className={`text-sm ${copied === 'referral' ? 'text-pepe-pink' : ''}`} />
                     {copied === 'referral' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.referral.copy_link')}
-                  </button>
+                  </SecondaryButton>
                 </div>
-              </div>
+              </GlassCard>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <Card>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.invited')}</p>
                   <p className="text-2xl font-black mt-1">{referralStats.invitedFriends}</p>
-                </div>
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                </Card>
+                <Card>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.active')}</p>
                   <p className="text-2xl font-black mt-1">{referralStats.activeReferrals}</p>
-                </div>
-                <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                </Card>
+                <Card>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.earned')}</p>
                   <p className="text-2xl font-black mt-1">${referralStats.earnedUsd.toFixed(2)}</p>
-                </div>
+                </Card>
               </div>
-              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+              <Card>
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.reward_progress')}</p>
                   <p className="text-xs font-black">{referralProgress}%</p>
                 </div>
-                <div className={`h-3 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
+                <div className="h-3 rounded-full overflow-hidden bg-[#e3efe8]">
                   <div className="h-full bg-pepe-pink transition-all" style={{ width: `${referralProgress}%` }} />
                 </div>
                 <p className="text-xs font-black opacity-70 mt-2">{t('dashboard_pro.referral.next_reward', { amount: referralStats.nextRewardUsd.toFixed(2) })}</p>
-              </div>
-            </div>
+              </Card>
+            </ContentSection>
           )}
 
           {['claim', 'staking'].includes(activeSection) && (
-            <div className={`rounded-3xl border-4 p-8 text-center ${cardBase}`}>
-              <p className="text-3xl font-black">{t('dashboard_pro.soon')}</p>
-              <p className="text-sm font-bold opacity-70 mt-2">{t('dashboard_pro.soon_desc')}</p>
-            </div>
+            <EmptyState
+              title={t('dashboard_pro.soon')}
+              subtitle={t('dashboard_pro.soon_desc')}
+            />
           )}
 
           {activeSection === 'support' && (

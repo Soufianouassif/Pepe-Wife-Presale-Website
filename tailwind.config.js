@@ -14,9 +14,9 @@ export default {
         'pepe-dark-gray': '#1a1a1a',
       },
       fontFamily: {
-        sans: ['Poppins', 'Sora', 'Fredoka', 'system-ui', 'sans-serif'],
-        luckiest: ['Poppins', 'Sora', 'sans-serif'],
-        brand: ['Poppins', 'Sora', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        luckiest: ['Inter', 'sans-serif'],
+        brand: ['Inter', 'sans-serif'],
       },
     },
   },

@@ -6,7 +6,7 @@ export const AppShell = ({ children }) => (
   <div
     className="min-h-screen text-[#123126] relative"
     style={{
-      backgroundImage: "linear-gradient(rgba(245,251,247,0.78), rgba(245,251,247,0.78)), url('/assets/bab.box')",
+      backgroundImage: "linear-gradient(rgba(245,251,247,0.78), rgba(245,251,247,0.78)), url('/assets/bab.png')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
