@@ -449,51 +449,51 @@ const DashboardPage = () => {
           {activeSection === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                <ContentSection className="p-6">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_supply')}</p>
                   <p className="text-3xl font-black mt-2">{stats.totalSupply.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                </div>
-                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                </ContentSection>
+                <ContentSection className="p-6">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.presale_available')}</p>
                   <p className="text-3xl font-black mt-2">{stats.presaleAvailable.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                </div>
-                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                </ContentSection>
+                <ContentSection className="p-6">
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.token_price')}</p>
                   <p className="text-3xl font-black mt-2">${stats.tokenPriceUsd.toFixed(8)}</p>
                   <p className="text-xs font-black opacity-60 mt-2">{t('dashboard_pro.overview.phase_status', { current: stats.currentPhase || PRESALE_CONFIG.currentPhase.id, total: stats.totalPhases || PRESALE_CONFIG.totalPhases })}</p>
-                </div>
+                </ContentSection>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                <ContentSection className="p-6">
                   <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.roi_calculator')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-black">{t('dashboard_pro.overview.investment_label')}</label>
-                      <input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className={`p-3 rounded-xl border-2 font-bold w-full ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                      <Input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className="h-12" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-black">{t('dashboard_pro.overview.target_label')}</label>
-                      <input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className={`p-3 rounded-xl border-2 font-bold w-full ${theme === 'dark' ? 'bg-[#111827] border-gray-700' : 'bg-white border-pepe-black/20'}`} />
+                      <Input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className="h-12" />
                     </div>
                   </div>
                   {'error' in roiResult ? (
                     <p className="text-sm font-black text-red-500 mt-4">{t('dashboard_pro.overview.invalid_roi')}</p>
                   ) : (
                     <div className="mt-4 grid grid-cols-2 gap-4">
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.profit')}</p>
                         <p className="text-xl font-black mt-1">${Number(roiResult.profit).toLocaleString()}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      </Card>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.roi')}</p>
                         <p className="text-xl font-black mt-1">{roiResult.roi}%</p>
-                      </div>
+                      </Card>
                     </div>
                   )}
-                </div>
+                </ContentSection>
 
-                <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+                <ContentSection className="p-6">
                   <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.stats_title')}</h3>
                   {statsLoading ? (
                     <div className="h-40 flex items-center justify-center">
@@ -501,44 +501,44 @@ const DashboardPage = () => {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.market_cap')}</p>
                         <p className="text-xl font-black mt-1">${Math.round(stats.marketCapUsd).toLocaleString()}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      </Card>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_liquidity')}</p>
                         <p className="text-xl font-black mt-1">${Math.round(stats.liquidityUsd).toLocaleString()}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      </Card>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.holders')}</p>
                         <p className="text-xl font-black mt-1">{stats.holders.toLocaleString()}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                      </Card>
+                      <Card className="p-4">
                         <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.pairs')}</p>
                         <p className="text-xl font-black mt-1">${stats.solUsd.toFixed(2)} / ${stats.usdtUsd.toFixed(2)}</p>
-                      </div>
+                      </Card>
                     </div>
                   )}
-                </div>
+                </ContentSection>
               </div>
 
-              <div className={`rounded-3xl border-4 p-6 ${cardBase}`}>
+              <ContentSection className="p-6">
                 <h3 className="text-xl font-black mb-4">{t('dashboard_pro.wallet_overview.title')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  <Card className="p-4 min-w-0">
                     <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet_overview.total_value')}</p>
                     <p className="text-2xl font-black mt-1 truncate">${totalWalletUsd.toFixed(2)}</p>
-                  </div>
-                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  </Card>
+                  <Card className="p-4 min-w-0">
                     <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
                     <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
-                  </div>
-                  <div className={`p-4 rounded-xl border-2 min-w-0 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                  </Card>
+                  <Card className="p-4 min-w-0">
                     <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
                     <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
-                  </div>
+                  </Card>
                 </div>
-              </div>
+              </ContentSection>
             </div>
           )}
 
@@ -571,7 +571,7 @@ const DashboardPage = () => {
                     <p className="text-sm font-semibold text-[#6c8177]">Phase Balance: 1,900,000,000 PWIFE</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 rounded-2xl p-1 border border-[#d7e7dd] bg-[#f6fbf8]">
+                  <div className="grid grid-cols-3 gap-3 rounded-2xl p-1 border border-[#d7e7dd] bg-[#f6fbf8]">
                     {['SOL', 'USDT'].map((currency) => (
                       <button
                         key={currency}
@@ -587,6 +587,7 @@ const DashboardPage = () => {
                         {currency}
                       </button>
                     ))}
+                    <button className="h-12 rounded-xl font-semibold text-[#6c8177] bg-white border border-[#d7e7dd]">MAX</button>
                   </div>
 
                   <div className="space-y-2">
@@ -611,6 +612,17 @@ const DashboardPage = () => {
                     {txProcessing && <AppIcon name="progress_activity" fallback="loading" className="text-lg animate-spin" />}
                     {txProcessing ? t('dashboard_pro.buy.processing') : '🚀 BUY PWIFE NOW'}
                   </button>
+                  <p className="text-center text-lg font-semibold text-[#8f59d1]">Early buyers win the most. 💎</p>
+                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3 flex flex-col md:flex-row items-start md:items-center gap-3 md:justify-between">
+                    <div className="w-full md:w-auto">
+                      <p className="text-2xl font-bold text-[#123126]">Your Referral Link</p>
+                      <CopyInput value="https://pepewife.../" onCopy={() => handleCopy('https://pepewife.../', 'referral-inline')} copyLabel="Copy" />
+                    </div>
+                    <div className="rounded-xl border border-[#d7e7dd] bg-[#f6fbf8] px-3 py-2 min-w-[140px]">
+                      <p className="text-sm font-bold text-[#0f7a4d]">↗ 20% PWIFE</p>
+                      <p className="text-xs font-semibold text-[#6c8177]">Free referral</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -650,6 +662,11 @@ const DashboardPage = () => {
 
                 <div className={`rounded-3xl border p-5 relative overflow-hidden ${cardBase}`}>
                   <h4 className="text-2xl font-black mb-3">Recent Transactions</h4>
+                  <div className="grid grid-cols-3 gap-2 text-sm font-semibold text-[#6c8177] border-b border-[#e3efe8] pb-2 mb-2">
+                    <span>Date</span>
+                    <span>Type</span>
+                    <span className="text-right">Amount</span>
+                  </div>
                   <div className="space-y-2">
                     {[
                       { time: '11 min', type: 'Buy', amount: '200,000,000' },
