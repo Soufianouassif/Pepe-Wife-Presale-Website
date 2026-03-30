@@ -22,7 +22,7 @@ export const dashboardTokens = {
   typography: {
     letterSpacing: '-0.01em',
     lineHeightText: 1.5,
-    lineHeightHeading: 1.25
+    lineHeightHeading: 1.2
   },
   radius: {
     sm: '12px',

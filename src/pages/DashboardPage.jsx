@@ -41,6 +41,7 @@ import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_
 import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
 import { PROJECT_CURRENCY_NAME } from '../constants/projectConstants'
 import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation'
+import { formatCompactNumber, formatFullNumber, formatDisplayPrice } from '../utils/numberFormat'
 import {
   AppShell,
   PageContainer,
@@ -94,6 +95,8 @@ const sidebarItems = [
   { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking' },
   { id: 'support', labelKey: 'dashboard_pro.sidebar.support' }
 ]
+
+const cn = (...classes) => classes.filter(Boolean).join(' ')
 
 const DashboardPage = () => {
   const { t, i18n } = useTranslation()
@@ -272,6 +275,29 @@ const DashboardPage = () => {
 
   const referralCode = address ? `${address.slice(0, 6)}${address.slice(-4)}` : 'guest0000'
   const referralLink = `${siteOrigin}/?ref=${referralCode}`
+  const roiProfit = Number(roiResult?.profit || 0)
+  const roiPercent = Number(roiResult?.roi || 0)
+
+  const toneClass = (value) => {
+    if (value > 0) return 'number-positive'
+    if (value < 0) return 'number-negative'
+    return 'number-neutral'
+  }
+
+  const renderPriceText = (price, { className = '', minimumFractionDigits = 0, maximumFractionDigits } = {}) => {
+    const display = formatDisplayPrice(price, { minimumFractionDigits, maximumFractionDigits })
+    if (display.type === 'small') {
+      return (
+        <span className={cn('price', className)}>
+          {display.sign}
+          {display.base}
+          <span className="zeros-count">{display.zeroCount}</span>
+          {display.significantDigits}
+        </span>
+      )
+    }
+    return <span className={cn('dashboard-number', className)}>{display.text}</span>
+  }
 
   const handleBuyAmountChange = (raw) => {
     setBuyPaymentAmount(raw)
@@ -323,25 +349,25 @@ const DashboardPage = () => {
   const renderOverview = (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard icon={<Coins size={18} />} label={t('dashboard_pro.overview.total_supply')} value={`${stats.totalSupply.toLocaleString()} ${PROJECT_CURRENCY_NAME}`} />
-        <StatsCard icon={<Wallet size={18} />} label={t('dashboard_pro.overview.presale_available')} value={`${stats.presaleAvailable.toLocaleString()} ${PROJECT_CURRENCY_NAME}`} />
-        <StatsCard icon={<Rocket size={18} />} label={t('dashboard_pro.overview.token_price')} value={`$${stats.tokenPriceUsd.toFixed(8)}`} hint={t('dashboard_pro.overview.phase_status', { current: stats.currentPhase, total: stats.totalPhases })} />
+        <StatsCard icon={<Coins size={18} />} label={t('dashboard_pro.overview.total_supply')} value={<span>{formatCompactNumber(stats.totalSupply)} {PROJECT_CURRENCY_NAME}</span>} />
+        <StatsCard icon={<Wallet size={18} />} label={t('dashboard_pro.overview.presale_available')} value={<span>{formatCompactNumber(stats.presaleAvailable)} {PROJECT_CURRENCY_NAME}</span>} hint={`${formatFullNumber(stats.presaleAvailable)} ${PROJECT_CURRENCY_NAME}`} />
+        <StatsCard icon={<Rocket size={18} />} label={t('dashboard_pro.overview.token_price')} value={<span>$ {renderPriceText(stats.tokenPriceUsd)}</span>} hint={t('dashboard_pro.overview.phase_status', { current: stats.currentPhase, total: stats.totalPhases })} />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <ContentSection>
           <PageHeader title={t('dashboard_pro.wallet_overview.title')} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <DashboardCard className="p-4">
-              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet_overview.total_value')}</p>
-              <p className="text-[28px] font-bold mt-2">${totalWalletUsd.toFixed(2)}</p>
+              <p className="dashboard-label">{t('dashboard_pro.wallet_overview.total_value')}</p>
+              <p className="dashboard-main-value mt-2">$ {formatFullNumber(totalWalletUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </DashboardCard>
             <DashboardCard className="p-4">
-              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet.sol_balance')}</p>
-              <p className="text-[28px] font-bold mt-2">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
+              <p className="dashboard-label">{t('dashboard_pro.wallet.sol_balance')}</p>
+              <p className="dashboard-main-value mt-2">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : formatFullNumber(walletBalances.sol, { minimumFractionDigits: 4, maximumFractionDigits: 4 }))}</p>
             </DashboardCard>
             <DashboardCard className="p-4">
-              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet.usdt_balance')}</p>
-              <p className="text-[28px] font-bold mt-2">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
+              <p className="dashboard-label">{t('dashboard_pro.wallet.usdt_balance')}</p>
+              <p className="dashboard-main-value mt-2">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : formatFullNumber(walletBalances.usdt, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</p>
             </DashboardCard>
           </div>
         </ContentSection>
@@ -350,19 +376,19 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium mb-2">{t('dashboard_pro.overview.investment_label')}</p>
-              <Input type="number" value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} placeholder={t('dashboard_pro.overview.investment_placeholder')} />
+              <Input type="number" value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} placeholder={t('dashboard_pro.overview.investment_placeholder')} className="font-mono" />
             </div>
             <div>
               <p className="text-sm font-medium mb-2">{t('dashboard_pro.overview.target_label')}</p>
-              <Input type="number" value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} placeholder={t('dashboard_pro.overview.target_placeholder')} />
+              <Input type="number" value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} placeholder={t('dashboard_pro.overview.target_placeholder')} className="font-mono" />
             </div>
           </div>
           {'error' in roiResult ? (
             <p className="text-sm text-dashboard-danger mt-3">{t('dashboard_pro.overview.invalid_roi')}</p>
           ) : (
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <DashboardCard className="p-4"><p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.overview.profit')}</p><p className="text-xl font-bold mt-1">${Number(roiResult.profit).toLocaleString()}</p></DashboardCard>
-              <DashboardCard className="p-4"><p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.overview.roi')}</p><p className="text-xl font-bold mt-1">{roiResult.roi}%</p></DashboardCard>
+              <DashboardCard className="p-4"><p className="dashboard-label">{t('dashboard_pro.overview.profit')}</p><p className={cn('text-xl mt-1 dashboard-number', toneClass(roiProfit))} style={{ fontWeight: 700 }}>$ {formatFullNumber(roiProfit, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p></DashboardCard>
+              <DashboardCard className="p-4"><p className="dashboard-label">{t('dashboard_pro.overview.roi')}</p><p className={cn('text-xl mt-1 dashboard-number', toneClass(roiPercent))} style={{ fontWeight: 700 }}>{formatFullNumber(roiPercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</p></DashboardCard>
             </div>
           )}
         </ContentSection>
@@ -375,15 +401,15 @@ const DashboardPage = () => {
       <ContentSection className="xl:col-span-8">
         <PageHeader title={t('dashboard_pro.buy.title')} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <StatsCard label="Wallet Balance" value="$1,240" />
-          <StatsCard label="Total Invested" value="$800" />
-          <StatsCard label="PWIFE Owned" value="120,000,000" />
+          <StatsCard label="Wallet Balance" value={`$${formatCompactNumber(totalWalletUsd)}`} hint={`$${formatFullNumber(totalWalletUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+          <StatsCard label="Total Invested" value={`$${formatCompactNumber(totalVolumeUsd)}`} hint={`$${formatFullNumber(totalVolumeUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
+          <StatsCard label="PWIFE Owned" value={`${formatCompactNumber(totalBoughtTokens)} ${PROJECT_CURRENCY_NAME}`} hint={`${formatFullNumber(totalBoughtTokens)} ${PROJECT_CURRENCY_NAME}`} />
         </div>
         <DashboardCard className="space-y-4">
           <div>
-            <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.buy.current_price')}</p>
-            <p className="text-[28px] font-bold text-dashboard-primary mt-1">$0.00000005</p>
-            <p className="text-sm text-dashboard-text-secondary mt-1">{t('dashboard_pro.buy.phase_supply', { supply: stats.presaleAvailable.toLocaleString() })}</p>
+            <p className="dashboard-label">{t('dashboard_pro.buy.current_price')}</p>
+            <p className="dashboard-main-value mt-1 text-dashboard-primary">$ {renderPriceText(stats.tokenPriceUsd)}</p>
+            <p className="text-sm text-dashboard-text-secondary mt-1">{t('dashboard_pro.buy.phase_supply', { supply: formatFullNumber(stats.presaleAvailable) })}</p>
           </div>
           <div className="grid grid-cols-3 gap-2 rounded-dashboard-lg p-1 bg-dashboard-highlight border border-dashboard-border">
             {['SOL', 'USDT'].map((currency) => (
@@ -400,14 +426,14 @@ const DashboardPage = () => {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
-            <Input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} />
+            <Input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} className="font-mono" />
             <p className="text-xs text-dashboard-muted">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
             {buyAmountError && <p className="text-xs text-dashboard-danger">{buyAmountError}</p>}
             {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
           </div>
           <DashboardCard className="p-4 bg-dashboard-highlight">
-            <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.buy.estimated_receive', { amount: (buyTokenAmount || 0).toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
-            <p className="text-[28px] font-bold mt-1 text-dashboard-primary">{(buyTokenAmount || 0).toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+            <p className="dashboard-label">{t('dashboard_pro.buy.estimated_receive', { amount: formatFullNumber((buyTokenAmount || 0)), currency: PROJECT_CURRENCY_NAME })}</p>
+            <p className="dashboard-main-value mt-1 text-dashboard-primary">{formatFullNumber((buyTokenAmount || 0))} {PROJECT_CURRENCY_NAME}</p>
           </DashboardCard>
           <PrimaryButton onClick={handleBuy} disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError} className="w-full h-11 rounded-dashboard-md">
             {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
@@ -420,8 +446,8 @@ const DashboardPage = () => {
           <div className="h-5 rounded-full bg-dashboard-highlight border border-dashboard-border overflow-hidden">
             <div className="h-full bg-dashboard-primary" style={{ width: '72%' }} />
           </div>
-          <div className="flex items-center justify-between mt-2 text-sm font-semibold text-dashboard-primary-dark">
-            <span>72% SOLD</span><span>72%</span>
+          <div className="flex items-center justify-between mt-2 text-sm text-dashboard-primary-dark" style={{ fontWeight: 600 }}>
+            <span className="dashboard-number">{formatFullNumber(72)}% SOLD</span><span className="dashboard-number">{formatFullNumber(72)}%</span>
           </div>
         </GlassPanel>
         <DashboardCard>
@@ -454,11 +480,11 @@ const DashboardPage = () => {
       <div className="overflow-x-auto rounded-dashboard-xl border border-dashboard-border-soft">
         <table className="w-full min-w-[760px] bg-white">
           <thead>
-            <tr className="h-11 text-[13px] font-semibold text-dashboard-text-secondary border-b border-[#EDF3ED]">
+            <tr className="h-11 text-[13px] text-dashboard-text-secondary border-b border-[#EDF3ED]" style={{ fontWeight: 600 }}>
               <th className="text-start px-4">{t('dashboard_pro.transactions.table.date')}</th>
               <th className="text-start px-4">{t('dashboard_pro.transactions.table.type')}</th>
-              <th className="text-start px-4">{t('dashboard_pro.transactions.table.tokens')}</th>
-              <th className="text-start px-4">{t('dashboard_pro.transactions.table.amount')}</th>
+              <th className="text-end px-4">{t('dashboard_pro.transactions.table.tokens')}</th>
+              <th className="text-end px-4">{t('dashboard_pro.transactions.table.amount')}</th>
               <th className="text-start px-4">{t('dashboard_pro.transactions.table.status')}</th>
             </tr>
           </thead>
@@ -467,8 +493,8 @@ const DashboardPage = () => {
               <tr key={tx.id} className="min-h-[52px] border-b border-[#F1F5F1] hover:bg-[#FAFDFA]">
                 <td className="px-4 py-3 text-sm">{new Date(tx.date).toLocaleDateString()}</td>
                 <td className="px-4 py-3 text-sm">{t(`dashboard_pro.transactions.types.${tx.type}`)}</td>
-                <td className="px-4 py-3 text-sm">{tx.tokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</td>
-                <td className={`px-4 py-3 text-sm font-semibold ${tx.type === 'claim' ? 'text-dashboard-success' : 'text-dashboard-text-primary'}`}>{tx.usdAmount.toFixed(2)} {tx.currency}</td>
+                <td className="px-4 py-3 text-sm text-end"><span className="dashboard-number">{formatFullNumber(tx.tokenAmount)} {PROJECT_CURRENCY_NAME}</span></td>
+                <td className={cn('px-4 py-3 text-sm text-end', 'dashboard-number', toneClass(tx.type === 'claim' ? tx.usdAmount : 0))} style={{ fontWeight: 600 }}>{formatFullNumber(tx.usdAmount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {tx.currency}</td>
                 <td className="px-4 py-3 text-sm"><StatusPill ok={tx.status === 'confirmed'}>{t(`dashboard_pro.transactions.status.${tx.status}`)}</StatusPill></td>
               </tr>
             ))}
@@ -482,7 +508,7 @@ const DashboardPage = () => {
     <ContentSection className="p-6 bg-[rgba(255,255,255,0.8)] backdrop-blur-[10px]">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="text-[28px] leading-tight font-bold text-[#1F2A1F]">{t('dashboard_pro.performance.title')}</h3>
+          <h3 className="text-[28px] leading-[1.2] text-[#1F2A1F]" style={{ fontWeight: 700 }}>{t('dashboard_pro.performance.title')}</h3>
           <p className="text-[15px] text-[#667368] mt-1">Track your token growth and performance</p>
         </div>
         <div className="flex items-center gap-2">
@@ -540,7 +566,7 @@ const DashboardPage = () => {
                     transform: 'translate(-50%, -120%)'
                   }}
                 >
-                  <p className="font-semibold text-[#2F6B3E]">${hoveredPoint.value.toFixed(8)}</p>
+                  <p className="text-[#2F6B3E]" style={{ fontWeight: 600 }}>$ {renderPriceText(hoveredPoint.value)}</p>
                   <p className="text-[#667368] mt-0.5">{performanceRange.toUpperCase()} · Point {hoveredPoint.index + 1}</p>
                 </div>
               )}
@@ -551,8 +577,8 @@ const DashboardPage = () => {
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><CircleDollarSign size={19} /></span>
                 <div>
-                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${stats.tokenPriceUsd.toFixed(8)}</p>
-                  <p className="text-[13px] font-medium text-[#667368] mt-2">{t('dashboard_pro.performance.current')}</p>
+                  <p className="dashboard-main-value">$ {renderPriceText(stats.tokenPriceUsd)}</p>
+                  <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>{t('dashboard_pro.performance.current')}</p>
                 </div>
               </div>
             </div>
@@ -560,8 +586,8 @@ const DashboardPage = () => {
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingUp size={19} /></span>
                 <div>
-                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${Math.max(...performanceSeries).toFixed(8)}</p>
-                  <p className="text-[13px] font-medium text-[#667368] mt-2">24H High</p>
+                  <p className="dashboard-main-value">$ {renderPriceText(Math.max(...performanceSeries))}</p>
+                  <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>24H High</p>
                 </div>
               </div>
             </div>
@@ -569,8 +595,8 @@ const DashboardPage = () => {
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingDown size={19} /></span>
                 <div>
-                  <p className="text-[27px] leading-none font-bold text-[#1F2A1F]">${Math.min(...performanceSeries).toFixed(8)}</p>
-                  <p className="text-[13px] font-medium text-[#667368] mt-2">24H Low</p>
+                  <p className="dashboard-main-value">$ {renderPriceText(Math.min(...performanceSeries))}</p>
+                  <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>24H Low</p>
                 </div>
               </div>
             </div>
@@ -580,18 +606,18 @@ const DashboardPage = () => {
           <GlassPanel className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.8)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <PageHeader title="Quick Insights" />
             <div className="space-y-3 mt-1">
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Token Price</span><span className="font-semibold text-[#1F2A1F]">${stats.tokenPriceUsd.toFixed(8)}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Market Cap</span><span className="font-semibold text-[#1F2A1F]">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Holders</span><span className="font-semibold text-[#1F2A1F]">{stats.holders.toLocaleString()}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Volume</span><span className="font-semibold text-[#1F2A1F]">${Math.round(totalVolumeUsd).toLocaleString()}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Token Price</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Market Cap</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(stats.marketCapUsd))}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Holders</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>{formatFullNumber(stats.holders)}</span></div>
+              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Volume</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(totalVolumeUsd))}</span></div>
             </div>
           </GlassPanel>
           <DashboardCard className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.85)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="flex items-center justify-between">
-              <h4 className="text-base font-semibold text-[#1F2A1F]">Your ROI</h4>
+              <h4 className="text-base text-[#1F2A1F]" style={{ fontWeight: 700 }}>Your ROI</h4>
               <Activity size={19} className="text-[#2F6B3E]" />
             </div>
-            <p className="text-[44px] leading-none font-bold text-[#5FAE6E] mt-5">+32.5%</p>
+            <p className={cn('text-[44px] leading-none dashboard-number mt-5', toneClass(roiPercent))} style={{ fontWeight: 700 }}>{roiPercent > 0 ? '+' : ''}{formatFullNumber(roiPercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</p>
           </DashboardCard>
         </div>
       </div>
@@ -602,9 +628,9 @@ const DashboardPage = () => {
     <ContentSection>
       <PageHeader title={t('dashboard_pro.tokens.title')} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard label="Total Balance" value={totalBoughtTokens.toLocaleString()} />
-        <StatsCard label="Locked" value={`${Math.floor(totalBoughtTokens * 0.45).toLocaleString()}`} />
-        <StatsCard label="Available" value={`${Math.floor(totalBoughtTokens * 0.55).toLocaleString()}`} />
+        <StatsCard label="Total Balance" value={formatCompactNumber(totalBoughtTokens)} hint={formatFullNumber(totalBoughtTokens)} />
+        <StatsCard label="Locked" value={formatCompactNumber(Math.floor(totalBoughtTokens * 0.45))} hint={formatFullNumber(Math.floor(totalBoughtTokens * 0.45))} />
+        <StatsCard label="Available" value={formatCompactNumber(Math.floor(totalBoughtTokens * 0.55))} hint={formatFullNumber(Math.floor(totalBoughtTokens * 0.55))} />
       </div>
       <div className="flex gap-3 mt-4">
         <PrimaryButton>Claim</PrimaryButton>
@@ -618,14 +644,14 @@ const DashboardPage = () => {
       <PageHeader title={t('dashboard_pro.referral.title')} />
       <CopyField value={referralLink} onCopy={() => handleCopy(referralLink, 'referral')} copyLabel={copied === 'referral' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.referral.copy_link')} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard label={t('dashboard_pro.referral.invited')} value={`${referralStats.invitedFriends}`} />
-        <StatsCard label={t('dashboard_pro.referral.active')} value={`${referralStats.activeReferrals}`} />
-        <StatsCard label={t('dashboard_pro.referral.earned')} value={`$${referralStats.earnedUsd.toFixed(2)}`} />
+        <StatsCard label={t('dashboard_pro.referral.invited')} value={`${formatCompactNumber(referralStats.invitedFriends)}`} hint={formatFullNumber(referralStats.invitedFriends)} />
+        <StatsCard label={t('dashboard_pro.referral.active')} value={`${formatCompactNumber(referralStats.activeReferrals)}`} hint={formatFullNumber(referralStats.activeReferrals)} />
+        <StatsCard label={t('dashboard_pro.referral.earned')} value={`$${formatCompactNumber(referralStats.earnedUsd)}`} hint={`$${formatFullNumber(referralStats.earnedUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
       </div>
       <DashboardCard className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[13px] font-medium text-dashboard-text-secondary">{t('dashboard_pro.referral.reward_progress')}</p>
-          <p className="text-xs">{referralProgress}%</p>
+          <p className="dashboard-label" style={{ fontWeight: 600 }}>{t('dashboard_pro.referral.reward_progress')}</p>
+          <p className="text-xs dashboard-number">{formatFullNumber(referralProgress)}%</p>
         </div>
         <div className="h-3 rounded-full bg-dashboard-highlight overflow-hidden">
           <div className="h-full bg-dashboard-primary" style={{ width: `${referralProgress}%` }} />
@@ -638,8 +664,8 @@ const DashboardPage = () => {
     <ContentSection>
       <PageHeader title={t('dashboard_pro.sidebar.claim')} />
       <DashboardCard className="p-5">
-        <p className="text-[13px] text-dashboard-text-secondary">Available Rewards</p>
-        <p className="text-[28px] font-bold mt-2 text-dashboard-primary">245,000 {PROJECT_CURRENCY_NAME}</p>
+        <p className="dashboard-label">Available Rewards</p>
+        <p className="dashboard-main-value mt-2 text-dashboard-primary">{formatFullNumber(245000)} {PROJECT_CURRENCY_NAME}</p>
         <PrimaryButton className="mt-4">Claim Rewards</PrimaryButton>
       </DashboardCard>
     </ContentSection>
@@ -649,9 +675,9 @@ const DashboardPage = () => {
     <ContentSection>
       <PageHeader title={t('dashboard_pro.sidebar.staking')} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard label="APR" value="24%" />
+        <StatsCard label="APR" value={`${formatFullNumber(24)}%`} />
         <StatsCard label="Status" value={t('dashboard_pro.soon')} />
-        <StatsCard label="Staked" value="0 PWIFE" />
+        <StatsCard label="Staked" value={`${formatFullNumber(0)} PWIFE`} />
       </div>
       <DashboardCard className="mt-4 p-5">
         <p className="text-sm text-dashboard-text-secondary">{t('dashboard_pro.soon_desc')}</p>
@@ -771,16 +797,16 @@ const DashboardPage = () => {
                   <GlassPanel>
                     <PageHeader title="Quick Insights" />
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="font-semibold">${stats.tokenPriceUsd.toFixed(8)}</span></div>
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="font-semibold">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="font-semibold">{stats.holders.toLocaleString()}</span></div>
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(stats.marketCapUsd))}</span></div>
+                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>{formatFullNumber(stats.holders)}</span></div>
                     </div>
                   </GlassPanel>
                   <DashboardCard className="relative overflow-hidden">
                     <PageHeader title="Referral" />
                     <p className="text-sm text-dashboard-text-secondary">Invite friends and earn rewards</p>
-                    <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm font-semibold">
-                      <ArrowUpRight size={16} /> 20% referral rate
+                    <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm" style={{ fontWeight: 600 }}>
+                      <ArrowUpRight size={16} /> <span className="dashboard-number">{formatFullNumber(20)}%</span> referral rate
                     </div>
                     <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-6 -right-3 w-28 opacity-80 pointer-events-none" />
                   </DashboardCard>

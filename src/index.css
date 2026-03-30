@@ -27,6 +27,64 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   font-family: 'Inter', sans-serif !important;
 }
 
+.dashboard-shell {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.dashboard-shell .dashboard-main-value,
+.dashboard-shell .dashboard-number,
+.dashboard-shell .price {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.dashboard-shell .dashboard-main-value {
+  font-size: clamp(26px, 2.2vw, 30px);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #1F2A1F;
+}
+
+.dashboard-shell .dashboard-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: #667368;
+}
+
+.dashboard-shell .price {
+  font-weight: 600;
+  color: #1F2A1F;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.dashboard-shell .zeros-count {
+  font-size: 0.65em;
+  vertical-align: super;
+  margin: 0 1px;
+  color: #2F6B3E;
+  line-height: 1;
+}
+
+.dashboard-shell .number-positive {
+  color: #3FAE5A;
+}
+
+.dashboard-shell .number-negative {
+  color: #D96C6C;
+}
+
+.dashboard-shell .number-neutral {
+  color: #1F2A1F;
+}
+
 @layer base {
   body {
     @apply font-sans antialiased;

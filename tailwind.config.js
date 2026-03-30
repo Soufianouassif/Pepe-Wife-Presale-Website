@@ -31,6 +31,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
         luckiest: ['Inter', 'sans-serif'],
         brand: ['Inter', 'sans-serif'],
       },

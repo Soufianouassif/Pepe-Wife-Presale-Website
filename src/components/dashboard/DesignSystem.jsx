@@ -65,7 +65,7 @@ export const ContentSection = ({ children, className = '' }) => (
 
 export const PageHeader = ({ title, right }) => (
   <div className="flex items-center justify-between gap-3 mb-[14px]">
-    <h3 className="text-lg font-bold text-dashboard-text-primary">{title}</h3>
+    <h3 className="text-lg leading-[1.2] text-dashboard-text-primary" style={{ fontWeight: 700 }}>{title}</h3>
     {right}
   </div>
 )
@@ -87,8 +87,8 @@ export const StatsCard = ({ icon, label, value, hint, className = '' }) => (
   <DashboardCard className={cn('min-h-[108px] p-[18px] md:p-5', className)}>
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="text-[13px] font-medium text-dashboard-text-secondary">{label}</p>
-        <p className="text-[28px] leading-[1.2] font-bold text-dashboard-text-primary mt-2 break-words">{value}</p>
+        <p className="dashboard-label" style={{ fontWeight: 600 }}>{label}</p>
+        <p className="dashboard-main-value mt-2">{value}</p>
         {hint ? <p className="text-xs font-normal text-dashboard-muted mt-1">{hint}</p> : null}
       </div>
       {icon ? (
@@ -101,7 +101,7 @@ export const StatsCard = ({ icon, label, value, hint, className = '' }) => (
 )
 
 export const Button = ({ children, className = '', ...props }) => (
-  <button {...props} className={cn('h-11 px-[18px] rounded-dashboard-md border text-sm font-semibold transition-colors', className)}>
+  <button {...props} className={cn('h-11 px-[18px] rounded-dashboard-md border text-sm font-medium transition-colors', className)}>
     {children}
   </button>
 )
@@ -161,7 +161,7 @@ export const TableCard = ({ title, children }) => (
 
 export const EmptyState = ({ title, subtitle }) => (
   <DashboardCard className="text-center">
-    <p className="text-[28px] leading-[1.2] font-bold">{title}</p>
+    <p className="text-[28px] leading-[1.2]" style={{ fontWeight: 700 }}>{title}</p>
     <p className="text-sm text-dashboard-text-secondary mt-2">{subtitle}</p>
   </DashboardCard>
 )
