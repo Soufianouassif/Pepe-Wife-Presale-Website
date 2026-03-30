@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next'
 import { ethers } from 'ethers'
 import { Connection, PublicKey } from '@solana/web3.js'
 import {
-  LayoutDashboard,
+  LayoutGrid,
   ShoppingCart,
   History,
-  ChartColumnIncreasing,
+  BarChart3,
   Coins,
   Users,
   Gift,
@@ -24,7 +24,7 @@ import {
   ArrowUpRight,
   BadgeCheck,
   Mail,
-  MessageCircleQuestion
+  HelpCircle
 } from 'lucide-react'
 import { useWallet } from '../context/WalletContext'
 import { formatAddress } from '../utils/format'
@@ -68,10 +68,10 @@ const navLinks = [
 ]
 
 const sidebarIcons = {
-  overview: LayoutDashboard,
+  overview: LayoutGrid,
   buy: ShoppingCart,
   transactions: History,
-  performance: ChartColumnIncreasing,
+  performance: BarChart3,
   tokens: Coins,
   referral: Users,
   claim: Gift,
@@ -132,7 +132,8 @@ const DashboardPage = () => {
   ])
 
   const supportUrl = import.meta?.env?.VITE_SUPPORT_URL || 'mailto:support@pepewife.io'
-  const faqUrl = `${window.location.origin}/#faq`
+  const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://pepewife.io'
+  const faqUrl = `${siteOrigin}/#faq`
   const referralStats = { invitedFriends: 18, activeReferrals: 9, earnedUsd: 386.4, nextRewardUsd: 500 }
   const referralProgress = Math.min(100, Math.round((referralStats.earnedUsd / referralStats.nextRewardUsd) * 100))
 
@@ -245,7 +246,7 @@ const DashboardPage = () => {
   }, [transactions, txTypeFilter, txRangeFilter])
 
   const referralCode = address ? `${address.slice(0, 6)}${address.slice(-4)}` : 'guest0000'
-  const referralLink = `${window.location.origin}/?ref=${referralCode}`
+  const referralLink = `${siteOrigin}/?ref=${referralCode}`
 
   const handleBuyAmountChange = (raw) => {
     setBuyPaymentAmount(raw)
@@ -552,7 +553,7 @@ const DashboardPage = () => {
           <Mail size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">Email Support</span>
         </a>
         <a href={faqUrl} className="rounded-dashboard-lg border border-dashboard-border-soft bg-white p-4 flex items-center gap-3">
-          <MessageCircleQuestion size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">FAQ</span>
+          <HelpCircle size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">FAQ</span>
         </a>
       </div>
     </ContentSection>
