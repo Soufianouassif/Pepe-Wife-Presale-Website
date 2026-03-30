@@ -4,6 +4,28 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { ethers } from 'ethers'
 import { Connection, PublicKey } from '@solana/web3.js'
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  History,
+  ChartColumnIncreasing,
+  Coins,
+  Users,
+  Gift,
+  Lock,
+  LifeBuoy,
+  Menu,
+  X,
+  Rocket,
+  Copy,
+  LogOut,
+  Wallet,
+  CircleCheck,
+  ArrowUpRight,
+  BadgeCheck,
+  Mail,
+  MessageCircleQuestion
+} from 'lucide-react'
 import { useWallet } from '../context/WalletContext'
 import { formatAddress } from '../utils/format'
 import { calculateProfit } from '../utils/calculator'
@@ -13,27 +35,24 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 import BrandLogo from '../components/BrandLogo'
 import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_PHASE_SUPPLY } from '../presaleConfig'
 import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
-import AppIcon from '../components/AppIcon'
 import { PROJECT_CURRENCY_NAME } from '../constants/projectConstants'
 import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation'
 import {
   AppShell,
   PageContainer,
-  Navbar as DsNavbar,
-  Sidebar as DsSidebar,
+  Navbar,
+  Sidebar,
   SidebarItem,
   ContentSection,
-  SectionHeader,
-  Card,
-  GlassCard,
+  PageHeader,
+  DashboardCard,
+  GlassPanel,
   StatsCard,
   PrimaryButton,
   SecondaryButton,
   Input,
-  CopyInput,
-  ProgressCard,
+  CopyField,
   TableCard,
-  EmptyState,
   Badge,
   StatusPill
 } from '../components/dashboard/DesignSystem'
@@ -48,34 +67,38 @@ const navLinks = [
   { href: '/#about', labelKey: 'nav.about' }
 ]
 
+const sidebarIcons = {
+  overview: LayoutDashboard,
+  buy: ShoppingCart,
+  transactions: History,
+  performance: ChartColumnIncreasing,
+  tokens: Coins,
+  referral: Users,
+  claim: Gift,
+  staking: Lock,
+  support: LifeBuoy
+}
+
 const sidebarItems = [
-  { id: 'overview', labelKey: 'dashboard_pro.sidebar.overview', icon: 'dashboard', enabled: true },
-  { id: 'buy', labelKey: 'dashboard_pro.sidebar.buy', icon: 'shopping_cart', enabled: true },
-  { id: 'transactions', labelKey: 'dashboard_pro.sidebar.transactions', icon: 'calendar_month', enabled: true },
-  { id: 'performance', labelKey: 'dashboard_pro.sidebar.performance', icon: 'monitoring', enabled: true },
-  { id: 'tokens', labelKey: 'dashboard_pro.sidebar.tokens', icon: 'token', enabled: true },
-  { id: 'referral', labelKey: 'dashboard_pro.sidebar.referral', icon: 'groups', enabled: true },
-  { id: 'claim', labelKey: 'dashboard_pro.sidebar.claim', icon: 'redeem', enabled: false },
-  { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking', icon: 'lock', enabled: false },
-  { id: 'support', labelKey: 'dashboard_pro.sidebar.support', icon: 'support_agent', enabled: true },
-  { id: 'wallet', labelKey: 'dashboard_pro.sidebar.wallet', icon: 'account_balance_wallet', enabled: true }
+  { id: 'overview', labelKey: 'dashboard_pro.sidebar.overview' },
+  { id: 'buy', labelKey: 'dashboard_pro.sidebar.buy' },
+  { id: 'transactions', labelKey: 'dashboard_pro.sidebar.transactions' },
+  { id: 'performance', labelKey: 'dashboard_pro.sidebar.performance' },
+  { id: 'tokens', labelKey: 'dashboard_pro.sidebar.tokens' },
+  { id: 'referral', labelKey: 'dashboard_pro.sidebar.referral' },
+  { id: 'claim', labelKey: 'dashboard_pro.sidebar.claim' },
+  { id: 'staking', labelKey: 'dashboard_pro.sidebar.staking' },
+  { id: 'support', labelKey: 'dashboard_pro.sidebar.support' }
 ]
 
 const DashboardPage = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const {
-    isConnected,
-    address,
-    walletType,
-    disconnect,
-    signMessage
-  } = useWallet()
+  const { isConnected, address, walletType, disconnect, signMessage } = useWallet()
   const isRTL = i18n.language === 'ar'
 
-  const [activeSection, setActiveSection] = useState('buy')
+  const [activeSection, setActiveSection] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [theme] = useState('light')
   const [stats, setStats] = useState({
     tokenPriceUsd: CURRENT_TOKEN_PRICE_USD,
     totalSupply: TOTAL_PRESALE_SUPPLY,
@@ -88,7 +111,6 @@ const DashboardPage = () => {
     currentPhase: PRESALE_CONFIG.currentPhase.id,
     totalPhases: PRESALE_CONFIG.totalPhases
   })
-  const [statsLoading, setStatsLoading] = useState(true)
   const [notification, setNotification] = useState(null)
   const [copied, setCopied] = useState('')
   const [walletBalances, setWalletBalances] = useState({ sol: null, usdt: null })
@@ -96,10 +118,8 @@ const DashboardPage = () => {
   const [txTypeFilter, setTxTypeFilter] = useState('all')
   const [txRangeFilter, setTxRangeFilter] = useState('30d')
   const [performanceRange, setPerformanceRange] = useState('30d')
-
   const [roiInvestment, setRoiInvestment] = useState('1000')
   const [roiTargetPrice, setRoiTargetPrice] = useState('0.0003')
-
   const [buyCurrency, setBuyCurrency] = useState('SOL')
   const [buyPaymentAmount, setBuyPaymentAmount] = useState('')
   const [buyAmountError, setBuyAmountError] = useState('')
@@ -112,12 +132,9 @@ const DashboardPage = () => {
   ])
 
   const supportUrl = import.meta?.env?.VITE_SUPPORT_URL || 'mailto:support@pepewife.io'
-  const explorerUrl = useMemo(() => {
-    if (!address) return '#'
-    if (isValidSolAddress(address)) return `https://explorer.solana.com/address/${address}`
-    if (isValidEvmAddress(address)) return `https://etherscan.io/address/${address}`
-    return '#'
-  }, [address])
+  const faqUrl = `${window.location.origin}/#faq`
+  const referralStats = { invitedFriends: 18, activeReferrals: 9, earnedUsd: 386.4, nextRewardUsd: 500 }
+  const referralProgress = Math.min(100, Math.round((referralStats.earnedUsd / referralStats.nextRewardUsd) * 100))
 
   useEffect(() => {
     if (!isConnected) navigate('/connect')
@@ -130,18 +147,11 @@ const DashboardPage = () => {
   useEffect(() => {
     let mounted = true
     const loadStats = async () => {
-      try {
-        setStatsLoading(true)
-        const data = await getDashboardStats()
-        if (mounted) setStats(data)
-      } finally {
-        if (mounted) setStatsLoading(false)
-      }
+      const data = await getDashboardStats()
+      if (mounted) setStats(data)
     }
-    loadStats()
-    return () => {
-      mounted = false
-    }
+    loadStats().catch(() => null)
+    return () => { mounted = false }
   }, [])
 
   useEffect(() => {
@@ -170,14 +180,19 @@ const DashboardPage = () => {
       }
     }
     loadBalances()
-    return () => {
-      mounted = false
-    }
+    return () => { mounted = false }
   }, [address, walletType, isConnected])
 
   const notify = (type, message) => {
     setNotification({ type, message, id: Date.now() })
-    setTimeout(() => setNotification(null), 3800)
+    setTimeout(() => setNotification(null), 3000)
+  }
+
+  const handleCopy = async (text, key) => {
+    if (!text) return
+    await navigator.clipboard.writeText(text)
+    setCopied(key)
+    setTimeout(() => setCopied(''), 1500)
   }
 
   const handleLogout = async () => {
@@ -185,78 +200,14 @@ const DashboardPage = () => {
     navigate('/')
   }
 
-  const handleCopy = async (text, type) => {
-    if (!text) return
-    await navigator.clipboard.writeText(text)
-    setCopied(type)
-    setTimeout(() => setCopied(''), 1800)
-  }
-
-  const roiResult = useMemo(() => {
-    return calculateProfit(roiInvestment, stats.tokenPriceUsd, roiTargetPrice, 0)
-  }, [roiInvestment, roiTargetPrice, stats.tokenPriceUsd])
-
   const buyRange = useMemo(() => getPaymentRange(buyCurrency), [buyCurrency])
-
-  const buyCostInSelectedCurrency = useMemo(() => {
-    const pay = Number(buyPaymentAmount || 0)
-    if (!pay || pay <= 0) return 0
-    return pay
-  }, [buyPaymentAmount])
-
-  const buyTotalCost = useMemo(() => {
-    if (!buyCostInSelectedCurrency) return 0
-    if (buyCurrency === 'SOL') return buyCostInSelectedCurrency * Math.max(stats.solUsd, 1)
-    return buyCostInSelectedCurrency * Math.max(stats.usdtUsd, 1)
-  }, [buyCostInSelectedCurrency, buyCurrency, stats.solUsd, stats.usdtUsd])
-
-  const buyTokenAmount = useMemo(() => {
-    if (!buyTotalCost || !stats.tokenPriceUsd) return 0
-    return Math.floor(buyTotalCost / stats.tokenPriceUsd)
-  }, [buyTotalCost, stats.tokenPriceUsd])
-
-  const handleBuyAmountChange = (raw) => {
-    setBuyPaymentAmount(raw)
-    if (raw === '') {
-      setBuyAmountError('')
-      return
-    }
-    const validation = validatePaymentAmount(raw, buyCurrency)
-    if (!validation.valid) {
-      setBuyAmountError(t('validation.amount_range', { min: validation.min, max: validation.max }))
-      return
-    }
-    setBuyAmountError('')
-  }
-
-  const handleBuyAmountBlur = () => {
-    if (buyPaymentAmount === '') return
-    const validation = validatePaymentAmount(buyPaymentAmount, buyCurrency)
-    if (!validation.valid) {
-      setBuyPaymentAmount(clampPaymentAmount(buyPaymentAmount, buyCurrency))
-    }
-  }
-
-  const totalWalletUsd = useMemo(() => {
-    const solUsd = walletBalances.sol === null ? 0 : walletBalances.sol * stats.solUsd
-    const usdtUsd = walletBalances.usdt === null ? 0 : walletBalances.usdt
-    return solUsd + usdtUsd
-  }, [walletBalances.sol, walletBalances.usdt, stats.solUsd])
-
-  const filteredTransactions = useMemo(() => {
-    const now = Date.now()
-    const daysMap = { '7d': 7, '30d': 30, '90d': 90, all: 9999 }
-    const maxDays = daysMap[txRangeFilter] || 30
-    return transactions.filter((tx) => {
-      const byType = txTypeFilter === 'all' ? true : tx.type === txTypeFilter
-      const diffDays = (now - new Date(tx.date).getTime()) / 86_400_000
-      const byRange = txRangeFilter === 'all' ? true : diffDays <= maxDays
-      return byType && byRange
-    })
-  }, [transactions, txTypeFilter, txRangeFilter])
-
+  const buyCostInSelectedCurrency = Number(buyPaymentAmount || 0)
+  const buyTotalCost = buyCurrency === 'SOL' ? buyCostInSelectedCurrency * Math.max(stats.solUsd, 1) : buyCostInSelectedCurrency * Math.max(stats.usdtUsd, 1)
+  const buyTokenAmount = buyTotalCost && stats.tokenPriceUsd ? Math.floor(buyTotalCost / stats.tokenPriceUsd) : 0
+  const totalWalletUsd = (walletBalances.sol || 0) * stats.solUsd + (walletBalances.usdt || 0)
   const buyTransactions = useMemo(() => transactions.filter((tx) => tx.type === 'buy'), [transactions])
   const totalBoughtTokens = useMemo(() => buyTransactions.reduce((sum, tx) => sum + tx.tokenAmount, 0), [buyTransactions])
+  const roiResult = useMemo(() => calculateProfit(roiInvestment, stats.tokenPriceUsd, roiTargetPrice, 0), [roiInvestment, roiTargetPrice, stats.tokenPriceUsd])
 
   const performanceSeries = useMemo(() => {
     const pointsMap = { '7d': 7, '30d': 12, '90d': 20 }
@@ -265,65 +216,66 @@ const DashboardPage = () => {
       const base = stats.tokenPriceUsd
       const wave = Math.sin(i / 2.4) * (base * 0.16)
       const trend = i * (base * 0.02)
-      const value = Number((base + wave + trend).toFixed(10))
-      return { label: `${i + 1}`, value }
+      return Number((base + wave + trend).toFixed(10))
     })
   }, [performanceRange, stats.tokenPriceUsd])
 
   const chartPath = useMemo(() => {
     if (!performanceSeries.length) return ''
-    const values = performanceSeries.map((d) => d.value)
-    const min = Math.min(...values)
-    const max = Math.max(...values)
+    const min = Math.min(...performanceSeries)
+    const max = Math.max(...performanceSeries)
     const spread = Math.max(max - min, 0.000000001)
-    return performanceSeries.map((d, i) => {
+    return performanceSeries.map((value, i) => {
       const x = (i / Math.max(performanceSeries.length - 1, 1)) * 100
-      const y = 100 - ((d.value - min) / spread) * 100
+      const y = 100 - ((value - min) / spread) * 100
       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`
     }).join(' ')
   }, [performanceSeries])
 
-  const referralCode = useMemo(() => (address ? `${address.slice(0, 6)}${address.slice(-4)}` : 'guest0000'), [address])
-  const referralLink = useMemo(() => {
-    if (typeof window === 'undefined') return `https://pepewife.io/?ref=${referralCode}`
-    return `${window.location.origin}/?ref=${referralCode}`
-  }, [referralCode])
-  const referralStats = useMemo(() => ({
-    invitedFriends: 18,
-    activeReferrals: 9,
-    earnedUsd: 386.4,
-    nextRewardUsd: 500
-  }), [])
-  const referralProgress = Math.min(100, Math.round((referralStats.earnedUsd / referralStats.nextRewardUsd) * 100))
+  const filteredTransactions = useMemo(() => {
+    const now = Date.now()
+    const daysMap = { '7d': 7, '30d': 30, '90d': 90, all: 9999 }
+    const maxDays = daysMap[txRangeFilter] || 30
+    return transactions.filter((tx) => {
+      const byType = txTypeFilter === 'all' || tx.type === txTypeFilter
+      const diffDays = (now - new Date(tx.date).getTime()) / 86_400_000
+      const byRange = txRangeFilter === 'all' || diffDays <= maxDays
+      return byType && byRange
+    })
+  }, [transactions, txTypeFilter, txRangeFilter])
+
+  const referralCode = address ? `${address.slice(0, 6)}${address.slice(-4)}` : 'guest0000'
+  const referralLink = `${window.location.origin}/?ref=${referralCode}`
+
+  const handleBuyAmountChange = (raw) => {
+    setBuyPaymentAmount(raw)
+    if (!raw) {
+      setBuyAmountError('')
+      return
+    }
+    const validation = validatePaymentAmount(raw, buyCurrency)
+    setBuyAmountError(validation.valid ? '' : t('validation.amount_range', { min: validation.min, max: validation.max }))
+  }
+
+  const handleBuyAmountBlur = () => {
+    if (!buyPaymentAmount) return
+    const validation = validatePaymentAmount(buyPaymentAmount, buyCurrency)
+    if (!validation.valid) setBuyPaymentAmount(clampPaymentAmount(buyPaymentAmount, buyCurrency))
+  }
 
   const handleBuy = async () => {
     const qty = Number(buyTokenAmount || 0)
     const validation = validatePaymentAmount(buyPaymentAmount, buyCurrency)
-    if (!validation.valid) {
-      notify('error', t('validation.amount_range', { min: validation.min, max: validation.max }))
-      return
-    }
-    if (!address || qty <= 0) {
-      notify('error', t('dashboard_pro.notifications.invalid_amount'))
-      return
-    }
-    if (buyCurrency === 'SOL' && !isValidSolAddress(address)) {
-      notify('error', t('dashboard_pro.notifications.require_solana'))
-      return
-    }
-    if (buyCurrency === 'USDT' && !isValidEvmAddress(address)) {
-      notify('error', t('dashboard_pro.notifications.require_evm'))
-      return
-    }
+    if (!validation.valid) return notify('error', t('validation.amount_range', { min: validation.min, max: validation.max }))
+    if (!address || qty <= 0) return notify('error', t('dashboard_pro.notifications.invalid_amount'))
+    if (buyCurrency === 'SOL' && !isValidSolAddress(address)) return notify('error', t('dashboard_pro.notifications.require_solana'))
+    if (buyCurrency === 'USDT' && !isValidEvmAddress(address)) return notify('error', t('dashboard_pro.notifications.require_evm'))
     try {
       setTxProcessing(true)
       const nonce = Date.now()
       const payload = `PWIFE_PRESALE_BUY|address=${address}|token=${qty}|currency=${buyCurrency}|nonce=${nonce}`
       const signature = await signMessage(payload)
-      if (!signature) {
-        notify('error', t('dashboard_pro.notifications.signature_failed'))
-        return
-      }
+      if (!signature) return notify('error', t('dashboard_pro.notifications.signature_failed'))
       await submitPresaleIntent({
         address,
         tokenAmount: qty,
@@ -331,18 +283,7 @@ const DashboardPage = () => {
         quoteUsd: buyTotalCost,
         signature
       })
-      setTransactions((prev) => [
-        {
-          id: `tx-${Date.now()}`,
-          date: new Date().toISOString(),
-          type: 'buy',
-          currency: buyCurrency,
-          tokenAmount: qty,
-          usdAmount: buyTotalCost,
-          status: 'confirmed'
-        },
-        ...prev
-      ])
+      setTransactions((prev) => [{ id: `tx-${Date.now()}`, date: new Date().toISOString(), type: 'buy', currency: buyCurrency, tokenAmount: qty, usdAmount: buyTotalCost, status: 'confirmed' }, ...prev])
       notify('success', t('dashboard_pro.notifications.buy_success'))
       setBuyPaymentAmount('')
       setBuyAmountError('')
@@ -353,551 +294,392 @@ const DashboardPage = () => {
     }
   }
 
-  const cardBase = 'bg-white/90 border-[#d6e8dc] text-[#123126] shadow-[0_8px_22px_rgba(15,122,77,0.06)]'
+  const renderOverview = (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard icon={<Coins size={18} />} label={t('dashboard_pro.overview.total_supply')} value={`${stats.totalSupply.toLocaleString()} ${PROJECT_CURRENCY_NAME}`} />
+        <StatsCard icon={<Wallet size={18} />} label={t('dashboard_pro.overview.presale_available')} value={`${stats.presaleAvailable.toLocaleString()} ${PROJECT_CURRENCY_NAME}`} />
+        <StatsCard icon={<Rocket size={18} />} label={t('dashboard_pro.overview.token_price')} value={`$${stats.tokenPriceUsd.toFixed(8)}`} hint={t('dashboard_pro.overview.phase_status', { current: stats.currentPhase, total: stats.totalPhases })} />
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <ContentSection>
+          <PageHeader title={t('dashboard_pro.wallet_overview.title')} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <DashboardCard className="p-4">
+              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet_overview.total_value')}</p>
+              <p className="text-[28px] font-bold mt-2">${totalWalletUsd.toFixed(2)}</p>
+            </DashboardCard>
+            <DashboardCard className="p-4">
+              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet.sol_balance')}</p>
+              <p className="text-[28px] font-bold mt-2">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
+            </DashboardCard>
+            <DashboardCard className="p-4">
+              <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.wallet.usdt_balance')}</p>
+              <p className="text-[28px] font-bold mt-2">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
+            </DashboardCard>
+          </div>
+        </ContentSection>
+        <ContentSection>
+          <PageHeader title={t('dashboard_pro.overview.roi_calculator')} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium mb-2">{t('dashboard_pro.overview.investment_label')}</p>
+              <Input type="number" value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} placeholder={t('dashboard_pro.overview.investment_placeholder')} />
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">{t('dashboard_pro.overview.target_label')}</p>
+              <Input type="number" value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} placeholder={t('dashboard_pro.overview.target_placeholder')} />
+            </div>
+          </div>
+          {'error' in roiResult ? (
+            <p className="text-sm text-dashboard-danger mt-3">{t('dashboard_pro.overview.invalid_roi')}</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <DashboardCard className="p-4"><p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.overview.profit')}</p><p className="text-xl font-bold mt-1">${Number(roiResult.profit).toLocaleString()}</p></DashboardCard>
+              <DashboardCard className="p-4"><p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.overview.roi')}</p><p className="text-xl font-bold mt-1">{roiResult.roi}%</p></DashboardCard>
+            </div>
+          )}
+        </ContentSection>
+      </div>
+    </div>
+  )
+
+  const renderBuy = (
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+      <ContentSection className="xl:col-span-8">
+        <PageHeader title={t('dashboard_pro.buy.title')} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <StatsCard label="Wallet Balance" value="$1,240" />
+          <StatsCard label="Total Invested" value="$800" />
+          <StatsCard label="PWIFE Owned" value="120,000,000" />
+        </div>
+        <DashboardCard className="space-y-4">
+          <div>
+            <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.buy.current_price')}</p>
+            <p className="text-[28px] font-bold text-dashboard-primary mt-1">$0.00000005</p>
+            <p className="text-sm text-dashboard-text-secondary mt-1">{t('dashboard_pro.buy.phase_supply', { supply: stats.presaleAvailable.toLocaleString() })}</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 rounded-dashboard-lg p-1 bg-dashboard-highlight border border-dashboard-border">
+            {['SOL', 'USDT'].map((currency) => (
+              <button
+                key={currency}
+                type="button"
+                onClick={() => setBuyCurrency(currency)}
+                className={`h-11 rounded-dashboard-md text-sm font-semibold ${buyCurrency === currency ? 'bg-dashboard-primary text-white' : 'text-dashboard-primary-dark bg-white'}`}
+              >
+                {currency}
+              </button>
+            ))}
+            <button type="button" className="h-11 rounded-dashboard-md text-sm font-medium border border-dashboard-border bg-white text-dashboard-text-secondary">MAX</button>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
+            <Input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} />
+            <p className="text-xs text-dashboard-muted">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
+            {buyAmountError && <p className="text-xs text-dashboard-danger">{buyAmountError}</p>}
+            {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
+          </div>
+          <DashboardCard className="p-4 bg-dashboard-highlight">
+            <p className="text-[13px] text-dashboard-text-secondary">{t('dashboard_pro.buy.estimated_receive', { amount: (buyTokenAmount || 0).toLocaleString(), currency: PROJECT_CURRENCY_NAME })}</p>
+            <p className="text-[28px] font-bold mt-1 text-dashboard-primary">{(buyTokenAmount || 0).toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
+          </DashboardCard>
+          <PrimaryButton onClick={handleBuy} disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError} className="w-full h-11 rounded-dashboard-md">
+            {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
+          </PrimaryButton>
+        </DashboardCard>
+      </ContentSection>
+      <div className="xl:col-span-4 space-y-4">
+        <GlassPanel>
+          <PageHeader title="Phase Progress" />
+          <div className="h-5 rounded-full bg-dashboard-highlight border border-dashboard-border overflow-hidden">
+            <div className="h-full bg-dashboard-primary" style={{ width: '72%' }} />
+          </div>
+          <div className="flex items-center justify-between mt-2 text-sm font-semibold text-dashboard-primary-dark">
+            <span>72% SOLD</span><span>72%</span>
+          </div>
+        </GlassPanel>
+        <DashboardCard>
+          <ul className="space-y-3 text-sm font-medium">
+            <li className="flex items-center gap-2"><BadgeCheck size={18} className="text-dashboard-primary" /> Liquidity Locked</li>
+            <li className="flex items-center gap-2"><BadgeCheck size={18} className="text-dashboard-primary" /> Mint Revoked</li>
+            <li className="flex items-center gap-2"><BadgeCheck size={18} className="text-dashboard-primary" /> Contract Verified</li>
+          </ul>
+        </DashboardCard>
+      </div>
+    </div>
+  )
+
+  const renderTransactions = (
+    <TableCard title={t('dashboard_pro.sidebar.transactions')}>
+      <div className="flex flex-wrap gap-3 mb-4">
+        <select value={txTypeFilter} onChange={(e) => setTxTypeFilter(e.target.value)} className="h-[46px] rounded-dashboard-md border border-dashboard-border bg-white px-3 text-sm">
+          <option value="all">{t('dashboard_pro.transactions.types.all')}</option>
+          <option value="buy">{t('dashboard_pro.transactions.types.buy')}</option>
+          <option value="referral">{t('dashboard_pro.transactions.types.referral')}</option>
+          <option value="claim">{t('dashboard_pro.transactions.types.claim')}</option>
+        </select>
+        <select value={txRangeFilter} onChange={(e) => setTxRangeFilter(e.target.value)} className="h-[46px] rounded-dashboard-md border border-dashboard-border bg-white px-3 text-sm">
+          <option value="7d">{t('dashboard_pro.transactions.range_7d')}</option>
+          <option value="30d">{t('dashboard_pro.transactions.range_30d')}</option>
+          <option value="90d">{t('dashboard_pro.transactions.range_90d')}</option>
+          <option value="all">{t('dashboard_pro.transactions.range_all')}</option>
+        </select>
+      </div>
+      <div className="overflow-x-auto rounded-dashboard-xl border border-dashboard-border-soft">
+        <table className="w-full min-w-[760px] bg-white">
+          <thead>
+            <tr className="h-11 text-[13px] font-semibold text-dashboard-text-secondary border-b border-[#EDF3ED]">
+              <th className="text-start px-4">{t('dashboard_pro.transactions.table.date')}</th>
+              <th className="text-start px-4">{t('dashboard_pro.transactions.table.type')}</th>
+              <th className="text-start px-4">{t('dashboard_pro.transactions.table.tokens')}</th>
+              <th className="text-start px-4">{t('dashboard_pro.transactions.table.amount')}</th>
+              <th className="text-start px-4">{t('dashboard_pro.transactions.table.status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTransactions.map((tx) => (
+              <tr key={tx.id} className="min-h-[52px] border-b border-[#F1F5F1] hover:bg-[#FAFDFA]">
+                <td className="px-4 py-3 text-sm">{new Date(tx.date).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-sm">{t(`dashboard_pro.transactions.types.${tx.type}`)}</td>
+                <td className="px-4 py-3 text-sm">{tx.tokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</td>
+                <td className={`px-4 py-3 text-sm font-semibold ${tx.type === 'claim' ? 'text-dashboard-success' : 'text-dashboard-text-primary'}`}>{tx.usdAmount.toFixed(2)} {tx.currency}</td>
+                <td className="px-4 py-3 text-sm"><StatusPill ok={tx.status === 'confirmed'}>{t(`dashboard_pro.transactions.status.${tx.status}`)}</StatusPill></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </TableCard>
+  )
+
+  const renderPerformance = (
+    <ContentSection>
+      <PageHeader
+        title={t('dashboard_pro.performance.title')}
+        right={
+          <div className="flex items-center gap-2">
+            {['7d', '30d', '90d'].map((range) => (
+              <SecondaryButton key={range} onClick={() => setPerformanceRange(range)} className={performanceRange === range ? 'bg-dashboard-primary text-white border-transparent' : ''}>
+                {t(`dashboard_pro.transactions.range_${range}`)}
+              </SecondaryButton>
+            ))}
+          </div>
+        }
+      />
+      <DashboardCard className="p-4 bg-white/90">
+        <svg viewBox="0 0 100 100" className="w-full h-56">
+          <path d={chartPath} fill="none" stroke="#5FAE6E" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </DashboardCard>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <StatsCard label={t('dashboard_pro.performance.current')} value={`$${stats.tokenPriceUsd.toFixed(8)}`} />
+        <StatsCard label={t('dashboard_pro.performance.high')} value={`$${Math.max(...performanceSeries).toFixed(8)}`} />
+        <StatsCard label={t('dashboard_pro.performance.low')} value={`$${Math.min(...performanceSeries).toFixed(8)}`} />
+      </div>
+    </ContentSection>
+  )
+
+  const renderTokens = (
+    <ContentSection>
+      <PageHeader title={t('dashboard_pro.tokens.title')} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard label="Total Balance" value={totalBoughtTokens.toLocaleString()} />
+        <StatsCard label="Locked" value={`${Math.floor(totalBoughtTokens * 0.45).toLocaleString()}`} />
+        <StatsCard label="Available" value={`${Math.floor(totalBoughtTokens * 0.55).toLocaleString()}`} />
+      </div>
+      <div className="flex gap-3 mt-4">
+        <PrimaryButton>Claim</PrimaryButton>
+        <SecondaryButton>Stake</SecondaryButton>
+      </div>
+    </ContentSection>
+  )
+
+  const renderReferral = (
+    <ContentSection className="space-y-4">
+      <PageHeader title={t('dashboard_pro.referral.title')} />
+      <CopyField value={referralLink} onCopy={() => handleCopy(referralLink, 'referral')} copyLabel={copied === 'referral' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.referral.copy_link')} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard label={t('dashboard_pro.referral.invited')} value={`${referralStats.invitedFriends}`} />
+        <StatsCard label={t('dashboard_pro.referral.active')} value={`${referralStats.activeReferrals}`} />
+        <StatsCard label={t('dashboard_pro.referral.earned')} value={`$${referralStats.earnedUsd.toFixed(2)}`} />
+      </div>
+      <DashboardCard className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[13px] font-medium text-dashboard-text-secondary">{t('dashboard_pro.referral.reward_progress')}</p>
+          <p className="text-xs">{referralProgress}%</p>
+        </div>
+        <div className="h-3 rounded-full bg-dashboard-highlight overflow-hidden">
+          <div className="h-full bg-dashboard-primary" style={{ width: `${referralProgress}%` }} />
+        </div>
+      </DashboardCard>
+    </ContentSection>
+  )
+
+  const renderClaim = (
+    <ContentSection>
+      <PageHeader title={t('dashboard_pro.sidebar.claim')} />
+      <DashboardCard className="p-5">
+        <p className="text-[13px] text-dashboard-text-secondary">Available Rewards</p>
+        <p className="text-[28px] font-bold mt-2 text-dashboard-primary">245,000 {PROJECT_CURRENCY_NAME}</p>
+        <PrimaryButton className="mt-4">Claim Rewards</PrimaryButton>
+      </DashboardCard>
+    </ContentSection>
+  )
+
+  const renderStaking = (
+    <ContentSection>
+      <PageHeader title={t('dashboard_pro.sidebar.staking')} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard label="APR" value="24%" />
+        <StatsCard label="Status" value={t('dashboard_pro.soon')} />
+        <StatsCard label="Staked" value="0 PWIFE" />
+      </div>
+      <DashboardCard className="mt-4 p-5">
+        <p className="text-sm text-dashboard-text-secondary">{t('dashboard_pro.soon_desc')}</p>
+      </DashboardCard>
+    </ContentSection>
+  )
+
+  const renderSupport = (
+    <ContentSection>
+      <PageHeader title={t('dashboard_pro.support.title')} />
+      <p className="text-sm text-dashboard-text-secondary mb-4">{t('dashboard_pro.support.desc')}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href={supportUrl} target="_blank" rel="noreferrer" className="rounded-dashboard-lg border border-dashboard-border-soft bg-white p-4 flex items-center gap-3">
+          <LifeBuoy size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">{t('dashboard_pro.support.open')}</span>
+        </a>
+        <a href="mailto:support@pepewife.io" className="rounded-dashboard-lg border border-dashboard-border-soft bg-white p-4 flex items-center gap-3">
+          <Mail size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">Email Support</span>
+        </a>
+        <a href={faqUrl} className="rounded-dashboard-lg border border-dashboard-border-soft bg-white p-4 flex items-center gap-3">
+          <MessageCircleQuestion size={18} className="text-dashboard-primary" /><span className="text-sm font-medium">FAQ</span>
+        </a>
+      </div>
+    </ContentSection>
+  )
+
+  const currentSection = {
+    overview: renderOverview,
+    buy: renderBuy,
+    transactions: renderTransactions,
+    performance: renderPerformance,
+    tokens: renderTokens,
+    referral: renderReferral,
+    claim: renderClaim,
+    staking: renderStaking,
+    support: renderSupport
+  }[activeSection]
 
   return (
     <AppShell>
-      <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
-      <DsNavbar>
-        <PageContainer className="h-20 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => setSidebarOpen((v) => !v)} className="lg:hidden p-2 rounded-xl border border-[#d7e7dd] bg-white/80">
-              {sidebarOpen ? <AppIcon name="close" fallback="close menu" className="text-lg" /> : <AppIcon name="menu" fallback="open menu" className="text-lg" />}
-            </button>
-            <button onClick={() => navigate('/')} className="min-w-0">
-              <BrandLogo size="md" />
-            </button>
+      <div className={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar>
+          <div className="w-full flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <button type="button" onClick={() => setSidebarOpen((v) => !v)} className="lg:hidden w-10 h-10 rounded-full border border-dashboard-border bg-white/90 flex items-center justify-center">
+                {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+              </button>
+              <button type="button" onClick={() => navigate('/')}><BrandLogo size="md" /></button>
+            </div>
+            <nav className="hidden lg:flex items-center gap-5">
+              {navLinks.map((link) => (
+                <a key={link.href} href={link.href} className="text-sm font-medium text-dashboard-text-primary hover:text-dashboard-primary">
+                  {t(link.labelKey)}
+                </a>
+              ))}
+            </nav>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher className="hidden md:flex" />
+              <PrimaryButton className="h-[42px] min-w-[124px] rounded-dashboard-pill hidden md:flex items-center justify-center gap-2">
+                <Rocket size={16} /> Buy Now
+              </PrimaryButton>
+              <GlassPanel className="h-10 px-[14px] py-0 rounded-dashboard-pill border border-[#DCECDC] bg-[rgba(255,255,255,0.88)] hidden sm:flex items-center">
+                <span className="text-[13px] font-medium">{formatAddress(address)}</span>
+              </GlassPanel>
+              <SecondaryButton onClick={() => handleCopy(address, 'wallet-badge')} className="h-10 px-3 rounded-dashboard-pill flex items-center gap-2">
+                <Copy size={16} />
+                <span className="text-[13px] font-medium">{copied === 'wallet-badge' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}</span>
+              </SecondaryButton>
+            </div>
           </div>
-          <nav className="hidden lg:flex items-center gap-6 min-w-0">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="font-semibold text-sm whitespace-nowrap text-[#28493b] hover:text-[#0f7a4d]">
-                {t(link.labelKey)}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher className="hidden md:flex" />
-            <PrimaryButton className="hidden md:flex h-11 px-5 items-center gap-2">
-              <AppIcon name="rocket_launch" fallback="buy now" className="text-sm" />
-              {t('hero.join_presale')}
-            </PrimaryButton>
-            <GlassCard className="hidden sm:flex items-center px-4 h-11 max-w-[240px] py-0">
-              <span className="font-black text-xs truncate">{formatAddress(address)}</span>
-            </GlassCard>
-            <SecondaryButton onClick={() => handleCopy(address, 'navbar')} className="h-11 px-3 text-xs flex items-center gap-2">
-              <AppIcon name="content_copy" fallback="copy address" className={`text-sm ${copied === 'navbar' ? 'text-pepe-pink' : ''}`} />
-              {copied === 'navbar' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}
-            </SecondaryButton>
+        </Navbar>
+
+        <PageContainer className="mt-5 pb-8">
+          <div className={`grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)_320px] gap-5 ${isRTL ? 'lg:[direction:rtl]' : ''}`}>
+            <aside className={`${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')} lg:translate-x-0 fixed lg:sticky top-24 z-30 ${isRTL ? 'right-4' : 'left-4'} lg:left-auto lg:right-auto w-[260px] transition-transform`}>
+              <Sidebar>
+                <div className="space-y-2">
+                  {sidebarItems.map((item) => {
+                    const Icon = sidebarIcons[item.id]
+                    return (
+                      <button key={item.id} type="button" onClick={() => { setActiveSection(item.id); setSidebarOpen(false) }} className="w-full text-left">
+                        <SidebarItem active={activeSection === item.id} right={item.id === 'tokens' ? <Badge>NEW</Badge> : null}>
+                          <span className="flex items-center gap-3 min-w-0">
+                            <Icon size={18} />
+                            <span className="truncate">{t(item.labelKey)}</span>
+                          </span>
+                        </SidebarItem>
+                      </button>
+                    )
+                  })}
+                </div>
+                <SecondaryButton onClick={handleLogout} className="w-full mt-4 h-11 flex items-center justify-center gap-2 border-[#ead3d3] text-[#9d3d3d]">
+                  <LogOut size={16} /> {t('dashboard_pro.logout')}
+                </SecondaryButton>
+              </Sidebar>
+            </aside>
+
+            <main className="min-w-0">
+              <AnimatePresence>
+                {notification && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`mb-4 rounded-dashboard-lg border p-3 flex items-center gap-2 ${notification.type === 'success' ? 'bg-[#EDFAEF] border-[#D3EFD9] text-dashboard-success' : 'bg-[#FFF4F4] border-[#F0D5D5] text-dashboard-danger'}`}
+                  >
+                    {notification.type === 'success' ? <CircleCheck size={16} /> : <X size={16} />}
+                    <span className="text-sm font-medium">{notification.message}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {currentSection}
+            </main>
+
+            <aside className="hidden xl:block">
+              <div className="space-y-4 sticky top-24">
+                <GlassPanel>
+                  <PageHeader title="Quick Insights" />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="font-semibold">${stats.tokenPriceUsd.toFixed(8)}</span></div>
+                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="font-semibold">${Math.round(stats.marketCapUsd).toLocaleString()}</span></div>
+                    <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="font-semibold">{stats.holders.toLocaleString()}</span></div>
+                  </div>
+                </GlassPanel>
+                <DashboardCard className="relative overflow-hidden">
+                  <PageHeader title="Referral" />
+                  <p className="text-sm text-dashboard-text-secondary">Invite friends and earn rewards</p>
+                  <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm font-semibold">
+                    <ArrowUpRight size={16} /> 20% referral rate
+                  </div>
+                  <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-6 -right-3 w-28 opacity-80 pointer-events-none" />
+                </DashboardCard>
+              </div>
+            </aside>
           </div>
         </PageContainer>
-      </DsNavbar>
 
-      <div className="flex">
-        <aside className={`${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')} lg:translate-x-0 fixed lg:static inset-y-0 top-20 ${isRTL ? 'right-0' : 'left-0'} z-30 w-72 p-4 transition-transform duration-300`}>
-          <DsSidebar>
-            <div className="space-y-2">
-              {sidebarItems.map((item) => {
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id)
-                      setSidebarOpen(false)
-                    }}
-                    className="w-full"
-                  >
-                    <SidebarItem
-                      active={activeSection === item.id}
-                      disabled={!item.enabled}
-                      right={item.id === 'tokens' ? <Badge>NEW</Badge> : (!item.enabled ? <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span> : null)}
-                    >
-                      <span className="flex items-center gap-3 min-w-0">
-                        <AppIcon name={item.icon} fallback={t(item.labelKey)} className="text-lg" />
-                        <span className="font-black text-sm truncate">{t(item.labelKey)}</span>
-                      </span>
-                    </SidebarItem>
-                  </button>
-                )
-              })}
-            </div>
-            <button onClick={handleLogout} className="mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border font-black border-red-500/30 text-red-600 bg-white">
-              <AppIcon name="logout" fallback="logout" className="text-base" />
-              {t('dashboard_pro.logout')}
-            </button>
-          </DsSidebar>
-        </aside>
-
-        <main className="flex-1 p-4 lg:p-8">
-          <AnimatePresence>
-            {notification && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className={`mb-5 p-4 rounded-2xl border-2 flex items-center gap-3 ${
-                  notification.type === 'success'
-                    ? 'bg-green-50 border-green-300 text-green-700'
-                    : 'bg-red-50 border-red-300 text-red-700'
-                }`}
-              >
-                {notification.type === 'success' ? <AppIcon name="check_circle" fallback="success" className="text-lg" /> : <AppIcon name="warning" fallback="warning" className="text-lg" />}
-                <span className="font-black text-sm">{notification.message}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {activeSection === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ContentSection className="p-6">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_supply')}</p>
-                  <p className="text-3xl font-black mt-2">{stats.totalSupply.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                </ContentSection>
-                <ContentSection className="p-6">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.presale_available')}</p>
-                  <p className="text-3xl font-black mt-2">{stats.presaleAvailable.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                </ContentSection>
-                <ContentSection className="p-6">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.token_price')}</p>
-                  <p className="text-3xl font-black mt-2">${stats.tokenPriceUsd.toFixed(8)}</p>
-                  <p className="text-xs font-black opacity-60 mt-2">{t('dashboard_pro.overview.phase_status', { current: stats.currentPhase || PRESALE_CONFIG.currentPhase.id, total: stats.totalPhases || PRESALE_CONFIG.totalPhases })}</p>
-                </ContentSection>
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <ContentSection className="p-6">
-                  <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.roi_calculator')}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-black">{t('dashboard_pro.overview.investment_label')}</label>
-                      <Input value={roiInvestment} onChange={(e) => setRoiInvestment(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.investment_placeholder')} className="h-12" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-black">{t('dashboard_pro.overview.target_label')}</label>
-                      <Input value={roiTargetPrice} onChange={(e) => setRoiTargetPrice(e.target.value)} type="number" placeholder={t('dashboard_pro.overview.target_placeholder')} className="h-12" />
-                    </div>
-                  </div>
-                  {'error' in roiResult ? (
-                    <p className="text-sm font-black text-red-500 mt-4">{t('dashboard_pro.overview.invalid_roi')}</p>
-                  ) : (
-                    <div className="mt-4 grid grid-cols-2 gap-4">
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.profit')}</p>
-                        <p className="text-xl font-black mt-1">${Number(roiResult.profit).toLocaleString()}</p>
-                      </Card>
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.roi')}</p>
-                        <p className="text-xl font-black mt-1">{roiResult.roi}%</p>
-                      </Card>
-                    </div>
-                  )}
-                </ContentSection>
-
-                <ContentSection className="p-6">
-                  <h3 className="text-xl font-black mb-4">{t('dashboard_pro.overview.stats_title')}</h3>
-                  {statsLoading ? (
-                    <div className="h-40 flex items-center justify-center">
-                      <AppIcon name="progress_activity" fallback="loading" className="text-2xl animate-spin" />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.market_cap')}</p>
-                        <p className="text-xl font-black mt-1">${Math.round(stats.marketCapUsd).toLocaleString()}</p>
-                      </Card>
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.total_liquidity')}</p>
-                        <p className="text-xl font-black mt-1">${Math.round(stats.liquidityUsd).toLocaleString()}</p>
-                      </Card>
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.holders')}</p>
-                        <p className="text-xl font-black mt-1">{stats.holders.toLocaleString()}</p>
-                      </Card>
-                      <Card className="p-4">
-                        <p className="text-xs font-black opacity-60">{t('dashboard_pro.overview.pairs')}</p>
-                        <p className="text-xl font-black mt-1">${stats.solUsd.toFixed(2)} / ${stats.usdtUsd.toFixed(2)}</p>
-                      </Card>
-                    </div>
-                  )}
-                </ContentSection>
-              </div>
-
-              <ContentSection className="p-6">
-                <h3 className="text-xl font-black mb-4">{t('dashboard_pro.wallet_overview.title')}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="p-4 min-w-0">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet_overview.total_value')}</p>
-                    <p className="text-2xl font-black mt-1 truncate">${totalWalletUsd.toFixed(2)}</p>
-                  </Card>
-                  <Card className="p-4 min-w-0">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
-                    <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
-                  </Card>
-                  <Card className="p-4 min-w-0">
-                    <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
-                    <p className="text-2xl font-black mt-1 truncate">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
-                  </Card>
-                </div>
-              </ContentSection>
-            </div>
-          )}
-
-          {activeSection === 'buy' && (
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
-              <div className={`xl:col-span-8 rounded-3xl border p-5 md:p-6 ${cardBase}`}>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xl">🔥</span>
-                  <h3 className="text-3xl font-black tracking-tight">{t('dashboard_pro.buy.title')}</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-semibold text-[#6c8177]">Wallet Balance</p>
-                    <p className="text-3xl font-bold text-[#0f7a4d]">$1,240</p>
-                  </div>
-                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-semibold text-[#6c8177]">Total Invested</p>
-                    <p className="text-3xl font-bold">$800</p>
-                  </div>
-                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3">
-                    <p className="text-xs font-semibold text-[#6c8177]">PWIFE Owned</p>
-                    <p className="text-3xl font-bold text-[#0f7a4d]">120,000,000</p>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-[#d7e7dd] bg-white p-4 md:p-5 space-y-4">
-                  <div>
-                    <p className="text-xs font-semibold text-[#6c8177]">Buy PWIFE</p>
-                    <p className="text-4xl font-bold text-[#0f7a4d]">$0.00000005 <span className="text-xl text-[#4b6b5c]">PWIFE</span></p>
-                    <p className="text-sm font-semibold text-[#6c8177]">Phase Balance: 1,900,000,000 PWIFE</p>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 rounded-2xl p-1 border border-[#d7e7dd] bg-[#f6fbf8]">
-                    {['SOL', 'USDT'].map((currency) => (
-                      <button
-                        key={currency}
-                        onClick={() => {
-                          setBuyCurrency(currency)
-                          if (buyPaymentAmount) {
-                            const v = validatePaymentAmount(buyPaymentAmount, currency)
-                            setBuyAmountError(v.valid ? '' : t('validation.amount_range', { min: v.min, max: v.max }))
-                          }
-                        }}
-                        className={`h-12 rounded-xl font-black transition-all ${buyCurrency === currency ? 'bg-[#1f2d3a] text-white' : 'text-[#2e4a3c]'}`}
-                      >
-                        {currency}
-                      </button>
-                    ))}
-                    <button className="h-12 rounded-xl font-semibold text-[#6c8177] bg-white border border-[#d7e7dd]">MAX</button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-black">{t('dashboard_pro.buy.payment_amount', { currency: buyCurrency })}</label>
-                    <input value={buyPaymentAmount} onChange={(e) => handleBuyAmountChange(e.target.value)} onBlur={handleBuyAmountBlur} min={buyRange.min} max={buyRange.max} type="number" placeholder={t('dashboard_pro.buy.payment_placeholder', { min: buyRange.min, max: buyRange.max })} className="w-full h-14 rounded-2xl border border-[#d7e7dd] bg-white px-4 text-2xl font-black text-[#123126]" />
-                    <p className="text-[11px] font-bold opacity-70">{t('dashboard_pro.buy.range_hint', { min: buyRange.min, max: buyRange.max })}</p>
-                    {buyAmountError && <p className="text-xs font-black text-red-500">{buyAmountError}</p>}
-                    {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
-                  </div>
-
-                  <div className="rounded-2xl border border-[#d7e7dd] bg-[#f6fbf8] p-3">
-                    <p className="text-xs font-semibold text-[#6c8177]">You Receive</p>
-                    <p className="text-4xl font-bold text-[#0f7a4d]">{(buyTokenAmount || 100000000).toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                    <p className="text-lg font-semibold text-[#4b6b5c]">~ $90 &nbsp;&nbsp;&nbsp;&nbsp; ≈ $190</p>
-                  </div>
-
-                  <button
-                    onClick={handleBuy}
-                    disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError}
-                    className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d] text-white font-bold text-2xl disabled:opacity-60 flex items-center justify-center gap-2"
-                  >
-                    {txProcessing && <AppIcon name="progress_activity" fallback="loading" className="text-lg animate-spin" />}
-                    {txProcessing ? t('dashboard_pro.buy.processing') : '🚀 BUY PWIFE NOW'}
-                  </button>
-                  <p className="text-center text-lg font-semibold text-[#8f59d1]">Early buyers win the most. 💎</p>
-                  <div className="rounded-2xl border border-[#d7e7dd] bg-white p-3 flex flex-col md:flex-row items-start md:items-center gap-3 md:justify-between">
-                    <div className="w-full md:w-auto">
-                      <p className="text-2xl font-bold text-[#123126]">Your Referral Link</p>
-                      <CopyInput value="https://pepewife.../" onCopy={() => handleCopy('https://pepewife.../', 'referral-inline')} copyLabel="Copy" />
-                    </div>
-                    <div className="rounded-xl border border-[#d7e7dd] bg-[#f6fbf8] px-3 py-2 min-w-[140px]">
-                      <p className="text-sm font-bold text-[#0f7a4d]">↗ 20% PWIFE</p>
-                      <p className="text-xs font-semibold text-[#6c8177]">Free referral</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="xl:col-span-4 space-y-4">
-                <div className={`rounded-3xl border p-5 ${cardBase}`}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">🔥</span>
-                    <h4 className="text-3xl font-black tracking-tight">Phase Progress</h4>
-                  </div>
-                  <div className="h-6 rounded-full bg-[#e8f6ee] border border-[#cfe9db] overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d]" style={{ width: '72%' }} />
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-sm font-black text-[#1d5a3f]">
-                    <span>72% SOLD</span>
-                    <span>72%</span>
-                  </div>
-                  <div className="mt-3 border-t border-[#d7e7dd] pt-3 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-[#6c8177]">Ends in:</span>
-                    <span className="text-3xl font-bold text-[#0f7a4d]">01:01:45</span>
-                  </div>
-                </div>
-
-                <div className={`rounded-3xl border p-5 ${cardBase}`}>
-                  <ul className="space-y-3 text-base font-semibold">
-                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Liquidity Locked</li>
-                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Mint Revoked</li>
-                    <li className="flex items-center gap-2"><AppIcon name="verified" fallback="ok" className="text-[#0f7a4d]" /> Contract Verified</li>
-                  </ul>
-                  <div className="mt-4 border-t border-[#d7e7dd] pt-3">
-                    <p className="text-xs font-black opacity-60">Presale Contract Address</p>
-                    <div className="mt-1 flex items-center justify-between gap-2">
-                      <p className="font-black truncate">{formatAddress(address)}</p>
-                      <button onClick={() => handleCopy(address, 'sidebar')} className="text-[#0f7a4d] font-semibold text-xs">Copy</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`rounded-3xl border p-5 relative overflow-hidden ${cardBase}`}>
-                  <h4 className="text-2xl font-black mb-3">Recent Transactions</h4>
-                  <div className="grid grid-cols-3 gap-2 text-sm font-semibold text-[#6c8177] border-b border-[#e3efe8] pb-2 mb-2">
-                    <span>Date</span>
-                    <span>Type</span>
-                    <span className="text-right">Amount</span>
-                  </div>
-                  <div className="space-y-2">
-                    {[
-                      { time: '11 min', type: 'Buy', amount: '200,000,000' },
-                      { time: '11 min', type: 'Buy', amount: '200,000,000' },
-                      { time: '9 min', type: 'Airdrop', amount: '750,000' }
-                    ].map((tx, index) => (
-                      <div key={`${tx.time}-${index}`} className="grid grid-cols-3 gap-2 text-sm font-semibold border-b border-[#e3efe8] pb-2">
-                        <span className="opacity-70">{tx.time}</span>
-                        <span>{tx.type}</span>
-                        <span className="text-right truncate">{tx.amount}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-4 -right-3 w-28 h-28 object-contain opacity-95 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSection === 'transactions' && (
-            <ContentSection className="space-y-5">
-              <div className="flex flex-wrap gap-3 items-end">
-                <div>
-                  <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_type')}</p>
-                  <select value={txTypeFilter} onChange={(e) => setTxTypeFilter(e.target.value)} className="p-2 rounded-xl border border-[#d7e7dd] bg-white font-semibold">
-                    <option value="all">{t('dashboard_pro.transactions.types.all')}</option>
-                    <option value="buy">{t('dashboard_pro.transactions.types.buy')}</option>
-                    <option value="referral">{t('dashboard_pro.transactions.types.referral')}</option>
-                    <option value="claim">{t('dashboard_pro.transactions.types.claim')}</option>
-                  </select>
-                </div>
-                <div>
-                  <p className="text-xs font-black opacity-60 mb-1">{t('dashboard_pro.transactions.filter_range')}</p>
-                  <select value={txRangeFilter} onChange={(e) => setTxRangeFilter(e.target.value)} className="p-2 rounded-xl border border-[#d7e7dd] bg-white font-semibold">
-                    <option value="7d">{t('dashboard_pro.transactions.range_7d')}</option>
-                    <option value="30d">{t('dashboard_pro.transactions.range_30d')}</option>
-                    <option value="90d">{t('dashboard_pro.transactions.range_90d')}</option>
-                    <option value="all">{t('dashboard_pro.transactions.range_all')}</option>
-                  </select>
-                </div>
-              </div>
-              <div className="rounded-2xl border border-[#d7e7dd] overflow-hidden bg-white/85">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[760px]">
-                    <thead className="bg-[#f5fbf7]">
-                      <tr>
-                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.date')}</th>
-                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.type')}</th>
-                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.tokens')}</th>
-                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.amount')}</th>
-                        <th className="text-start p-3 text-xs font-black uppercase">{t('dashboard_pro.transactions.table.status')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredTransactions.map((tx) => (
-                        <tr key={tx.id} className="border-t border-[#e3efe8]">
-                          <td className="p-3 text-sm font-bold whitespace-nowrap">{new Date(tx.date).toLocaleDateString()}</td>
-                          <td className="p-3 text-sm font-bold">{t(`dashboard_pro.transactions.types.${tx.type}`)}</td>
-                          <td className="p-3 text-sm font-bold">{Number(tx.tokenAmount).toLocaleString()} {PROJECT_CURRENCY_NAME}</td>
-                          <td className="p-3 text-sm font-bold">{tx.usdAmount.toFixed(2)} {tx.currency}</td>
-                          <td className="p-3 text-sm font-bold">{t(`dashboard_pro.transactions.status.${tx.status}`)}</td>
-                        </tr>
-                      ))}
-                      {!filteredTransactions.length && (
-                        <tr>
-                          <td className="p-4 text-sm font-black opacity-70" colSpan={5}>{t('dashboard_pro.transactions.empty')}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </ContentSection>
-          )}
-
-          {activeSection === 'performance' && (
-            <ContentSection className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-2xl font-black">{t('dashboard_pro.performance.title')}</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {['7d', '30d', '90d'].map((range) => (
-                    <button key={range} onClick={() => setPerformanceRange(range)} className={`px-3 py-2 rounded-xl border text-xs font-semibold ${performanceRange === range ? 'bg-[#0f7a4d] text-white border-transparent' : 'border-[#d7e7dd] bg-white text-[#2d4a3b]'}`}>
-                      {t(`dashboard_pro.transactions.range_${range}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-[#d7e7dd] p-4 bg-white/75">
-                <svg viewBox="0 0 100 100" className="w-full h-56">
-                  <path d={chartPath} fill="none" stroke="#ec4899" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-                </svg>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.current')}</p>
-                  <p className="text-xl font-black mt-1">${stats.tokenPriceUsd.toFixed(8)}</p>
-                </div>
-                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.high')}</p>
-                  <p className="text-xl font-black mt-1">${Math.max(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
-                </div>
-                <div className="p-4 rounded-xl border border-[#d7e7dd] bg-white">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.performance.low')}</p>
-                  <p className="text-xl font-black mt-1">${Math.min(...performanceSeries.map((d) => d.value)).toFixed(8)}</p>
-                </div>
-              </div>
-            </ContentSection>
-          )}
-
-          {activeSection === 'tokens' && (
-            <ContentSection className="space-y-5">
-              <h3 className="text-2xl font-black">{t('dashboard_pro.tokens.title')}</h3>
-              <Card>
-                <p className="text-xs font-black opacity-60">{t('dashboard_pro.tokens.total_bought')}</p>
-                <p className="text-3xl font-black mt-1 break-words">{totalBoughtTokens.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-              </Card>
-              <div className="space-y-3">
-                {buyTransactions.map((tx) => (
-                  <div key={tx.id} className="p-4 rounded-xl border border-[#d7e7dd] bg-white grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <p className="text-sm font-black">{new Date(tx.date).toLocaleDateString()}</p>
-                    <p className="text-sm font-black break-words">{tx.tokenAmount.toLocaleString()} {PROJECT_CURRENCY_NAME}</p>
-                    <p className="text-sm font-black">{tx.usdAmount.toFixed(2)} {tx.currency}</p>
-                    <p className="text-sm font-black">{t(`dashboard_pro.transactions.status.${tx.status}`)}</p>
-                  </div>
-                ))}
-                {!buyTransactions.length && <p className="text-sm font-black opacity-70">{t('dashboard_pro.tokens.empty')}</p>}
-              </div>
-            </ContentSection>
-          )}
-
-          {activeSection === 'referral' && (
-            <ContentSection className="space-y-5">
-              <h3 className="text-2xl font-black">{t('dashboard_pro.referral.title')}</h3>
-              <GlassCard>
-                <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.unique_link')}</p>
-                <div className="mt-2 flex flex-col sm:flex-row gap-3">
-                  <p className="font-black text-sm break-all flex-1">{referralLink}</p>
-                  <SecondaryButton onClick={() => handleCopy(referralLink, 'referral')} className="px-4 py-2 font-semibold flex items-center gap-2">
-                    <AppIcon name="content_copy" fallback="copy link" className={`text-sm ${copied === 'referral' ? 'text-pepe-pink' : ''}`} />
-                    {copied === 'referral' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.referral.copy_link')}
-                  </SecondaryButton>
-                </div>
-              </GlassCard>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Card>
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.invited')}</p>
-                  <p className="text-2xl font-black mt-1">{referralStats.invitedFriends}</p>
-                </Card>
-                <Card>
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.active')}</p>
-                  <p className="text-2xl font-black mt-1">{referralStats.activeReferrals}</p>
-                </Card>
-                <Card>
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.earned')}</p>
-                  <p className="text-2xl font-black mt-1">${referralStats.earnedUsd.toFixed(2)}</p>
-                </Card>
-              </div>
-              <Card>
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.referral.reward_progress')}</p>
-                  <p className="text-xs font-black">{referralProgress}%</p>
-                </div>
-                <div className="h-3 rounded-full overflow-hidden bg-[#e3efe8]">
-                  <div className="h-full bg-pepe-pink transition-all" style={{ width: `${referralProgress}%` }} />
-                </div>
-                <p className="text-xs font-black opacity-70 mt-2">{t('dashboard_pro.referral.next_reward', { amount: referralStats.nextRewardUsd.toFixed(2) })}</p>
-              </Card>
-            </ContentSection>
-          )}
-
-          {['claim', 'staking'].includes(activeSection) && (
-            <EmptyState
-              title={t('dashboard_pro.soon')}
-              subtitle={t('dashboard_pro.soon_desc')}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/35 lg:hidden z-20"
             />
           )}
-
-          {activeSection === 'support' && (
-            <ContentSection className="p-8">
-              <SectionHeader title={t('dashboard_pro.support.title')} />
-              <p className="text-sm font-bold opacity-80 mb-6">{t('dashboard_pro.support.desc')}</p>
-              <a href={supportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#d7e7dd] bg-white font-black">
-                {t('dashboard_pro.support.open')}
-                <AppIcon name="open_in_new" fallback="open link" className="text-base" />
-              </a>
-            </ContentSection>
-          )}
-
-          {activeSection === 'wallet' && (
-            <ContentSection className="space-y-6">
-              <SectionHeader title={t('dashboard_pro.wallet.title')} />
-              <GlassCard>
-                <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.connected_address')}</p>
-                <p className="font-black break-all mt-1">{address || '---'}</p>
-                <div className="flex flex-wrap gap-3 mt-4">
-                  <SecondaryButton onClick={() => handleCopy(address, 'wallet')} className="px-4 py-2 flex items-center gap-2">
-                    <AppIcon name="content_copy" fallback="copy address" className="text-sm" />
-                    {copied === 'wallet' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy')}
-                  </SecondaryButton>
-                  <a href={explorerUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-[#d7e7dd] bg-white font-black flex items-center gap-2">
-                    {t('dashboard_pro.wallet.explorer')}
-                    <AppIcon name="open_in_new" fallback="open explorer" className="text-sm" />
-                  </a>
-                </div>
-              </GlassCard>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
-                  <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
-                </Card>
-                <Card>
-                  <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
-                  <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
-                </Card>
-              </div>
-            </ContentSection>
-          )}
-        </main>
-      </div>
-
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black/40 lg:hidden z-20"
-          />
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
       </div>
     </AppShell>
   )

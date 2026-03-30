@@ -1,12 +1,14 @@
 import React from 'react'
+import { dashboardTokens } from './tokens'
 
 const cn = (...classes) => classes.filter(Boolean).join(' ')
 
 export const AppShell = ({ children }) => (
   <div
-    className="min-h-screen text-[#123126] relative"
+    className="dashboard-shell min-h-screen relative text-dashboard-text-primary"
     style={{
-      backgroundImage: "linear-gradient(rgba(245,251,247,0.18), rgba(245,251,247,0.18)), url('/assets/bab.png')",
+      backgroundColor: dashboardTokens.colors.pageBg,
+      backgroundImage: "linear-gradient(rgba(255,255,255,0.08), rgba(255,255,255,0.08)), url('/assets/bab.png')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
@@ -18,29 +20,36 @@ export const AppShell = ({ children }) => (
 )
 
 export const PageContainer = ({ children, className = '' }) => (
-  <div className={cn('px-4 lg:px-8', className)}>{children}</div>
+  <div className={cn('w-full max-w-[1440px] mx-auto px-4 md:px-5 lg:px-6', className)}>{children}</div>
 )
 
-export const Navbar = ({ children }) => (
-  <header className="sticky top-0 z-40 border border-[#d7e7dd] bg-white/75 backdrop-blur-md rounded-b-2xl shadow-[0_4px_16px_rgba(16,72,47,0.06)]">
-    {children}
+export const DashboardNavbar = ({ children }) => (
+  <header className="sticky top-4 z-40">
+    <PageContainer>
+      <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-[rgba(255,255,255,0.62)] backdrop-blur-[10px] shadow-dashboard-soft flex items-center">
+        {children}
+      </div>
+    </PageContainer>
   </header>
 )
 
-export const Sidebar = ({ children }) => (
-  <div className="h-full rounded-3xl border border-white/70 bg-white/45 backdrop-blur-xl p-4 shadow-[0_6px_20px_rgba(16,72,47,0.05)]">
+export const DashboardSidebar = ({ children, className = '' }) => (
+  <div className={cn('rounded-3xl border border-[#E0EEE0] bg-[rgba(255,255,255,0.58)] backdrop-blur-[10px] p-[18px] shadow-dashboard-soft min-h-[calc(100vh-120px)]', className)}>
     {children}
   </div>
 )
 
+export const Navbar = DashboardNavbar
+export const Sidebar = DashboardSidebar
+
 export const SidebarItem = ({ active, children, disabled, right }) => (
   <div
     className={cn(
-      'w-full flex items-center justify-between p-3 rounded-xl border transition-all',
+      'w-full h-[46px] px-[14px] rounded-dashboard-md border transition-all flex items-center justify-between gap-3 text-sm font-medium',
       active
-        ? 'bg-gradient-to-r from-[#1fa767] to-[#0f7a4d] text-white border-transparent shadow-[0_6px_14px_rgba(16,122,77,0.18)]'
-        : 'border-[#d7e7dd] text-[#123126] bg-white/78',
-      disabled && 'opacity-60'
+        ? 'bg-dashboard-primary text-white border-transparent shadow-[0_8px_20px_rgba(31,42,31,0.08)]'
+        : 'border-transparent text-dashboard-text-primary hover:bg-[#EEF7EE] hover:text-dashboard-primary-dark',
+      disabled && 'opacity-55'
     )}
   >
     {children}
@@ -49,36 +58,50 @@ export const SidebarItem = ({ active, children, disabled, right }) => (
 )
 
 export const ContentSection = ({ children, className = '' }) => (
-  <section className={cn('rounded-3xl border border-white/70 bg-white/50 backdrop-blur-xl p-6 shadow-[0_8px_22px_rgba(15,122,77,0.06)]', className)}>
+  <section className={cn('rounded-dashboard-xl border border-dashboard-border-soft bg-[rgba(255,255,255,0.82)] p-5 shadow-dashboard-card', className)}>
     {children}
   </section>
 )
 
-export const SectionHeader = ({ title, right }) => (
-  <div className="flex items-center justify-between gap-3 mb-4">
-    <h3 className="text-2xl font-black tracking-tight">{title}</h3>
+export const PageHeader = ({ title, right }) => (
+  <div className="flex items-center justify-between gap-3 mb-[14px]">
+    <h3 className="text-lg font-bold text-dashboard-text-primary">{title}</h3>
     {right}
   </div>
 )
 
-export const Card = ({ children, className = '' }) => (
-  <div className={cn('rounded-2xl border border-white/75 bg-white/62 backdrop-blur-md p-4', className)}>{children}</div>
+export const SectionHeader = PageHeader
+
+export const DashboardCard = ({ children, className = '' }) => (
+  <div className={cn('rounded-dashboard-xl border border-dashboard-border-soft bg-white p-5 shadow-dashboard-card', className)}>{children}</div>
 )
 
-export const GlassCard = ({ children, className = '' }) => (
-  <div className={cn('rounded-2xl border border-white/70 bg-white/48 backdrop-blur-xl p-4 shadow-[0_6px_16px_rgba(16,72,47,0.05)]', className)}>{children}</div>
+export const GlassPanel = ({ children, className = '' }) => (
+  <div className={cn('rounded-dashboard-xl border border-[rgba(255,255,255,0.35)] bg-[rgba(255,255,255,0.58)] backdrop-blur-[10px] p-5 shadow-dashboard-soft', className)}>{children}</div>
 )
 
-export const StatsCard = ({ label, value, hint }) => (
-  <Card>
-    <p className="text-xs font-black opacity-60">{label}</p>
-    <p className="text-3xl font-black mt-1 text-[#0f7a4d]">{value}</p>
-    {hint ? <p className="text-[11px] font-black opacity-60 mt-1">{hint}</p> : null}
-  </Card>
+export const Card = DashboardCard
+export const GlassCard = GlassPanel
+
+export const StatsCard = ({ icon, label, value, hint, className = '' }) => (
+  <DashboardCard className={cn('min-h-[108px] p-[18px] md:p-5', className)}>
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-[13px] font-medium text-dashboard-text-secondary">{label}</p>
+        <p className="text-[28px] leading-[1.2] font-bold text-dashboard-text-primary mt-2 break-words">{value}</p>
+        {hint ? <p className="text-xs font-normal text-dashboard-muted mt-1">{hint}</p> : null}
+      </div>
+      {icon ? (
+        <span className="w-9 h-9 rounded-[12px] bg-dashboard-icon-soft text-dashboard-primary flex items-center justify-center shrink-0">
+          {icon}
+        </span>
+      ) : null}
+    </div>
+  </DashboardCard>
 )
 
 export const Button = ({ children, className = '', ...props }) => (
-  <button {...props} className={cn('h-11 px-4 rounded-xl border font-black transition-all', className)}>
+  <button {...props} className={cn('h-11 px-[18px] rounded-dashboard-md border text-sm font-semibold transition-colors', className)}>
     {children}
   </button>
 )
@@ -86,14 +109,14 @@ export const Button = ({ children, className = '', ...props }) => (
 export const PrimaryButton = ({ children, className = '', ...props }) => (
   <Button
     {...props}
-    className={cn('bg-gradient-to-r from-[#42c96f] to-[#0f7a4d] text-white border-transparent shadow-[0_8px_18px_rgba(16,122,77,0.16)] hover:brightness-105', className)}
+    className={cn('bg-dashboard-primary text-white border-transparent shadow-dashboard-soft hover:bg-dashboard-hoverGreen', className)}
   >
     {children}
   </Button>
 )
 
 export const SecondaryButton = ({ children, className = '', ...props }) => (
-  <Button {...props} className={cn('bg-white border-[#d7e7dd] text-[#123126] hover:bg-[#f4faf6]', className)}>
+  <Button {...props} className={cn('bg-[rgba(255,255,255,0.9)] border-dashboard-border-soft text-dashboard-primary-dark hover:bg-dashboard-highlight', className)}>
     {children}
   </Button>
 )
@@ -102,51 +125,53 @@ export const Input = (props) => (
   <input
     {...props}
     className={cn(
-      'w-full h-12 rounded-xl border border-[#d7e7dd] bg-white px-4 font-bold text-[#123126] focus:ring-2 focus:ring-[#93d8b4] outline-none',
+      'w-full h-[46px] rounded-dashboard-md border border-dashboard-border bg-[rgba(255,255,255,0.95)] px-[14px] text-sm font-medium text-dashboard-text-primary placeholder:text-dashboard-muted focus:border-dashboard-primary focus:outline-none focus:shadow-[0_0_0_4px_rgba(95,174,110,0.12)]',
       props.className
     )}
   />
 )
 
-export const CopyInput = ({ value, onCopy, copyLabel = 'Copy' }) => (
-  <div className="flex items-center gap-2 rounded-xl border border-[#d7e7dd] bg-white p-2">
-    <input value={value} readOnly className="flex-1 bg-transparent outline-none font-black text-sm text-[#123126]" />
-    <SecondaryButton onClick={onCopy} className="h-9 px-3 text-xs">
+export const CopyField = ({ value, onCopy, copyLabel = 'Copy', className = '' }) => (
+  <div className={cn('flex items-center gap-2 rounded-dashboard-md border border-dashboard-border-soft bg-white p-2', className)}>
+    <input value={value} readOnly className="flex-1 bg-transparent outline-none text-sm font-medium text-dashboard-text-primary" />
+    <PrimaryButton onClick={onCopy} className="h-10 px-[14px] rounded-[12px] text-[13px]">
       {copyLabel}
-    </SecondaryButton>
+    </PrimaryButton>
   </div>
 )
 
+export const CopyInput = CopyField
+
 export const ProgressCard = ({ title, value, children }) => (
   <ContentSection>
-    <SectionHeader title={title} />
-    <div className="h-5 rounded-full bg-[#e8f6ee] border border-[#cfe9db] overflow-hidden">
-      <div className="h-full bg-gradient-to-r from-[#4ecb73] to-[#0f7a4d]" style={{ width: `${value}%` }} />
+    <PageHeader title={title} />
+    <div className="h-5 rounded-full bg-dashboard-highlight border border-dashboard-border overflow-hidden">
+      <div className="h-full bg-dashboard-primary" style={{ width: `${value}%` }} />
     </div>
     {children}
   </ContentSection>
 )
 
 export const TableCard = ({ title, children }) => (
-  <ContentSection>
-    <SectionHeader title={title} />
+  <DashboardCard className="p-5">
+    <PageHeader title={title} />
     {children}
-  </ContentSection>
+  </DashboardCard>
 )
 
 export const EmptyState = ({ title, subtitle }) => (
-  <ContentSection className="text-center">
-    <p className="text-3xl font-black">{title}</p>
-    <p className="text-sm font-bold opacity-70 mt-2">{subtitle}</p>
-  </ContentSection>
+  <DashboardCard className="text-center">
+    <p className="text-[28px] leading-[1.2] font-bold">{title}</p>
+    <p className="text-sm text-dashboard-text-secondary mt-2">{subtitle}</p>
+  </DashboardCard>
 )
 
 export const Badge = ({ children, className = '' }) => (
-  <span className={cn('text-[10px] px-2 py-0.5 rounded-full bg-[#e8f8ee] text-[#0f7a4d] font-black', className)}>{children}</span>
+  <span className={cn('text-[10px] px-2 py-0.5 rounded-full bg-dashboard-highlight text-dashboard-primary-dark font-semibold', className)}>{children}</span>
 )
 
 export const StatusPill = ({ children, ok = true }) => (
-  <span className={cn('px-2.5 py-1 rounded-full text-xs font-black', ok ? 'bg-[#e8f8ee] text-[#0f7a4d]' : 'bg-[#fff0f0] text-[#b42318]')}>
+  <span className={cn('px-2.5 py-1 rounded-full text-xs font-semibold', ok ? 'bg-[#EAF7EC] text-dashboard-success' : 'bg-[#FFF1F1] text-dashboard-danger')}>
     {children}
   </span>
 )
