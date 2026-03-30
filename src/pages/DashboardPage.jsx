@@ -41,7 +41,7 @@ import { PRESALE_CONFIG, CURRENT_TOKEN_PRICE_USD, TOTAL_PRESALE_SUPPLY, CURRENT_
 import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
 import { PROJECT_CURRENCY_NAME } from '../constants/projectConstants'
 import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation'
-import { formatCompactNumber, formatFullNumber, formatDisplayPrice } from '../utils/numberFormat'
+import { formatCompactNumber, formatFullNumber, formatAutoNumber, formatCryptoDisplayPrice } from '../utils/numberFormat'
 import {
   AppShell,
   PageContainer,
@@ -231,9 +231,9 @@ const DashboardPage = () => {
   }, [performanceRange, stats.tokenPriceUsd])
 
   const performanceChart = useMemo(() => {
-    const width = 760
-    const height = 280
-    const padding = { top: 20, right: 18, bottom: 24, left: 18 }
+    const width = 900
+    const height = 340
+    const padding = { top: 24, right: 20, bottom: 28, left: 20 }
     if (!performanceSeries.length) {
       return { width, height, padding, points: [], linePath: '', areaPath: '' }
     }
@@ -285,7 +285,7 @@ const DashboardPage = () => {
   }
 
   const renderPriceText = (price, { className = '', minimumFractionDigits = 0, maximumFractionDigits } = {}) => {
-    const display = formatDisplayPrice(price, { minimumFractionDigits, maximumFractionDigits })
+    const display = formatCryptoDisplayPrice(price, { minimumFractionDigits, maximumFractionDigits })
     if (display.type === 'small') {
       return (
         <span className={cn('price', className)}>
@@ -298,6 +298,8 @@ const DashboardPage = () => {
     }
     return <span className={cn('dashboard-number', className)}>{display.text}</span>
   }
+
+  const formatMetricValue = (value, options = {}) => formatAutoNumber(value, options)
 
   const handleBuyAmountChange = (raw) => {
     setBuyPaymentAmount(raw)
@@ -349,8 +351,8 @@ const DashboardPage = () => {
   const renderOverview = (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatsCard icon={<Coins size={18} />} label={t('dashboard_pro.overview.total_supply')} value={<span>{formatCompactNumber(stats.totalSupply)} {PROJECT_CURRENCY_NAME}</span>} />
-        <StatsCard icon={<Wallet size={18} />} label={t('dashboard_pro.overview.presale_available')} value={<span>{formatCompactNumber(stats.presaleAvailable)} {PROJECT_CURRENCY_NAME}</span>} hint={`${formatFullNumber(stats.presaleAvailable)} ${PROJECT_CURRENCY_NAME}`} />
+        <StatsCard icon={<Coins size={18} />} label={t('dashboard_pro.overview.total_supply')} value={<span>{formatCompactNumber(stats.totalSupply)}</span>} hint={`${formatFullNumber(stats.totalSupply)} ${PROJECT_CURRENCY_NAME}`} />
+        <StatsCard icon={<Wallet size={18} />} label={t('dashboard_pro.overview.presale_available')} value={<span>{formatCompactNumber(stats.presaleAvailable)}</span>} hint={`${formatFullNumber(stats.presaleAvailable)} ${PROJECT_CURRENCY_NAME}`} />
         <StatsCard icon={<Rocket size={18} />} label={t('dashboard_pro.overview.token_price')} value={<span>$ {renderPriceText(stats.tokenPriceUsd)}</span>} hint={t('dashboard_pro.overview.phase_status', { current: stats.currentPhase, total: stats.totalPhases })} />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -403,13 +405,13 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <StatsCard label="Wallet Balance" value={`$${formatCompactNumber(totalWalletUsd)}`} hint={`$${formatFullNumber(totalWalletUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
           <StatsCard label="Total Invested" value={`$${formatCompactNumber(totalVolumeUsd)}`} hint={`$${formatFullNumber(totalVolumeUsd, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} />
-          <StatsCard label="PWIFE Owned" value={`${formatCompactNumber(totalBoughtTokens)} ${PROJECT_CURRENCY_NAME}`} hint={`${formatFullNumber(totalBoughtTokens)} ${PROJECT_CURRENCY_NAME}`} />
+          <StatsCard label="PWIFE Owned" value={formatCompactNumber(totalBoughtTokens)} hint={`${formatFullNumber(totalBoughtTokens)} ${PROJECT_CURRENCY_NAME}`} />
         </div>
         <DashboardCard className="space-y-4">
           <div>
             <p className="dashboard-label">{t('dashboard_pro.buy.current_price')}</p>
             <p className="dashboard-main-value mt-1 text-dashboard-primary">$ {renderPriceText(stats.tokenPriceUsd)}</p>
-            <p className="text-sm text-dashboard-text-secondary mt-1">{t('dashboard_pro.buy.phase_supply', { supply: formatFullNumber(stats.presaleAvailable) })}</p>
+            <p className="text-sm text-dashboard-text-secondary mt-1">{t('dashboard_pro.buy.phase_supply', { supply: formatMetricValue(stats.presaleAvailable, { compactLarge: true }) })}</p>
           </div>
           <div className="grid grid-cols-3 gap-2 rounded-dashboard-lg p-1 bg-dashboard-highlight border border-dashboard-border">
             {['SOL', 'USDT'].map((currency) => (
@@ -432,8 +434,8 @@ const DashboardPage = () => {
             {buyCurrency === 'USDT' && <EthereumUsdtNotice />}
           </div>
           <DashboardCard className="p-4 bg-dashboard-highlight">
-            <p className="dashboard-label">{t('dashboard_pro.buy.estimated_receive', { amount: formatFullNumber((buyTokenAmount || 0)), currency: PROJECT_CURRENCY_NAME })}</p>
-            <p className="dashboard-main-value mt-1 text-dashboard-primary">{formatFullNumber((buyTokenAmount || 0))} {PROJECT_CURRENCY_NAME}</p>
+            <p className="dashboard-label">{t('dashboard_pro.buy.estimated_receive', { amount: formatMetricValue((buyTokenAmount || 0), { compactLarge: true }), currency: PROJECT_CURRENCY_NAME })}</p>
+            <p className="dashboard-main-value mt-1 text-dashboard-primary">{formatMetricValue((buyTokenAmount || 0), { compactLarge: true })} {PROJECT_CURRENCY_NAME}</p>
           </DashboardCard>
           <PrimaryButton onClick={handleBuy} disabled={txProcessing || !buyPaymentAmount || Number(buyPaymentAmount) <= 0 || !!buyAmountError} className="w-full h-11 rounded-dashboard-md">
             {txProcessing ? t('dashboard_pro.buy.processing') : t('dashboard_pro.buy.confirm')}
@@ -528,11 +530,11 @@ const DashboardPage = () => {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 mt-5">
+      <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_300px] gap-4 mt-5">
         <div className="space-y-4">
           <DashboardCard className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.85)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="relative" onMouseLeave={() => setHoveredPointIndex(null)}>
-              <svg viewBox={`0 0 ${performanceChart.width} ${performanceChart.height}`} className="w-full h-[300px]">
+              <svg viewBox={`0 0 ${performanceChart.width} ${performanceChart.height}`} className="w-full h-[360px]">
                 <defs>
                   <linearGradient id="performance-area-fill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="rgba(95,174,110,0.22)" />
@@ -572,30 +574,30 @@ const DashboardPage = () => {
               )}
             </div>
           </DashboardCard>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] min-w-0">
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><CircleDollarSign size={19} /></span>
-                <div>
-                  <p className="dashboard-main-value">$ {renderPriceText(stats.tokenPriceUsd)}</p>
+                <div className="min-w-0">
+                  <p className="dashboard-main-value text-[clamp(24px,2.8vw,34px)] leading-tight">$ {renderPriceText(stats.tokenPriceUsd)}</p>
                   <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>{t('dashboard_pro.performance.current')}</p>
                 </div>
               </div>
             </div>
-            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] min-w-0">
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingUp size={19} /></span>
-                <div>
-                  <p className="dashboard-main-value">$ {renderPriceText(Math.max(...performanceSeries))}</p>
+                <div className="min-w-0">
+                  <p className="dashboard-main-value text-[clamp(24px,2.8vw,34px)] leading-tight">$ {renderPriceText(Math.max(...performanceSeries))}</p>
                   <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>24H High</p>
                 </div>
               </div>
             </div>
-            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <div className="rounded-[20px] border border-[#DCECDC] bg-[rgba(255,255,255,0.85)] backdrop-blur-[8px] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] min-w-0">
               <div className="flex items-start gap-3">
                 <span className="w-10 h-10 rounded-[14px] border border-[#DCECDC] bg-[#EEF8EE] text-[#2F6B3E] flex items-center justify-center"><TrendingDown size={19} /></span>
-                <div>
-                  <p className="dashboard-main-value">$ {renderPriceText(Math.min(...performanceSeries))}</p>
+                <div className="min-w-0">
+                  <p className="dashboard-main-value text-[clamp(24px,2.8vw,34px)] leading-tight">$ {renderPriceText(Math.min(...performanceSeries))}</p>
                   <p className="dashboard-label mt-2" style={{ fontWeight: 600 }}>24H Low</p>
                 </div>
               </div>
@@ -606,10 +608,10 @@ const DashboardPage = () => {
           <GlassPanel className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.8)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <PageHeader title="Quick Insights" />
             <div className="space-y-3 mt-1">
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Token Price</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Market Cap</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(stats.marketCapUsd))}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Holders</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>{formatFullNumber(stats.holders)}</span></div>
-              <div className="flex items-center justify-between text-sm"><span className="text-[#667368]">Volume</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(totalVolumeUsd))}</span></div>
+              <div className="flex items-center justify-between gap-3 text-sm min-w-0 dashboard-row"><span className="text-[#667368] min-w-0 truncate">Token Price</span><span className="dashboard-number number-neutral text-right text-[clamp(16px,1.4vw,22px)] leading-tight dashboard-ellipsis" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
+              <div className="flex items-center justify-between gap-3 text-sm min-w-0 dashboard-row"><span className="text-[#667368] min-w-0 truncate">Market Cap</span><span className="dashboard-number number-neutral text-right text-[clamp(16px,1.4vw,22px)] leading-tight dashboard-ellipsis" style={{ fontWeight: 600 }}>$ {formatMetricValue(Math.round(stats.marketCapUsd), { compactLarge: true })}</span></div>
+              <div className="flex items-center justify-between gap-3 text-sm min-w-0 dashboard-row"><span className="text-[#667368] min-w-0 truncate">Holders</span><span className="dashboard-number number-neutral text-right text-[clamp(16px,1.4vw,22px)] leading-tight dashboard-ellipsis" style={{ fontWeight: 600 }}>{formatMetricValue(stats.holders, { compactLarge: true })}</span></div>
+              <div className="flex items-center justify-between gap-3 text-sm min-w-0 dashboard-row"><span className="text-[#667368] min-w-0 truncate">Volume</span><span className="dashboard-number number-neutral text-right text-[clamp(16px,1.4vw,22px)] leading-tight dashboard-ellipsis" style={{ fontWeight: 600 }}>$ {formatMetricValue(Math.round(totalVolumeUsd), { compactLarge: true })}</span></div>
             </div>
           </GlassPanel>
           <DashboardCard className="rounded-[20px] border-[#DCECDC] bg-[rgba(255,255,255,0.85)] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
@@ -617,7 +619,7 @@ const DashboardPage = () => {
               <h4 className="text-base text-[#1F2A1F]" style={{ fontWeight: 700 }}>Your ROI</h4>
               <Activity size={19} className="text-[#2F6B3E]" />
             </div>
-            <p className={cn('text-[44px] leading-none dashboard-number mt-5', toneClass(roiPercent))} style={{ fontWeight: 700 }}>{roiPercent > 0 ? '+' : ''}{formatFullNumber(roiPercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</p>
+            <p className={cn('text-[clamp(30px,3.9vw,52px)] leading-[1.05] dashboard-number mt-5 overflow-hidden text-ellipsis', toneClass(roiPercent))} style={{ fontWeight: 700 }}>{roiPercent > 0 ? '+' : ''}{formatMetricValue(roiPercent, { minimumFractionDigits: 2, maximumFractionDigits: 2, compactLarge: true })}%</p>
           </DashboardCard>
         </div>
       </div>
@@ -733,17 +735,17 @@ const DashboardPage = () => {
                 </a>
               ))}
             </nav>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <LanguageSwitcher className="hidden md:flex" />
               <PrimaryButton className="h-[42px] min-w-[124px] rounded-dashboard-pill hidden md:flex items-center justify-center gap-2">
                 <Rocket size={16} /> Buy Now
               </PrimaryButton>
-              <GlassPanel className="h-10 px-[14px] py-0 rounded-dashboard-pill border border-[#DCECDC] bg-[rgba(255,255,255,0.88)] hidden sm:flex items-center">
-                <span className="text-[13px] font-medium">{formatAddress(address)}</span>
+              <GlassPanel className="h-10 px-[14px] py-0 rounded-dashboard-pill border border-[#DCECDC] bg-[rgba(255,255,255,0.92)] hidden sm:flex items-center min-w-[112px] max-w-[156px] shadow-[0_8px_20px_rgba(31,42,31,0.06)]">
+                <span dir="ltr" title={address} className="dashboard-number text-[12px] md:text-[13px] font-semibold tracking-tight truncate">{formatAddress(address)}</span>
               </GlassPanel>
-              <SecondaryButton onClick={() => handleCopy(address, 'wallet-badge')} className="h-10 px-3 rounded-dashboard-pill flex items-center gap-2">
-                <Copy size={16} />
-                <span className="text-[13px] font-medium">{copied === 'wallet-badge' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}</span>
+              <SecondaryButton onClick={() => handleCopy(address, 'wallet-badge')} className="h-10 px-3.5 rounded-dashboard-pill flex items-center gap-2 border-[#CFE5CF] bg-white/95 hover:bg-[#F4FBF4] text-dashboard-primary-dark shadow-[0_8px_20px_rgba(31,42,31,0.06)]">
+                {copied === 'wallet-badge' ? <CircleCheck size={16} className="text-dashboard-success" /> : <Copy size={16} />}
+                <span dir="ltr" className="text-[13px] font-semibold tracking-tight">{copied === 'wallet-badge' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}</span>
               </SecondaryButton>
             </div>
           </div>
@@ -797,9 +799,9 @@ const DashboardPage = () => {
                   <GlassPanel>
                     <PageHeader title="Quick Insights" />
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Token Price</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Market Cap</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>$ {formatFullNumber(Math.round(stats.marketCapUsd))}</span></div>
-                      <div className="flex items-center justify-between text-sm"><span className="text-dashboard-text-secondary">Holders</span><span className="dashboard-number number-neutral" style={{ fontWeight: 600 }}>{formatFullNumber(stats.holders)}</span></div>
+                      <div className="flex items-center justify-between gap-3 text-sm dashboard-row"><span className="text-dashboard-text-secondary min-w-0 truncate">Token Price</span><span className="dashboard-number number-neutral dashboard-ellipsis" style={{ fontWeight: 600 }}>$ {renderPriceText(stats.tokenPriceUsd)}</span></div>
+                      <div className="flex items-center justify-between gap-3 text-sm dashboard-row"><span className="text-dashboard-text-secondary min-w-0 truncate">Market Cap</span><span className="dashboard-number number-neutral dashboard-ellipsis" style={{ fontWeight: 600 }}>$ {formatMetricValue(Math.round(stats.marketCapUsd), { compactLarge: true })}</span></div>
+                      <div className="flex items-center justify-between gap-3 text-sm dashboard-row"><span className="text-dashboard-text-secondary min-w-0 truncate">Holders</span><span className="dashboard-number number-neutral dashboard-ellipsis" style={{ fontWeight: 600 }}>{formatMetricValue(stats.holders, { compactLarge: true })}</span></div>
                     </div>
                   </GlassPanel>
                   <DashboardCard className="relative overflow-hidden">
@@ -808,7 +810,6 @@ const DashboardPage = () => {
                     <div className="mt-3 flex items-center gap-2 text-dashboard-primary text-sm" style={{ fontWeight: 600 }}>
                       <ArrowUpRight size={16} /> <span className="dashboard-number">{formatFullNumber(20)}%</span> referral rate
                     </div>
-                    <img src="/assets/hero-character.png" alt="PepeWife" className="absolute -bottom-6 -right-3 w-28 opacity-80 pointer-events-none" />
                   </DashboardCard>
                 </div>
               </aside>

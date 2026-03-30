@@ -65,7 +65,7 @@ export const ContentSection = ({ children, className = '' }) => (
 
 export const PageHeader = ({ title, right }) => (
   <div className="flex items-center justify-between gap-3 mb-[14px]">
-    <h3 className="text-lg leading-[1.2] text-dashboard-text-primary" style={{ fontWeight: 700 }}>{title}</h3>
+    <h3 className="text-lg leading-[1.2] text-dashboard-text-primary min-w-0 truncate" style={{ fontWeight: 700 }}>{title}</h3>
     {right}
   </div>
 )
@@ -73,11 +73,11 @@ export const PageHeader = ({ title, right }) => (
 export const SectionHeader = PageHeader
 
 export const DashboardCard = ({ children, className = '' }) => (
-  <div className={cn('rounded-dashboard-xl border border-dashboard-border-soft bg-white p-5 shadow-dashboard-card', className)}>{children}</div>
+  <div className={cn('min-w-0 overflow-hidden rounded-dashboard-xl border border-dashboard-border-soft bg-white p-5 shadow-dashboard-card', className)}>{children}</div>
 )
 
 export const GlassPanel = ({ children, className = '' }) => (
-  <div className={cn('rounded-dashboard-xl border border-[rgba(255,255,255,0.35)] bg-[rgba(255,255,255,0.58)] backdrop-blur-[10px] p-5 shadow-dashboard-soft', className)}>{children}</div>
+  <div className={cn('min-w-0 rounded-dashboard-xl border border-[rgba(255,255,255,0.35)] bg-[rgba(255,255,255,0.58)] backdrop-blur-[10px] p-5 shadow-dashboard-soft', className)}>{children}</div>
 )
 
 export const Card = DashboardCard
@@ -86,10 +86,10 @@ export const GlassCard = GlassPanel
 export const StatsCard = ({ icon, label, value, hint, className = '' }) => (
   <DashboardCard className={cn('min-h-[108px] p-[18px] md:p-5', className)}>
     <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <p className="dashboard-label" style={{ fontWeight: 600 }}>{label}</p>
-        <p className="dashboard-main-value mt-2">{value}</p>
-        {hint ? <p className="text-xs font-normal text-dashboard-muted mt-1">{hint}</p> : null}
+      <div className="min-w-0 flex-1">
+        <p className="dashboard-label truncate" style={{ fontWeight: 600 }}>{label}</p>
+        <p className="dashboard-main-value dashboard-stat-value mt-2 block max-w-full dashboard-ellipsis">{value}</p>
+        {hint ? <p className="text-xs font-normal text-dashboard-muted mt-1 truncate max-w-full">{hint}</p> : null}
       </div>
       {icon ? (
         <span className="w-9 h-9 rounded-[12px] bg-dashboard-icon-soft text-dashboard-primary flex items-center justify-center shrink-0">
@@ -133,7 +133,7 @@ export const Input = (props) => (
 
 export const CopyField = ({ value, onCopy, copyLabel = 'Copy', className = '' }) => (
   <div className={cn('flex items-center gap-2 rounded-dashboard-md border border-dashboard-border-soft bg-white p-2', className)}>
-    <input value={value} readOnly className="flex-1 bg-transparent outline-none text-sm font-medium text-dashboard-text-primary" />
+    <input value={value} readOnly className="flex-1 min-w-0 bg-transparent outline-none text-sm font-medium text-dashboard-text-primary truncate" />
     <PrimaryButton onClick={onCopy} className="h-10 px-[14px] rounded-[12px] text-[13px]">
       {copyLabel}
     </PrimaryButton>

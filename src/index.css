@@ -40,14 +40,24 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
   transition: color 0.3s ease, opacity 0.3s ease;
 }
 
 .dashboard-shell .dashboard-main-value {
+  display: block;
   font-size: clamp(26px, 2.2vw, 30px);
   line-height: 1.2;
   font-weight: 700;
   color: #1F2A1F;
+}
+
+.dashboard-shell .dashboard-stat-value {
+  font-size: clamp(20px, 1.65vw, 28px);
+  line-height: 1.1;
 }
 
 .dashboard-shell .dashboard-label {
@@ -63,6 +73,31 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   color: #1F2A1F;
   display: inline-flex;
   align-items: baseline;
+  min-width: 0;
+  vertical-align: bottom;
+}
+
+.dashboard-shell p,
+.dashboard-shell span,
+.dashboard-shell li,
+.dashboard-shell a {
+  font-size: inherit;
+}
+
+.dashboard-shell .dashboard-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-shell .dashboard-row {
+  min-width: 0;
+}
+
+@media (max-width: 1280px) {
+  .dashboard-shell .dashboard-stat-value {
+    font-size: clamp(18px, 2.1vw, 24px);
+  }
 }
 
 .dashboard-shell .zeros-count {

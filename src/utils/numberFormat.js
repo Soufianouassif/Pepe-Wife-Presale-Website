@@ -82,3 +82,38 @@ export const formatDisplayPrice = (value, options = {}) => {
     })
   }
 }
+
+export const formatAutoNumber = (value, options = {}) => {
+  const numberValue = toNumber(value)
+  if (numberValue === null) return '--'
+  const absolute = Math.abs(numberValue)
+  const useCompact = options.compactLarge !== false && absolute >= (options.compactThreshold ?? 1_000_000)
+  if (useCompact) {
+    return new Intl.NumberFormat('en-US', {
+      notation: 'compact',
+      maximumFractionDigits: options.compactFractionDigits ?? 2
+    }).format(numberValue)
+  }
+  const minimumFractionDigits = options.minimumFractionDigits ?? 0
+  const maximumFractionDigits = options.maximumFractionDigits
+    ?? (absolute >= 1000 ? 2 : absolute >= 1 ? 4 : absolute >= 0.01 ? 6 : 8)
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits,
+    maximumFractionDigits
+  }).format(numberValue)
+}
+
+export const formatCryptoDisplayPrice = (value, options = {}) => {
+  const numberValue = toNumber(value)
+  if (numberValue === null) return { type: 'normal', text: '--' }
+  const small = formatSmallPrice(numberValue, options.smallPriceOptions)
+  if (small) return { type: 'small', ...small }
+  return {
+    type: 'normal',
+    text: formatAutoNumber(numberValue, {
+      compactLarge: false,
+      minimumFractionDigits: options.minimumFractionDigits ?? 0,
+      maximumFractionDigits: options.maximumFractionDigits ?? (Math.abs(numberValue) < 1 ? 8 : 4)
+    })
+  }
+}
