@@ -16,6 +16,27 @@ import EthereumUsdtNotice from '../components/EthereumUsdtNotice'
 import AppIcon from '../components/AppIcon'
 import { PROJECT_CURRENCY_NAME } from '../constants/projectConstants'
 import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation'
+import {
+  AppShell,
+  PageContainer,
+  Navbar as DsNavbar,
+  Sidebar as DsSidebar,
+  SidebarItem,
+  ContentSection,
+  SectionHeader,
+  Card,
+  GlassCard,
+  StatsCard,
+  PrimaryButton,
+  SecondaryButton,
+  Input,
+  CopyInput,
+  ProgressCard,
+  TableCard,
+  EmptyState,
+  Badge,
+  StatusPill
+} from '../components/dashboard/DesignSystem'
 
 const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 const ERC20_ABI = ['function balanceOf(address owner) view returns (uint256)']
@@ -54,7 +75,7 @@ const DashboardPage = () => {
 
   const [activeSection, setActiveSection] = useState('buy')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [theme, setTheme] = useState(() => localStorage.getItem('dashboard-theme') || 'light')
+  const [theme] = useState('light')
   const [stats, setStats] = useState({
     tokenPriceUsd: CURRENT_TOKEN_PRICE_USD,
     totalSupply: TOTAL_PRESALE_SUPPLY,
@@ -103,9 +124,8 @@ const DashboardPage = () => {
   }, [isConnected, navigate])
 
   useEffect(() => {
-    localStorage.setItem('dashboard-theme', theme)
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme])
+    document.documentElement.classList.remove('dark')
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -338,14 +358,12 @@ const DashboardPage = () => {
     : 'bg-white/95 border-[#d6e8dc] text-[#123126]'
 
   return (
-    <div
-      className={`min-h-screen ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-[#F3F8F3] text-[#123126]'} ${isRTL ? 'rtl' : 'ltr'}`}
-      style={theme === 'dark' ? undefined : { backgroundImage: "linear-gradient(rgba(243,248,243,0.92), rgba(243,248,243,0.92)), url('/assets/bab.box')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
-    >
-      <header className={`sticky top-0 z-40 border-b ${theme === 'dark' ? 'bg-[#0b1224]/90 border-gray-800' : 'bg-white/95 border-[#d7e7dd]'} backdrop-blur`}>
-        <div className="px-4 lg:px-8 h-20 flex items-center justify-between gap-3">
+    <AppShell>
+      <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
+      <DsNavbar>
+        <PageContainer className="h-20 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => setSidebarOpen((v) => !v)} className={`lg:hidden p-2 rounded-xl border-2 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black'}`}>
+            <button onClick={() => setSidebarOpen((v) => !v)} className="lg:hidden p-2 rounded-xl border border-[#d7e7dd] bg-white/80">
               {sidebarOpen ? <AppIcon name="close" fallback="close menu" className="text-lg" /> : <AppIcon name="menu" fallback="open menu" className="text-lg" />}
             </button>
             <button onClick={() => navigate('/')} className="min-w-0">
@@ -361,27 +379,24 @@ const DashboardPage = () => {
           </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher className="hidden md:flex" />
-            <button onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))} className={`hidden sm:flex w-11 h-11 rounded-xl border items-center justify-center ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
-              {theme === 'dark' ? <AppIcon name="light_mode" fallback="light mode" className="text-base" /> : <AppIcon name="dark_mode" fallback="dark mode" className="text-base" />}
-            </button>
-            <button className="hidden md:flex h-11 px-5 rounded-xl bg-gradient-to-r from-[#42c96f] to-[#0f7a4d] text-white font-black items-center gap-2">
+            <PrimaryButton className="hidden md:flex h-11 px-5 items-center gap-2">
               <AppIcon name="rocket_launch" fallback="buy now" className="text-sm" />
               {t('hero.join_presale')}
-            </button>
-            <div className={`hidden sm:flex items-center px-4 h-11 rounded-xl border max-w-[240px] ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
+            </PrimaryButton>
+            <GlassCard className="hidden sm:flex items-center px-4 h-11 max-w-[240px] py-0">
               <span className="font-black text-xs truncate">{formatAddress(address)}</span>
-            </div>
-            <button onClick={() => handleCopy(address, 'navbar')} className={`h-11 px-3 rounded-xl border font-black text-xs flex items-center gap-2 ${theme === 'dark' ? 'border-gray-700' : 'border-[#d7e7dd]'}`}>
+            </GlassCard>
+            <SecondaryButton onClick={() => handleCopy(address, 'navbar')} className="h-11 px-3 text-xs flex items-center gap-2">
               <AppIcon name="content_copy" fallback="copy address" className={`text-sm ${copied === 'navbar' ? 'text-pepe-pink' : ''}`} />
               {copied === 'navbar' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}
-            </button>
+            </SecondaryButton>
           </div>
-        </div>
-      </header>
+        </PageContainer>
+      </DsNavbar>
 
       <div className="flex">
         <aside className={`${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')} lg:translate-x-0 fixed lg:static inset-y-0 top-20 ${isRTL ? 'right-0' : 'left-0'} z-30 w-72 p-4 transition-transform duration-300`}>
-          <div className={`h-full rounded-3xl border p-4 ${cardBase}`}>
+          <DsSidebar>
             <div className="space-y-2">
               {sidebarItems.map((item) => {
                 return (
@@ -391,27 +406,27 @@ const DashboardPage = () => {
                       setActiveSection(item.id)
                       setSidebarOpen(false)
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
-                      activeSection === item.id
-                        ? 'bg-gradient-to-r from-[#0f7a4d] to-[#0a5d3b] text-white border-transparent'
-                        : `${theme === 'dark' ? 'border-gray-700 text-gray-200' : 'border-[#d7e7dd] text-[#123126] bg-white'}`
-                    } ${!item.enabled ? 'opacity-60' : ''}`}
+                    className="w-full"
                   >
+                    <SidebarItem
+                      active={activeSection === item.id}
+                      disabled={!item.enabled}
+                      right={item.id === 'tokens' ? <Badge>NEW</Badge> : (!item.enabled ? <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span> : null)}
+                    >
                       <span className="flex items-center gap-3 min-w-0">
                         <AppIcon name={item.icon} fallback={t(item.labelKey)} className="text-lg" />
                         <span className="font-black text-sm truncate">{t(item.labelKey)}</span>
                       </span>
-                    {item.id === 'tokens' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e8f8ee] text-[#0f7a4d] font-black">NEW</span>}
-                    {!item.enabled && <span className="text-[10px] font-black">{t('dashboard_pro.soon')}</span>}
+                    </SidebarItem>
                   </button>
                 )
               })}
             </div>
-            <button onClick={handleLogout} className={`mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border font-black ${theme === 'dark' ? 'border-red-500/40 text-red-300' : 'border-red-500/30 text-red-600 bg-white'}`}>
+            <button onClick={handleLogout} className="mt-4 w-full flex items-center justify-center gap-2 p-3 rounded-xl border font-black border-red-500/30 text-red-600 bg-white">
               <AppIcon name="logout" fallback="logout" className="text-base" />
               {t('dashboard_pro.logout')}
             </button>
-          </div>
+          </DsSidebar>
         </aside>
 
         <main className="flex-1 p-4 lg:p-8">
@@ -807,44 +822,44 @@ const DashboardPage = () => {
           )}
 
           {activeSection === 'support' && (
-            <div className={`rounded-3xl border-4 p-8 ${cardBase}`}>
-              <h3 className="text-2xl font-black mb-3">{t('dashboard_pro.support.title')}</h3>
+            <ContentSection className="p-8">
+              <SectionHeader title={t('dashboard_pro.support.title')} />
               <p className="text-sm font-bold opacity-80 mb-6">{t('dashboard_pro.support.desc')}</p>
-              <a href={supportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-pepe-black bg-pepe-yellow font-black">
+              <a href={supportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#d7e7dd] bg-white font-black">
                 {t('dashboard_pro.support.open')}
                 <AppIcon name="open_in_new" fallback="open link" className="text-base" />
               </a>
-            </div>
+            </ContentSection>
           )}
 
           {activeSection === 'wallet' && (
-            <div className={`rounded-3xl border-4 p-6 space-y-6 ${cardBase}`}>
-              <h3 className="text-2xl font-black">{t('dashboard_pro.wallet.title')}</h3>
-              <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+            <ContentSection className="space-y-6">
+              <SectionHeader title={t('dashboard_pro.wallet.title')} />
+              <GlassCard>
                 <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.connected_address')}</p>
                 <p className="font-black break-all mt-1">{address || '---'}</p>
                 <div className="flex flex-wrap gap-3 mt-4">
-                  <button onClick={() => handleCopy(address, 'wallet')} className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                  <SecondaryButton onClick={() => handleCopy(address, 'wallet')} className="px-4 py-2 flex items-center gap-2">
                     <AppIcon name="content_copy" fallback="copy address" className="text-sm" />
                     {copied === 'wallet' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy')}
-                  </button>
-                  <a href={explorerUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border-2 border-pepe-black font-black flex items-center gap-2">
+                  </SecondaryButton>
+                  <a href={explorerUrl} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-[#d7e7dd] bg-white font-black flex items-center gap-2">
                     {t('dashboard_pro.wallet.explorer')}
                     <AppIcon name="open_in_new" fallback="open explorer" className="text-sm" />
                   </a>
                 </div>
-              </div>
+              </GlassCard>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                <Card>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.sol_balance')}</p>
                   <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.sol === null ? '--' : walletBalances.sol.toFixed(4))}</p>
-                </div>
-                <div className={`rounded-2xl border-2 p-4 ${theme === 'dark' ? 'border-gray-700' : 'border-pepe-black/10'}`}>
+                </Card>
+                <Card>
                   <p className="text-xs font-black opacity-60">{t('dashboard_pro.wallet.usdt_balance')}</p>
                   <p className="text-2xl font-black mt-1">{walletBalancesLoading ? '...' : (walletBalances.usdt === null ? '--' : walletBalances.usdt.toFixed(2))}</p>
-                </div>
+                </Card>
               </div>
-            </div>
+            </ContentSection>
           )}
         </main>
       </div>
@@ -860,7 +875,8 @@ const DashboardPage = () => {
           />
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </AppShell>
   )
 }
 
