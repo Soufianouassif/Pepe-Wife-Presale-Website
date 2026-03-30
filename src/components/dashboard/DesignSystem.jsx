@@ -6,7 +6,7 @@ export const AppShell = ({ children }) => (
   <div
     className="min-h-screen text-[#123126] relative"
     style={{
-      backgroundImage: "linear-gradient(rgba(245,251,247,0.78), rgba(245,251,247,0.78)), url('/assets/bab.png')",
+      backgroundImage: "linear-gradient(rgba(245,251,247,0.18), rgba(245,251,247,0.18)), url('/assets/bab.png')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
@@ -28,7 +28,7 @@ export const Navbar = ({ children }) => (
 )
 
 export const Sidebar = ({ children }) => (
-  <div className="h-full rounded-3xl border border-[#cfe3d5] bg-white/58 backdrop-blur-md p-4 shadow-[0_6px_20px_rgba(16,72,47,0.05)]">
+  <div className="h-full rounded-3xl border border-white/70 bg-white/45 backdrop-blur-xl p-4 shadow-[0_6px_20px_rgba(16,72,47,0.05)]">
     {children}
   </div>
 )
@@ -49,7 +49,7 @@ export const SidebarItem = ({ active, children, disabled, right }) => (
 )
 
 export const ContentSection = ({ children, className = '' }) => (
-  <section className={cn('rounded-3xl border border-[#d6e8dc] bg-white/90 p-6 shadow-[0_8px_22px_rgba(15,122,77,0.06)]', className)}>
+  <section className={cn('rounded-3xl border border-white/70 bg-white/50 backdrop-blur-xl p-6 shadow-[0_8px_22px_rgba(15,122,77,0.06)]', className)}>
     {children}
   </section>
 )
@@ -62,11 +62,11 @@ export const SectionHeader = ({ title, right }) => (
 )
 
 export const Card = ({ children, className = '' }) => (
-  <div className={cn('rounded-2xl border border-[#d7e7dd] bg-white p-4', className)}>{children}</div>
+  <div className={cn('rounded-2xl border border-white/75 bg-white/62 backdrop-blur-md p-4', className)}>{children}</div>
 )
 
 export const GlassCard = ({ children, className = '' }) => (
-  <div className={cn('rounded-2xl border border-white/60 bg-white/55 backdrop-blur-md p-4 shadow-[0_6px_16px_rgba(16,72,47,0.05)]', className)}>{children}</div>
+  <div className={cn('rounded-2xl border border-white/70 bg-white/48 backdrop-blur-xl p-4 shadow-[0_6px_16px_rgba(16,72,47,0.05)]', className)}>{children}</div>
 )
 
 export const StatsCard = ({ label, value, hint }) => (
