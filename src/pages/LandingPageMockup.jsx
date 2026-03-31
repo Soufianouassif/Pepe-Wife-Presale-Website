@@ -70,6 +70,9 @@ const LandingPageMockup = () => {
             <button onClick={handleBuyNow} className="mt-5 h-11 px-8 rounded-full border-2 border-[#2e5d3e] bg-[#2f6b3e] text-white text-[14px] sm:text-[16px] font-mono font-medium whitespace-nowrap">
               BUY NOW
             </button>
+            <button onClick={handleBuyNow} className="mt-3 h-11 px-8 rounded-full border-2 border-white/70 bg-white/15 backdrop-blur-sm text-white text-[14px] sm:text-[16px] font-mono font-medium whitespace-nowrap">
+              JOIN COMMUNITY
+            </button>
           </div>
         </section>
 

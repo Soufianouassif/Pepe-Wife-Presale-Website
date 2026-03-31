@@ -15,12 +15,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.01em;
   line-height: 1.5;
+  font-weight: 400;
 }
 
-h1, h2, h3, h4, h5, h6, button, nav, a {
+h1, h2, h3, h4, h5, h6, nav, a {
   font-family: 'Inter', sans-serif !important;
   letter-spacing: -0.01em;
-  line-height: 1.25;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+p, span, li, label, input, textarea {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+button {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .font-brand {
@@ -129,21 +143,20 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
     background-image: radial-gradient(circle at 50% 50%, #f9fafb 0%, #ffffff 100%);
   }
 
-  /* Responsive Font Sizes for Mobile-First Approach */
   h1 {
-    @apply text-[28px] sm:text-[40px] md:text-[60px] lg:text-[144px] font-semibold leading-tight;
+    @apply text-[30px] sm:text-[40px] md:text-[52px] lg:text-[60px] leading-tight;
   }
   
   h2 {
-    @apply text-[24px] sm:text-[32px] md:text-[48px] lg:text-[72px] font-semibold leading-tight;
+    @apply text-[24px] sm:text-[30px] md:text-[36px] lg:text-[44px] leading-tight;
   }
 
   h3 {
-    @apply text-[20px] sm:text-[24px] md:text-[32px] lg:text-[48px] font-medium;
+    @apply text-[20px] sm:text-[22px] md:text-[26px] lg:text-[30px];
   }
 
   p, span, li, a {
-    @apply text-[14px] sm:text-[16px] md:text-[18px] lg:text-[20px];
+    @apply text-[14px] sm:text-[15px] md:text-[16px];
   }
 
   button, input {
@@ -163,7 +176,12 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   }
 
   .font-bold {
-    font-weight: 500 !important;
+    font-weight: 700 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, p, span, li, a, label, button {
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 }
 
@@ -208,7 +226,7 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   }
 
   .cartoon-card {
-    @apply bg-white text-pepe-black p-8 rounded-[2.5rem] border-4 border-pepe-black shadow-[12px_12px_0px_0px_rgba(10,10,10,1)] transition-all hover:-translate-y-2 hover:-translate-x-1 hover:shadow-[16px_16px_0px_0px_rgba(10,10,10,1)];
+    @apply bg-[#F4EEDB] text-pepe-black p-8 rounded-[2.5rem] border-4 border-pepe-black shadow-[12px_12px_0px_0px_rgba(10,10,10,1)] transition-all hover:-translate-y-2 hover:-translate-x-1 hover:shadow-[16px_16px_0px_0px_rgba(10,10,10,1)];
   }
 
   .shadow-pink-custom {
@@ -226,7 +244,7 @@ h1, h2, h3, h4, h5, h6, button, nav, a {
   }
 
   .risk-card {
-    @apply bg-white p-12 rounded-[3rem] border-4 border-pepe-black transition-all duration-300;
+    @apply bg-[#F4EEDB] p-12 rounded-[3rem] border-4 border-pepe-black transition-all duration-300;
     box-shadow: 12px 12px 0px 0px #FF69B4;
   }
   
