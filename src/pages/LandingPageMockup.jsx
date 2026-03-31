@@ -34,9 +34,9 @@ const LandingPageMockup = () => {
 
   return (
     <div className="relative min-h-screen bg-[#E8E6D7] text-[#35503A] font-sans overflow-x-hidden">
-      <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('/assets/risk-bg.svg')] bg-cover bg-center" />
-      <div className="relative">
-        <header className="w-full h-[86px] bg-[#EADFC9] border-b border-[rgba(60,83,52,0.12)]">
+      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('/assets/risk-bg.svg')] bg-cover bg-center" />
+      <div className="relative pt-[10px]">
+        <header className="w-full h-[86px] bg-[#EADFC9] border-b border-[rgba(0,0,0,0.08)]">
           <div className="max-w-[1200px] mx-auto h-full px-3 lg:px-4 flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0">
               <img src="/assets/hero-character.png" alt="PepeWife" className="w-10 h-10 rounded-full object-cover border border-[#5d7049]" />
