@@ -76,10 +76,9 @@ const LandingPageMockup = () => {
           </div>
         </section>
 
-        <div className="max-w-[1280px] mx-auto px-3 lg:px-4">
-          <section className="relative mt-4 rounded-[12px] overflow-hidden border border-[#c6bd9f]">
-            <img src="/assets/risk-bg.svg" alt="Texture" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-            <div className="relative p-4 sm:p-6 lg:p-8">
+        <div className="w-full">
+          <section className="relative mt-4 w-full border-y border-[#c6bd9f] bg-[#F4EEDB]">
+            <div className="max-w-[1280px] mx-auto px-3 lg:px-4 py-4 sm:py-6 lg:py-8">
               <h2 className="text-center text-[24px] sm:text-[36px] lg:text-[56px] leading-[1.15] font-bold break-words">BE EARLY.. OR CRY LATER</h2>
               <p className="text-center text-[14px] sm:text-[18px] lg:text-[30px] mt-2 font-normal break-words">The most elegant memecoin presale</p>
               <div className="flex justify-center mt-4">
@@ -97,20 +96,20 @@ const LandingPageMockup = () => {
                 <article id="buy" className="bg-[#F4EEDB] rounded-[18px] border border-[#d2cab1] p-4 sm:p-5 min-w-0">
                   <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">Buy PWIFE</h3>
                   <div className="space-y-3 mt-4">
-                    <div className="rounded-[12px] border border-[#d2cab1] bg-[#fffdfa] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
+                    <div className="rounded-[12px] border border-[#d2cab1] bg-[#F4EEDB] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
                       <span className="text-[14px] font-normal min-w-0 break-words">Price 1 PWIFE</span>
                       <span className="text-[18px] sm:text-[20px] font-mono font-medium whitespace-nowrap">
                         ${tinyPrice.isTiny ? <>0.0<sup className="text-[10px]">{tinyPrice.zeroCount}</sup>{tinyPrice.significant}</> : tinyPrice.normal}
                       </span>
                     </div>
-                    <div className="rounded-[12px] border border-[#d2cab1] bg-[#fffdfa] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
+                    <div className="rounded-[12px] border border-[#d2cab1] bg-[#F4EEDB] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
                       <span className="text-[14px] font-normal">Amount</span>
                       <div className="flex items-center gap-2 min-w-0">
                         <input value={amount} onChange={(e) => setAmount(e.target.value)} className="w-[110px] sm:w-[130px] text-right bg-transparent outline-none text-[16px] sm:text-[18px] font-mono font-medium min-w-0" />
                         <span className="text-[14px] sm:text-[16px] font-normal whitespace-nowrap">ETH ▾</span>
                       </div>
                     </div>
-                    <div className="rounded-[12px] border border-[#c6bfab] bg-[#dce4ce] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
+                    <div className="rounded-[12px] border border-[#c6bfab] bg-[#F4EEDB] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
                       <span className="text-[14px] font-normal">You receive</span>
                       <span className="text-[18px] sm:text-[20px] font-mono font-medium min-w-0 truncate">{pwifeAmount} PWIFE</span>
                     </div>
@@ -124,9 +123,9 @@ const LandingPageMockup = () => {
                       <p>✔ No vesting, no lock</p>
                       <p>✔ High growth potential</p>
                     </div>
-                    <div className="w-20 h-20 rounded-[8px] bg-[#f0ead9] border border-[#cabf9f] flex items-center justify-center text-[16px] shrink-0 font-mono">QR</div>
+                    <div className="w-20 h-20 rounded-[8px] bg-[#F4EEDB] border border-[#cabf9f] flex items-center justify-center text-[16px] shrink-0 font-mono">QR</div>
                   </div>
-                  <div className="mt-4 rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] px-3 py-2 flex items-center justify-between gap-2 min-w-0">
+                  <div className="mt-4 rounded-[10px] border border-[#d2cab1] bg-[#F4EEDB] px-3 py-2 flex items-center justify-between gap-2 min-w-0">
                     <span className="text-[13px] sm:text-[14px] font-normal min-w-0 truncate">{isConnected ? formatAddress(address) : 'Wallet not connected'}</span>
                     <button onClick={handleCopyAddress} className="h-8 px-3 rounded border border-[#c8bf9f] text-[12px] font-mono font-medium whitespace-nowrap">Copy</button>
                   </div>
@@ -135,21 +134,21 @@ const LandingPageMockup = () => {
                 <article id="tokenomics" className="bg-[#F4EEDB] rounded-[18px] border border-[#d2cab1] p-4 sm:p-5 flex flex-col min-w-0">
                   <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">Tokenomics</h3>
                   <div className="mt-3 min-w-0">
-                    <div className="rounded-[12px] border border-dashed border-[#cabf9f] bg-[#efe9d8] h-[240px] sm:h-[280px] flex items-center justify-center">
+                    <div className="rounded-[12px] border border-dashed border-[#cabf9f] bg-[#F4EEDB] h-[240px] sm:h-[280px] flex items-center justify-center">
                       <span className="font-mono text-[16px] sm:text-[18px] text-[#6d745f]">IMAGE HERE</span>
                     </div>
                     <div className="mt-4 text-center">
                       <p className="text-[14px] sm:text-[16px] font-bold">Phase 1 ends in</p>
                       <div className="mt-2 flex items-center justify-center gap-2 sm:gap-3">
-                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#F4EEDB] py-2 px-3">
                           <p className="font-mono text-[20px] sm:text-[24px] leading-none">09</p>
                           <p className="text-[11px] sm:text-[12px] mt-1">Days</p>
                         </div>
-                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#F4EEDB] py-2 px-3">
                           <p className="font-mono text-[20px] sm:text-[24px] leading-none">12</p>
                           <p className="text-[11px] sm:text-[12px] mt-1">Hours</p>
                         </div>
-                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#F4EEDB] py-2 px-3">
                           <p className="font-mono text-[20px] sm:text-[24px] leading-none">32</p>
                           <p className="text-[11px] sm:text-[12px] mt-1">Minutes</p>
                         </div>
