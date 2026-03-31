@@ -36,8 +36,8 @@ const LandingPageMockup = () => {
     <div className="relative min-h-screen bg-[#E8E6D7] text-[#35503A] font-sans overflow-x-hidden">
       <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('/assets/risk-bg.svg')] bg-cover bg-center" />
       <div className="relative">
-        <div className="max-w-[1280px] mx-auto px-3 lg:px-4 pt-3">
-          <header className="h-[86px] bg-[#EADFC9] rounded-[14px] border border-[#b7ae90] flex items-center justify-between px-4 lg:px-6 shadow-[0_2px_0_#d4c8a8]">
+        <header className="w-full h-[86px] bg-[#EADFC9] border-b border-[rgba(60,83,52,0.12)]">
+          <div className="max-w-[1200px] mx-auto h-full px-3 lg:px-4 flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0">
               <img src="/assets/hero-character.png" alt="PepeWife" className="w-10 h-10 rounded-full object-cover border border-[#5d7049]" />
               <span className="text-[24px] leading-none font-bold tracking-tight truncate">PepeWife</span>
@@ -55,10 +55,10 @@ const LandingPageMockup = () => {
               <LanguageSwitcher className="hidden sm:flex" />
               <button className="w-10 h-10 rounded-xl border border-[#b7ae90] bg-[#EADFC9] text-[20px] leading-none">☰</button>
             </div>
-          </header>
-        </div>
+          </div>
+        </header>
 
-        <section id="home" className="relative mt-4 w-full overflow-hidden border-y border-[#c6bd9f]">
+        <section id="home" className="relative w-full overflow-hidden border-y border-[#c6bd9f]">
           <img src="/assets/hero-section.svg" alt="Hero" className="w-full h-auto min-h-[320px] md:min-h-[520px] object-cover block" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)] text-[28px] sm:text-[42px] lg:text-[64px] leading-[1.1] break-words max-w-[1100px]">
@@ -134,20 +134,27 @@ const LandingPageMockup = () => {
 
                 <article id="tokenomics" className="bg-[#F4EEDB] rounded-[18px] border border-[#d2cab1] p-4 sm:p-5 flex flex-col min-w-0">
                   <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">Tokenomics</h3>
-                  <div className="mt-3 flex-1 flex flex-col justify-between min-w-0">
-                    <div>
-                      <p className="text-[18px] sm:text-[20px] font-mono font-medium">✔ 1,0000000</p>
-                      <ul className="mt-2 space-y-2 text-[16px] sm:text-[18px] leading-[1.3] font-normal min-w-0">
-                        <li className="flex items-center gap-3 min-w-0"><span className="w-3 h-3 rounded-full bg-[#2f6b3e] inline-block shrink-0" /> <span className="break-words">Presale</span></li>
-                        <li className="flex items-center gap-3 min-w-0"><span className="w-3 h-3 rounded-full bg-[#3b7f50] inline-block shrink-0" /> <span className="break-words">Liquidity</span></li>
-                        <li className="flex items-center gap-3 min-w-0"><span className="w-3 h-3 rounded-full bg-[#b59a38] inline-block shrink-0" /> <span className="break-words">Marketing</span></li>
-                        <li className="flex items-center gap-3 min-w-0"><span className="w-3 h-3 rounded-full bg-[#d8bf52] inline-block shrink-0" /> <span className="break-words">CEX Listings</span></li>
-                      </ul>
+                  <div className="mt-3 min-w-0">
+                    <div className="rounded-[12px] border border-dashed border-[#cabf9f] bg-[#efe9d8] h-[240px] sm:h-[280px] flex items-center justify-center">
+                      <span className="font-mono text-[16px] sm:text-[18px] text-[#6d745f]">IMAGE HERE</span>
                     </div>
-                    <div className="mt-4 rounded-[12px] overflow-hidden border border-[#cabf9f]">
-                      <img src="/assets/ChatGPT Image 31 mars 2026, 16_26_18.png" alt="Pepe" className="w-full h-auto block" />
+                    <div className="mt-4 text-center">
+                      <p className="text-[14px] sm:text-[16px] font-bold">Phase 1 ends in</p>
+                      <div className="mt-2 flex items-center justify-center gap-2 sm:gap-3">
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                          <p className="font-mono text-[20px] sm:text-[24px] leading-none">09</p>
+                          <p className="text-[11px] sm:text-[12px] mt-1">Days</p>
+                        </div>
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                          <p className="font-mono text-[20px] sm:text-[24px] leading-none">12</p>
+                          <p className="text-[11px] sm:text-[12px] mt-1">Hours</p>
+                        </div>
+                        <div className="min-w-[64px] sm:min-w-[76px] rounded-[10px] border border-[#d2cab1] bg-[#fffdfa] py-2 px-3">
+                          <p className="font-mono text-[20px] sm:text-[24px] leading-none">32</p>
+                          <p className="text-[11px] sm:text-[12px] mt-1">Minutes</p>
+                        </div>
+                      </div>
                     </div>
-                    <button className="mt-4 h-11 px-7 self-start rounded-full border-2 border-[#2e5d3e] bg-[#2f6b3e] text-white text-[14px] sm:text-[16px] font-mono font-medium whitespace-nowrap">READ MORE</button>
                   </div>
                 </article>
               </div>
