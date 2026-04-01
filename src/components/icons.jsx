@@ -43,3 +43,17 @@ export const AlertTriangle = createIcon('warning', 'warning')
 export const Search = createIcon('search', 'search')
 export const Save = createIcon('save', 'save')
 export const RefreshCw = createIcon('autorenew', 'refresh')
+export const Twitter = ({ className = '', size = 20 }) => (
+  <span className={`inline-flex items-center justify-center ${className}`} style={{ fontSize: `${size}px` }} aria-label="twitter">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2H21l-6.5 7.43L22.5 22H16l-5-6.5L5 22H2l7-8-7-12h6l4.5 6L18.244 2z"/>
+    </svg>
+  </span>
+)
+export const Telegram = ({ className = '', size = 20 }) => (
+  <span className={`inline-flex items-center justify-center ${className}`} style={{ fontSize: `${size}px` }} aria-label="telegram">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M9.04 15.314l-.376 5.31c.538 0 .77-.231 1.049-.509l2.523-2.41 5.226 3.827c.96.53 1.64.252 1.9-.889l3.44-16.081c.305-1.418-.512-1.973-1.446-1.621L1.73 9.81c-1.382.538-1.36 1.314-.235 1.664l5.43 1.69L19.6 5.86c.635-.41 1.21-.182.735.228"/>
+    </svg>
+  </span>
+)
