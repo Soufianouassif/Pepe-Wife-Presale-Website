@@ -8,7 +8,7 @@ import BrandLogo from '../components/BrandLogo';
 import { 
   Globe, Shield, Rocket, ArrowLeft, Check, Lock, 
   AlertCircle, X
-} from '../components/icons';
+} from 'lucide-react';
 
 // --- INTEGRATED HIGH-QUALITY SVG ICONS ---
 const Icons = {

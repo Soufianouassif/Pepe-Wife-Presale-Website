@@ -459,6 +459,10 @@
   "validation": {
     "amount_range": "La valeur doit être comprise entre {{min}} et {{max}}"
   },
+  "buy_notices": {
+    "usdt_eth": "USDT works on Ethereum. Make sure you are on Ethereum network before paying.",
+    "network_check": "Verify the correct network and wallet address before proceeding."
+  },
   "usdt_notice": {
     "title": "USDT sur Ethereum uniquement",
     "desc": "Les paiements USDT sont traités uniquement sur {{network}}. Frais de gas estimés : {{gas}}."

@@ -6,7 +6,7 @@ import { CURRENT_TOKEN_PRICE_USD } from '../presaleConfig';
 import { PROJECT_CURRENCY_SYMBOL, PROJECT_CURRENCY_NAME } from '../constants/projectConstants';
 import { getPaymentRange, validatePaymentAmount, clampPaymentAmount } from '../utils/amountValidation';
 import EthereumUsdtNotice from './EthereumUsdtNotice';
-import AppIcon from './AppIcon';
+import { Zap, Settings as SettingsIcon, ChevronDown, ArrowDown, Info, Loader2, CheckCircle2, AlertCircle, Shield, X } from 'lucide-react';
 
 const TOKENS = [
   { id: 'SOL', name: 'Solana', symbol: 'SOL', icon: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', price: 185.50 },
@@ -103,12 +103,12 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3 space-x-reverse">
           <div className="w-10 h-10 bg-pepe-yellow rounded-xl border-2 border-pepe-black flex items-center justify-center shadow-[4px_4px_0_0_#000]">
-            <AppIcon name="bolt" fallback="bolt" className="text-pepe-black text-xl" />
+            <Zap className="text-pepe-black" />
           </div>
           <h3 className="text-xl font-black uppercase italic tracking-tight">{t('buybox_widget.title')}</h3>
         </div>
         <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <AppIcon name="settings" fallback="settings" className="text-gray-400 text-lg" />
+          <SettingsIcon className="text-gray-400" />
         </button>
       </div>
 
@@ -138,7 +138,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
           >
             <img src={fromToken.icon} alt={fromToken.symbol} className="w-6 h-6 rounded-full" />
             <span className="font-black uppercase text-sm">{fromToken.symbol}</span>
-            <AppIcon name="keyboard_arrow_down" fallback="open" className="text-base" />
+            <ChevronDown className="text-base" />
           </button>
         </div>
         {amountError && <p className="text-xs font-black text-red-600 px-2">{amountError}</p>}
@@ -149,7 +149,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       {/* Divider / Switch */}
       <div className="flex justify-center -my-3 relative z-10">
         <div className="bg-pepe-black text-white p-2 rounded-full border-4 border-white shadow-lg">
-          <AppIcon name="south" fallback="down" className="text-base" />
+          <ArrowDown className="text-base" />
         </div>
       </div>
 
@@ -175,13 +175,13 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
       <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border-2 border-pepe-black/5">
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            {t('buybox_widget.exchange_rate')} <AppIcon name="info" fallback="info" className="text-xs" />
+            {t('buybox_widget.exchange_rate')} <Info className="text-xs" />
           </div>
             <span className="font-black text-pepe-black">1 {fromToken.symbol} ≈ {(fromToken.price / PWIFE_PRICE).toLocaleString()} {PROJECT_CURRENCY_NAME}</span>
         </div>
         <div className="flex justify-between text-xs font-bold text-gray-500">
           <div className="flex items-center gap-1">
-            {t('buybox_widget.network_fee')} <AppIcon name="info" fallback="info" className="text-xs" />
+            {t('buybox_widget.network_fee')} <Info className="text-xs" />
           </div>
           <span className="font-black text-pepe-black">~$0.25</span>
         </div>
@@ -202,18 +202,18 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
         {isBuying ? (
           <div className="flex items-center justify-center gap-3">
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-              <AppIcon name="progress_activity" fallback="loading" className="text-2xl" />
+              <Loader2 className="text-2xl" />
             </motion.div>
             {t('buybox_widget.processing')}
           </div>
         ) : txStatus === 'success' ? (
           <div className="flex items-center justify-center gap-3">
-            <AppIcon name="check_circle" fallback="success" className="text-2xl" />
+            <CheckCircle2 className="text-2xl" />
             {t('buybox_widget.success')}
           </div>
         ) : txStatus === 'error' ? (
           <div className="flex items-center justify-center gap-3">
-            <AppIcon name="error" fallback="failed" className="text-2xl" />
+            <AlertCircle className="text-2xl" />
             {t('buybox_widget.failed')}
           </div>
         ) : (
@@ -223,7 +223,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
 
       {/* Footer Security */}
       <div className="flex items-center justify-center gap-2 opacity-30 text-[10px] font-black uppercase tracking-widest">
-        <AppIcon name="shield" fallback="secure" className="text-sm" />
+        <Shield className="text-sm" />
         {t('buybox_widget.secured')}
       </div>
 
@@ -239,7 +239,7 @@ const BuyBox = ({ t: tProp, onSuccess }) => {
             <div className="flex justify-between items-center mb-6">
               <h4 className="font-black uppercase italic text-lg">{t('buybox_widget.select_token')}</h4>
               <button onClick={() => setShowTokenList(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <AppIcon name="close" fallback="close" className="text-lg" />
+                <X className="text-lg" />
               </button>
             </div>
             <div className="space-y-2 overflow-y-auto custom-scrollbar pr-2">

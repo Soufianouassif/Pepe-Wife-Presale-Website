@@ -459,6 +459,10 @@
   "validation": {
     "amount_range": "القيمة يجب أن تكون بين {{min}} و{{max}}"
   },
+  "buy_notices": {
+    "usdt_eth": "USDT works on Ethereum. Make sure you are on Ethereum network before paying.",
+    "network_check": "Verify the correct network and wallet address before proceeding."
+  },
   "usdt_notice": {
     "title": "USDT على شبكة Ethereum فقط",
     "desc": "مدفوعات USDT تتم عبر شبكة {{network}} فقط. رسوم الغاز التقريبية: {{gas}}."

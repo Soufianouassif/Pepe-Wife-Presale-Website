@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Rocket, ShieldCheck, CheckCircle2, Globe, Lock, Loader2 } from '../components/icons';
+import { Rocket, ShieldCheck, CheckCircle2, Globe, Lock, Loader2 } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 
 const LoadingPage = () => {

@@ -5,7 +5,7 @@ import {
   Settings, Lock, Unlock, ArrowRight,
   Database, Activity, BarChart3, AlertTriangle,
   Search, Download, Save, RefreshCw
-} from '../components/icons';
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import BrandLogo from '../components/BrandLogo';
 
