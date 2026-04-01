@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { WalletProvider } from './context/WalletContext';
-import LandingPage from './pages/LandingPageMockup';
+import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import ConnectPage from './pages/ConnectPage';
 import LoadingPage from './pages/LoadingPage';
