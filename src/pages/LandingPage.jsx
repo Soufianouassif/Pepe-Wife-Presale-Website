@@ -755,7 +755,8 @@ const Footer = ({ t }) => (
     </div>
   </footer>
 );
-};
+
+};
 
 const DashboardTickerSection = ({ t }) => (
   <section className="py-4 overflow-hidden border-y-4 border-pepe-black bg-white">
