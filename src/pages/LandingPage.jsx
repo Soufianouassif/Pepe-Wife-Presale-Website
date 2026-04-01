@@ -30,10 +30,19 @@ const ASSETS = {
   COIN_ICON: '/assets/hero-character.png', // Placeholder if missing
   WHY_BUY_BG: '/assets/risk-bg.svg',
   WHY_BUY_MOBILE_BG: '/assets/risk-bg-mobil.png',
-  TOKENOMICS_BG: '/assets/hero-section.svg', 
+  TOKENOMICS_BG: '/assets/hero-section.svg',
   BUY_BOX_BG: '/assets/presel-bg.svg', // Fixed from 'Untitled design.svg'
   BUY_BOX_MOBILE_BG: '/assets/sell-mb-bg.png',
 };
+
+const dashboardTickerItems = [
+  'Presale Live Now',
+  'Secure Multi-Wallet Access',
+  'Real-Time Analytics Dashboard',
+  'Roadmap Execution In Progress',
+  'Community Rewards & Referral',
+  'Token Utility Expansion'
+];
 
 const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-pepe-yellow' }) => {
   return (
@@ -746,6 +755,133 @@ const Footer = ({ t }) => (
     </div>
   </footer>
 );
+};
+
+const DashboardTickerSection = ({ t }) => (
+  <section className="py-4 overflow-hidden border-y-4 border-pepe-black bg-white">
+    <div className="h-[60px] w-full px-4 flex items-center overflow-hidden">
+      <div className="dashboard-marquee-track text-sm md:text-base font-bold text-pepe-black whitespace-nowrap">
+        {[...dashboardTickerItems, ...dashboardTickerItems].map((item, index) => (
+          <span key={`${item}-${index}`} className="inline-flex items-center gap-3 mr-10">
+            <Rocket size={15} className="text-pepe-green" />
+            <span>{item}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const DashboardRoadmapSection = ({ t }) => {
+  const phases = [
+    { id: '01', title: t('roadmap.phase1_title'), items: [t('roadmap.phase1_item1'), t('roadmap.phase1_item2'), t('roadmap.phase1_item3'), t('roadmap.phase1_item4')] },
+    { id: '02', title: t('roadmap.phase2_title'), items: [t('roadmap.phase2_item1'), t('roadmap.phase2_item2'), t('roadmap.phase2_item3'), t('roadmap.phase2_item4')] },
+    { id: '03', title: t('roadmap.phase3_title'), items: [t('roadmap.phase3_item1'), t('roadmap.phase3_item2'), t('roadmap.phase3_item3'), t('roadmap.phase3_item4')] },
+    { id: '04', title: t('roadmap.phase4_title'), items: [t('roadmap.phase4_item1'), t('roadmap.phase4_item2'), t('roadmap.phase4_item3'), t('roadmap.phase4_item4')] },
+  ];
+  return (
+    <section className="py-16 sm:py-20 bg-white border-y-4 border-pepe-black">
+      <div className="section-container px-4 sm:px-6">
+        <h2 className="text-3xl sm:text-5xl font-black uppercase italic text-pepe-black mb-10 text-center">{t('roadmap.title_roadmap')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {phases.map((phase) => (
+            <div key={phase.id} className="bg-white p-6 sm:p-8 rounded-[2rem] border-4 border-pepe-black shadow-[8px_8px_0_0_#000] hover:shadow-[12px_12px_0_0_#000] transition-all hover:-translate-y-1">
+              <div className="w-12 h-12 bg-pepe-pink rounded-xl border-4 border-pepe-black flex items-center justify-center text-white font-black text-xl mb-6 shadow-[4px_4px_0_0_#000]">
+                {phase.id}
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black uppercase italic mb-6 text-pepe-black">{phase.title}</h3>
+              <ul className="space-y-4">
+                {phase.items.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 group">
+                    <div className="mt-1.5 w-3 h-3 bg-pepe-green rounded-full border-2 border-pepe-black shrink-0 group-hover:scale-125 transition-transform" />
+                    <span className="text-gray-700 font-bold text-sm sm:text-base leading-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const DashboardTokenContractSection = ({ t }) => {
+  const tokenContractAddress = import.meta?.env?.VITE_PWIFE_TOKEN_CONTRACT || 'YOUR_TOKEN_MINT_ADDRESS_HERE';
+  const handleCopy = async (text) => { if (text) await navigator.clipboard.writeText(text); };
+  return (
+    <section className="py-16 sm:py-20 bg-pepe-black text-white border-y-4 border-pepe-black">
+      <div className="section-container px-4 sm:px-6">
+        <h2 className="text-3xl sm:text-5xl font-black uppercase italic text-pepe-green mb-10 text-center">{t('nav.contract')}</h2>
+        <div className="space-y-6">
+          <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-[2rem] border-4 border-white/20">
+            <p className="text-pepe-yellow font-black uppercase text-sm mb-2">Token</p>
+            <p className="text-2xl sm:text-3xl font-black text-white">PWIFE</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-[2rem] border-4 border-white/20">
+            <p className="text-pepe-yellow font-black uppercase text-sm mb-2">Network</p>
+            <p className="text-xl sm:text-2xl font-black text-white">Solana · Mainnet</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-[2rem] border-4 border-white/20">
+            <p className="text-pepe-yellow font-black uppercase text-sm mb-2">Contract Address</p>
+            <p className="text-xs sm:text-sm text-white/80 break-all font-mono mb-4">{tokenContractAddress}</p>
+            <button onClick={() => handleCopy(tokenContractAddress)} className="h-11 px-6 rounded-xl border-4 border-pepe-green bg-pepe-green text-pepe-black font-black uppercase text-sm hover:bg-pepe-yellow hover:border-pepe-yellow transition-all shadow-[4px_4px_0_0_#fff]">
+              Copy Address
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const DashboardFaqSection = ({ t }) => {
+  const faqs = [
+    { q: t('faq.q1'), a: t('faq.a1') },
+    { q: t('faq.q2'), a: t('faq.a2') },
+    { q: t('faq.q3'), a: t('faq.a3') },
+    { q: t('faq.q4'), a: t('faq.a4') },
+  ];
+  return (
+    <section className="py-16 sm:py-20 bg-pepe-yellow border-y-4 border-pepe-black">
+      <div className="section-container px-4 sm:px-6">
+        <h2 className="text-3xl sm:text-5xl font-black uppercase italic text-pepe-black mb-10 text-center">{t('faq.title')}</h2>
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <div key={idx} className="bg-white p-5 sm:p-6 rounded-[1.5rem] border-4 border-pepe-black shadow-[4px_4px_0_0_#000]">
+              <p className="font-black text-pepe-black text-sm sm:text-base mb-2">{faq.q}</p>
+              <p className="text-gray-700 font-bold text-sm sm:text-base">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const DashboardRiskSection = ({ t }) => (
+  <section className="py-16 sm:py-20 bg-white border-y-4 border-pepe-black">
+    <div className="section-container px-4 sm:px-6">
+      <h2 className="text-3xl sm:text-5xl font-black uppercase italic text-pepe-pink mb-10 text-center">{t('risk.title')}</h2>
+      <div className="bg-pepe-pink/10 p-6 sm:p-8 rounded-[2rem] border-4 border-pepe-pink">
+        <ul className="space-y-4">
+          <li className="flex items-start gap-3">
+            <span className="mt-1 text-pepe-pink"><X size={18} /></span>
+            <span className="text-gray-700 font-bold text-sm sm:text-base">{t('risk.p1')}</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="mt-1 text-pepe-pink"><X size={18} /></span>
+            <span className="text-gray-700 font-bold text-sm sm:text-base">{t('risk.p2')}</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="mt-1 text-pepe-pink"><X size={18} /></span>
+            <span className="text-gray-700 font-bold text-sm sm:text-base">Only invest funds you can afford to lose and always use your own research.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+);
 
 const Navbar = ({ isOpen, setIsOpen, t, openModal }) => {
   return (
@@ -1003,7 +1139,16 @@ const LandingPage = () => {
           <TokenomicsSection t={t} openModal={setActiveModal} />
           <WhyBuySection t={t} />
           <PartnersTicker t={t} />
+          <DashboardTickerSection t={t} />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-10">
+            <DashboardRoadmapSection t={t} />
+            <DashboardTokenContractSection t={t} />
+          </div>
           <WhitepaperSection t={t} openModal={setActiveModal} />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-10">
+            <DashboardFaqSection t={t} />
+            <DashboardRiskSection t={t} />
+          </div>
           <RiskWarningSection t={t} />
         </main>
 

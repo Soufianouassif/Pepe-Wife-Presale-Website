@@ -422,94 +422,6 @@ const DashboardPage = () => {
     </div>
   )
 
-  const dashboardExtraContent = (
-    <>
-      <ContentSection className="p-0 overflow-hidden">
-        <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-white backdrop-blur-[10px] shadow-dashboard-soft flex items-center overflow-hidden">
-          <div className="dashboard-marquee-track text-sm md:text-[15px] font-medium text-dashboard-text-primary">
-            {[...dashboardTickerItems, ...dashboardTickerItems].map((item, index) => (
-              <span key={`${item}-${index}`} className="inline-flex items-center gap-3 mr-8 whitespace-nowrap">
-                <Rocket size={15} className="text-dashboard-primary" />
-                <span>{item}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </ContentSection>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:[direction:rtl]">
-        <ContentSection className="space-y-3">
-          <PageHeader title="Roadmap" />
-          {roadmapPhases.map((phase) => (
-            <DashboardCard key={phase.id} className="p-4">
-              <div className="flex items-start gap-3">
-                <span className="w-9 h-9 rounded-[12px] bg-dashboard-icon-soft text-dashboard-primary flex items-center justify-center shrink-0 dashboard-number" style={{ fontWeight: 700 }}>
-                  {phase.id}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm text-dashboard-text-primary" style={{ fontWeight: 700 }}>{phase.title}</p>
-                  <p className="text-sm text-dashboard-text-secondary mt-1">{phase.desc}</p>
-                </div>
-              </div>
-            </DashboardCard>
-          ))}
-        </ContentSection>
-        <ContentSection>
-          <PageHeader title="Token Contract" />
-          <div className="space-y-3">
-            <DashboardCard className="p-4">
-              <p className="dashboard-label">Token</p>
-              <p className="dashboard-main-value mt-1">PWIFE</p>
-            </DashboardCard>
-            <DashboardCard className="p-4">
-              <p className="dashboard-label">Network</p>
-              <p className="text-base text-dashboard-text-primary mt-1" style={{ fontWeight: 700 }}>Solana · Mainnet</p>
-            </DashboardCard>
-            <DashboardCard className="p-4">
-              <p className="dashboard-label">Contract Address</p>
-              <p className="text-sm text-dashboard-text-primary mt-1 break-all dashboard-number">{tokenContractAddress}</p>
-              <div className="mt-3">
-                <SecondaryButton onClick={() => handleCopy(tokenContractAddress, 'token-contract')} className="h-10 px-3.5 rounded-dashboard-pill flex items-center gap-2 border-[#CFE5CF] bg-white/95 hover:bg-[#F4FBF4] text-dashboard-primary-dark shadow-[0_8px_20px_rgba(31,42,31,0.06)]">
-                  {copied === 'token-contract' ? <CircleCheck size={16} className="text-dashboard-success" /> : <Copy size={16} />}
-                  <span className="text-[13px] font-semibold tracking-tight">{copied === 'token-contract' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}</span>
-                </SecondaryButton>
-              </div>
-            </DashboardCard>
-          </div>
-        </ContentSection>
-      </div>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:[direction:rtl]">
-        <ContentSection className="space-y-3">
-          <PageHeader title="FAQ" />
-          {faqItems.map((item, index) => (
-            <DashboardCard key={`${item.q}-${index}`} className="p-4">
-              <p className="text-sm text-dashboard-text-primary" style={{ fontWeight: 700 }}>{item.q}</p>
-              <p className="text-sm text-dashboard-text-secondary mt-1">{item.a}</p>
-            </DashboardCard>
-          ))}
-        </ContentSection>
-        <ContentSection>
-          <PageHeader title="Risk Warning" />
-          <DashboardCard className="p-4 bg-[rgba(255,255,255,0.92)]">
-            <ul className="space-y-3 text-sm text-dashboard-text-secondary">
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
-                <span>Crypto markets are volatile; token prices can move sharply in short periods.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
-                <span>Only invest funds you can afford to lose and always use your own research.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
-                <span>Never share seed phrases or private keys with anyone claiming support access.</span>
-              </li>
-            </ul>
-          </DashboardCard>
-        </ContentSection>
-      </div>
-    </>
-  )
-
   const renderBuy = (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
       <ContentSection className="xl:col-span-8">
@@ -903,7 +815,6 @@ const DashboardPage = () => {
                 )}
               </AnimatePresence>
               {currentSection}
-              {dashboardExtraContent}
             </main>
 
             {activeSection !== 'performance' && (
