@@ -419,6 +419,11 @@ const DashboardPage = () => {
           )}
         </ContentSection>
       </div>
+    </div>
+  )
+
+  const dashboardExtraContent = (
+    <>
       <ContentSection className="p-0 overflow-hidden">
         <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-white backdrop-blur-[10px] shadow-dashboard-soft flex items-center overflow-hidden">
           <div className="dashboard-marquee-track text-sm md:text-[15px] font-medium text-dashboard-text-primary">
@@ -502,7 +507,7 @@ const DashboardPage = () => {
           </DashboardCard>
         </ContentSection>
       </div>
-    </div>
+    </>
   )
 
   const renderBuy = (
@@ -898,6 +903,7 @@ const DashboardPage = () => {
                 )}
               </AnimatePresence>
               {currentSection}
+              {dashboardExtraContent}
             </main>
 
             {activeSection !== 'performance' && (
