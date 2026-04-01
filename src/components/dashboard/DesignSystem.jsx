@@ -1,5 +1,5 @@
 import React from 'react'
-import { dashboardTokens } from './tokens'
+ 
 
 const cn = (...classes) => classes.filter(Boolean).join(' ')
 
@@ -7,7 +7,7 @@ export const AppShell = ({ children }) => (
   <div
     className="dashboard-shell min-h-screen relative text-pepe-black"
     style={{
-      backgroundColor: dashboardTokens.colors.pageBg,
+      backgroundColor: '#ffffff',
       backgroundImage: "linear-gradient(rgba(255,255,255,0.10), rgba(255,255,255,0.10)), url('/assets/bab.png')",
       backgroundSize: 'contain',
       backgroundPosition: 'center',
