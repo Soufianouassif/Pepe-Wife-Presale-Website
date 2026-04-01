@@ -22,6 +22,8 @@ const LandingPageNew = () => {
     const v = t(key)
     return v === key ? (isRTL ? ar : en) : v
   }
+  const [openFaq, setOpenFaq] = useState(null)
+  const toggleFaq = (idx) => setOpenFaq((prev) => (prev === idx ? null : idx))
   const pwifeAmount = useMemo(() => {
     const parsed = Number(amount)
     if (!Number.isFinite(parsed) || parsed <= 0) return '0'
@@ -92,7 +94,7 @@ const LandingPageNew = () => {
   return (
     <div className="relative min-h-screen bg-[#E8E6D7] text-[#35503A]">
       <header className="w-full h-[86px] bg-[#FCEDE2] border-b border-[rgba(0,0,0,0.08)] shadow-[0_10px_20px_-12px_rgba(92,64,48,0.38)]">
-        <div className="max-w-[1200px] mx-auto h-full px-3 lg:px-4 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto h-full px-3 lg:px-4 mt-3 flex items-center justify-between shadow-[0_16px_32px_-18px_rgba(53,80,58,0.45)] rounded-2xl">
           <div className="flex items-center gap-3 min-w-0">
             <img src="/assets/hero-character.png" alt="PepeWife" className="w-10 h-10 rounded-full object-cover border border-[#5d7049]" />
             <span className="text-[24px] leading-none font-bold tracking-tight truncate">PepeWife</span>
@@ -125,9 +127,14 @@ const LandingPageNew = () => {
           <div className="mt-6 text-center">
             <p className="text-white/90 text-[14px] sm:text-[16px] font-bold tracking-wide">JOIN $PWIFE Community</p>
             <div className="mt-3 flex items-center gap-3">
-              <a href="https://x.com" target="_blank" rel="noreferrer" className="h-10 px-4 rounded-full border border-white/60 bg-white/20 backdrop-blur-sm text-white text-[13px] font-mono hover:bg-white/30">
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noreferrer"
+                className="h-10 px-4 rounded-full border border-white/60 bg-black text-white text-[13px] font-mono hover:bg-black/90"
+              >
                 <span className="inline-flex items-center gap-2">
-                  <IconBrandX size={16} />
+                  <img src="/assets/twitter.png" alt="Twitter" className="h-4 w-4" />
                   X (Twitter)
                 </span>
               </a>
@@ -143,15 +150,26 @@ const LandingPageNew = () => {
       </section>
 
       <section id="buy" className="relative mt-4 w-full border-y border-[#c6bd9f] bg-[#FCEDE2]">
-        <div className="max-w-[1280px] mx-auto px-3 lg:px-4 py-6">
+        <div
+          className="max-w-[1280px] mx-auto px-3 lg:px-4 py-6"
+          style={{ backgroundImage: "url('/assets/bg.svg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+        >
           <div className="grid lg:grid-cols-2 gap-5">
             <article className="bg-[#FCEDE2] rounded-[18px] border border-[#d2cab1] shadow-[0_0_0_1px_rgba(120,86,68,0.06),0_10px_24px_-8px_rgba(120,86,68,0.22)] p-4 sm:p-5 min-w-0">
-              <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">{t('buy.title')}</h3>
+              <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">{tt('buy.title', 'Buy PWIFE', 'شراء PWIFE')}</h3>
               <div className="space-y-3 mt-4">
                 <div className="rounded-[12px] border border-[#d2cab1] bg-[#FCEDE2] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
-                  <span className="text-[14px] font-normal">{t('buy.price_label')}</span>
+                  <span className="text-[14px] font-normal">{tt('buy.price_label', 'Price 1 PWIFE', 'سعر 1 PWIFE')}</span>
                   <span className="text-[18px] sm:text-[20px] font-mono font-medium whitespace-nowrap">
-                    {tinyPrice.isTiny ? <>0.0<sup className="text-[10px]">{tinyPrice.zeroCount}</sup>{tinyPrice.significant}</> : tinyPrice.normal}
+                    {tinyPrice.isTiny ? (
+                      <span>
+                        0.0
+                        <sup className="text-[10px]">{tinyPrice.zeroCount}</sup>
+                        {tinyPrice.significant}
+                      </span>
+                    ) : (
+                      tinyPrice.normal
+                    )}
                   </span>
                 </div>
                 <p className="text-[14px] font-normal mb-1">{tt('buy.amount', 'Amount', 'المبلغ')}</p>
@@ -197,7 +215,7 @@ const LandingPageNew = () => {
                     onClick={() => { setCurrency('SOL'); setError(''); validateAndClamp(amount, 'SOL', true) }}
                     className="h-10 px-4 rounded-full border border-[#335f43] bg-[#e4ead4] text-[#35503A] text-[12px] font-mono hover:bg-[#dfe9cd]"
                   >
-                    Use SOL
+                    <img src="/assets/coinSolana.png" alt="SOL" className="h-5 w-5" />
                   </button>
                   <button
                     type="button"
@@ -213,24 +231,24 @@ const LandingPageNew = () => {
                   </div>
                 )}
                 <div className="rounded-[12px] border border-[#c6bfab] bg-[#FCEDE2] px-3 py-3 flex items-center justify-between gap-2 min-w-0">
-                  <span className="text-[14px] font-normal">You receive</span>
+                  <span className="text-[14px] font-normal">{tt('buy.you_receive','You receive','ستحصل على')}</span>
                   <span className="text-[18px] sm:text-[20px] font-mono font-medium min-w-0 truncate">{pwifeAmount} PWIFE</span>
                 </div>
               </div>
               <button onClick={handleBuyNow} className="mt-4 w-full h-11 rounded-full border-2 border-[#2e5d3e] bg-[#2f6b3e] text-white text-[14px] sm:text-[16px] font-mono font-medium">
-                {t('hero.join_presale')}
+                {tt('hero.join_presale','Join Presale','انضم للبيع المسبق')}
               </button>
               <div className="mt-4 rounded-[10px] border border-[#d2cab1] bg-[#FCEDE2] px-3 py-2 flex items-center justify-between gap-2 min-w-0">
                 <span className="text-[13px] sm:text-[14px] font-normal min-w-0 truncate">
-                  {isConnected ? formatAddress(address) : t('buy.wallet_not_connected')}
+                  {isConnected ? formatAddress(address) : tt('buy.wallet_not_connected','Wallet not connected','المحفظة غير متصلة')}
                 </span>
                 <button onClick={handleCopy} className="h-8 px-3 rounded border border-[#c8bf9f] text-[12px] font-mono font-medium whitespace-nowrap">Copy</button>
               </div>
             </article>
             <article id="tokenomics" className="bg-[#FCEDE2] rounded-[18px] border border-[#d2cab1] shadow-[0_0_0_1px_rgba(120,86,68,0.06),0_10px_24px_-8px_rgba(120,86,68,0.22)] p-4 sm:p-5 min-w-0">
-              <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">{t('tokenomics.title')}</h3>
+              <h3 className="text-[28px] sm:text-[34px] leading-[1.1] font-bold break-words">{tt('tokenomics.title','Tokenomics','توكنوميكس')}</h3>
               <div className="mt-3 rounded-[12px] border border-dashed border-[#cabf9f] bg-[#FCEDE2] h-[240px] sm:h-[280px] flex items-center justify-center">
-                <span className="font-mono text-[16px] sm:text-[18px] text-[#6d745f]">{t('tokenomics.image_placeholder')}</span>
+                <span className="font-mono text-[16px] sm:text-[18px] text-[#6d745f]">{tt('tokenomics.image_placeholder','IMAGE HERE','صورة هنا')}</span>
               </div>
             </article>
           </div>
@@ -291,7 +309,7 @@ const LandingPageNew = () => {
                 </div>
                 <div className="rounded-[12px] border border-[#d2cab1] bg-white px-3 py-3">
                   <p className="text-[12px] text-[#6d745f] font-bold uppercase">Contract Address</p>
-                  <p className="text-[12px] font-mono text-[#35503A]/80 break-all">{import.meta?.env?.VITE_PWIFE_TOKEN_CONTRACT || 'YOUR_TOKEN_MINT_ADDRESS_HERE'}</p>
+                  <p className="text-[12px] font-mono text-[#35503A]/80 break-all">{(import.meta && import.meta.env && import.meta.env.VITE_PWIFE_TOKEN_CONTRACT) || 'YOUR_TOKEN_MINT_ADDRESS_HERE'}</p>
                   <button onClick={handleCopy} className="mt-3 h-9 px-4 rounded-full border border-[#2f5e3f] bg-[#2f6b3e] text-white text-[12px] font-mono">Copy</button>
                 </div>
               </div>
@@ -308,9 +326,27 @@ const LandingPageNew = () => {
               <h3 className="text-[26px] sm:text-[32px] font-bold break-words">{t('faq.title')}</h3>
               <div className="mt-4 space-y-3">
                 {[t('faq.q1'), t('faq.q2'), t('faq.q3'), t('faq.q4')].map((q, i) => (
-                  <div key={i} className="rounded-[12px] border border-[#d2cab1] bg-white px-3 py-3">
-                    <p className="text-[14px] font-bold text-[#35503A]">{q}</p>
-                    <p className="text-[13px] text-[#5b6450] mt-1">{t(`faq.a${i+1}`)}</p>
+                  <div key={i} className="rounded-[14px] p-[1px] bg-gradient-to-r from-[#e9dfc8] to-[#d2cab1]">
+                    <div className="rounded-[12px] bg-white">
+                      <button
+                        type="button"
+                        onClick={() => toggleFaq(i)}
+                        className="w-full flex items-center justify-between px-3 sm:px-4 py-3 hover:bg-[#FCEDE2]/60 transition-colors"
+                      >
+                        <p className="text-[14px] font-bold text-[#35503A]">{q}</p>
+                        <span
+                          className={`ml-3 h-6 w-6 rounded-full border border-[#d2cab1] bg-[#FCEDE2] text-[#35503A] flex items-center justify-center transition-transform ${openFaq===i ? 'rotate-45' : ''}`}
+                          aria-hidden="true"
+                        >
+                          +
+                        </span>
+                      </button>
+                      <div className={`${openFaq===i ? 'block' : 'hidden'} px-3 sm:px-4 pb-4`}>
+                        <div className="text-[13px] text-[#5b6450] mt-1 leading-relaxed">
+                          {t(['faq.a1','faq.a2','faq.a3','faq.a4'][i])}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
