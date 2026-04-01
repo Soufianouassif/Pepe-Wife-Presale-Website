@@ -72,6 +72,29 @@ const navLinks = [
   { href: '/#about', labelKey: 'nav.about' }
 ]
 
+const dashboardTickerItems = [
+  'Presale Live Now',
+  'Secure Multi-Wallet Access',
+  'Real-Time Analytics Dashboard',
+  'Roadmap Execution In Progress',
+  'Community Rewards & Referral',
+  'Token Utility Expansion'
+]
+
+const roadmapPhases = [
+  { id: '01', title: 'Phase 1 · Foundation', desc: 'Brand launch, core website, and initial community onboarding.' },
+  { id: '02', title: 'Phase 2 · Presale', desc: 'Presale rollout, wallet integrations, and on-chain payment flows.' },
+  { id: '03', title: 'Phase 3 · Growth', desc: 'CEX/DEX expansion, partnerships, and referral acceleration.' },
+  { id: '04', title: 'Phase 4 · Utility', desc: 'Staking, ecosystem features, and long-term product scaling.' }
+]
+
+const faqItems = [
+  { q: 'How do I buy PWIFE tokens?', a: 'Go to Buy section, choose SOL or USDT, enter amount, then confirm transaction.' },
+  { q: 'When can I claim purchased tokens?', a: 'Claim availability follows the official release schedule and vesting plan.' },
+  { q: 'Is the dashboard connected to my wallet?', a: 'Yes, balances and activity are shown based on your currently connected wallet.' },
+  { q: 'Where can I get official support?', a: 'Use the support section or the official email for verified assistance only.' }
+]
+
 const sidebarIcons = {
   overview: LayoutGrid,
   buy: ShoppingCart,
@@ -140,6 +163,7 @@ const DashboardPage = () => {
   ])
 
   const supportUrl = import.meta?.env?.VITE_SUPPORT_URL || 'mailto:support@pepewife.io'
+  const tokenContractAddress = import.meta?.env?.VITE_PWIFE_TOKEN_CONTRACT || 'YOUR_TOKEN_MINT_ADDRESS_HERE'
   const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://pepewife.io'
   const faqUrl = `${siteOrigin}/#faq`
   const referralStats = { invitedFriends: 18, activeReferrals: 9, earnedUsd: 386.4, nextRewardUsd: 500 }
@@ -393,6 +417,89 @@ const DashboardPage = () => {
               <DashboardCard className="p-4"><p className="dashboard-label">{t('dashboard_pro.overview.roi')}</p><p className={cn('text-xl mt-1 dashboard-number', toneClass(roiPercent))} style={{ fontWeight: 700 }}>{formatFullNumber(roiPercent, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</p></DashboardCard>
             </div>
           )}
+        </ContentSection>
+      </div>
+      <ContentSection className="p-0 overflow-hidden">
+        <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-white backdrop-blur-[10px] shadow-dashboard-soft flex items-center overflow-hidden">
+          <div className="dashboard-marquee-track text-sm md:text-[15px] font-medium text-dashboard-text-primary">
+            {[...dashboardTickerItems, ...dashboardTickerItems].map((item, index) => (
+              <span key={`${item}-${index}`} className="inline-flex items-center gap-3 mr-8 whitespace-nowrap">
+                <Rocket size={15} className="text-dashboard-primary" />
+                <span>{item}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </ContentSection>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:[direction:rtl]">
+        <ContentSection className="space-y-3">
+          <PageHeader title="Roadmap" />
+          {roadmapPhases.map((phase) => (
+            <DashboardCard key={phase.id} className="p-4">
+              <div className="flex items-start gap-3">
+                <span className="w-9 h-9 rounded-[12px] bg-dashboard-icon-soft text-dashboard-primary flex items-center justify-center shrink-0 dashboard-number" style={{ fontWeight: 700 }}>
+                  {phase.id}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm text-dashboard-text-primary" style={{ fontWeight: 700 }}>{phase.title}</p>
+                  <p className="text-sm text-dashboard-text-secondary mt-1">{phase.desc}</p>
+                </div>
+              </div>
+            </DashboardCard>
+          ))}
+        </ContentSection>
+        <ContentSection>
+          <PageHeader title="Token Contract" />
+          <div className="space-y-3">
+            <DashboardCard className="p-4">
+              <p className="dashboard-label">Token</p>
+              <p className="dashboard-main-value mt-1">PWIFE</p>
+            </DashboardCard>
+            <DashboardCard className="p-4">
+              <p className="dashboard-label">Network</p>
+              <p className="text-base text-dashboard-text-primary mt-1" style={{ fontWeight: 700 }}>Solana · Mainnet</p>
+            </DashboardCard>
+            <DashboardCard className="p-4">
+              <p className="dashboard-label">Contract Address</p>
+              <p className="text-sm text-dashboard-text-primary mt-1 break-all dashboard-number">{tokenContractAddress}</p>
+              <div className="mt-3">
+                <SecondaryButton onClick={() => handleCopy(tokenContractAddress, 'token-contract')} className="h-10 px-3.5 rounded-dashboard-pill flex items-center gap-2 border-[#CFE5CF] bg-white/95 hover:bg-[#F4FBF4] text-dashboard-primary-dark shadow-[0_8px_20px_rgba(31,42,31,0.06)]">
+                  {copied === 'token-contract' ? <CircleCheck size={16} className="text-dashboard-success" /> : <Copy size={16} />}
+                  <span className="text-[13px] font-semibold tracking-tight">{copied === 'token-contract' ? t('dashboard_pro.wallet.copied') : t('dashboard_pro.wallet.copy_nav')}</span>
+                </SecondaryButton>
+              </div>
+            </DashboardCard>
+          </div>
+        </ContentSection>
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:[direction:rtl]">
+        <ContentSection className="space-y-3">
+          <PageHeader title="FAQ" />
+          {faqItems.map((item, index) => (
+            <DashboardCard key={`${item.q}-${index}`} className="p-4">
+              <p className="text-sm text-dashboard-text-primary" style={{ fontWeight: 700 }}>{item.q}</p>
+              <p className="text-sm text-dashboard-text-secondary mt-1">{item.a}</p>
+            </DashboardCard>
+          ))}
+        </ContentSection>
+        <ContentSection>
+          <PageHeader title="Risk Warning" />
+          <DashboardCard className="p-4 bg-[rgba(255,255,255,0.92)]">
+            <ul className="space-y-3 text-sm text-dashboard-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
+                <span>Crypto markets are volatile; token prices can move sharply in short periods.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
+                <span>Only invest funds you can afford to lose and always use your own research.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 text-dashboard-danger"><X size={16} /></span>
+                <span>Never share seed phrases or private keys with anyone claiming support access.</span>
+              </li>
+            </ul>
+          </DashboardCard>
         </ContentSection>
       </div>
     </div>
@@ -816,6 +923,32 @@ const DashboardPage = () => {
             )}
           </div>
         </PageContainer>
+        <footer className="pb-8">
+          <PageContainer>
+            <div className="rounded-dashboard-xl border border-dashboard-border-soft bg-[rgba(255,255,255,0.82)] p-5 shadow-dashboard-card">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <BrandLogo size="md" />
+                  <p className="text-sm text-dashboard-text-secondary">Secure crypto dashboard experience with unified design system.</p>
+                </div>
+                <nav className="flex flex-wrap items-center gap-4">
+                  {navLinks.map((link) => (
+                    <a key={`footer-${link.href}`} href={link.href} className="text-sm font-medium text-dashboard-text-primary hover:text-dashboard-primary">
+                      {t(link.labelKey)}
+                    </a>
+                  ))}
+                  <a href={faqUrl} className="text-sm font-medium text-dashboard-text-primary hover:text-dashboard-primary">Support</a>
+                </nav>
+              </div>
+              <div className="mt-4 pt-4 border-t border-dashboard-border-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-xs text-dashboard-text-secondary">© {new Date().getFullYear()} PEPE WIFE. All rights reserved.</p>
+                <a href={supportUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-dashboard-primary hover:text-dashboard-primary-dark">
+                  Contact Support
+                </a>
+              </div>
+            </div>
+          </PageContainer>
+        </footer>
 
         <AnimatePresence>
           {sidebarOpen && (

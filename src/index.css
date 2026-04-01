@@ -284,6 +284,18 @@ button {
     animation: marquee 100s linear infinite;
   }
 
+  @keyframes dashboard-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .dashboard-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: dashboard-marquee 42s linear infinite;
+    will-change: transform;
+  }
+
   @keyframes gradient-bg {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }

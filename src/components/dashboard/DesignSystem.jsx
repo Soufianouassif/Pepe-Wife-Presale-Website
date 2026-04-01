@@ -8,8 +8,8 @@ export const AppShell = ({ children }) => (
     className="dashboard-shell min-h-screen relative text-dashboard-text-primary"
     style={{
       backgroundColor: dashboardTokens.colors.pageBg,
-      backgroundImage: "linear-gradient(rgba(255,255,255,0.08), rgba(255,255,255,0.08)), url('/assets/bab.png')",
-      backgroundSize: 'cover',
+      backgroundImage: "linear-gradient(rgba(255,255,255,0.10), rgba(255,255,255,0.10)), url('/assets/bab.png')",
+      backgroundSize: 'contain',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundAttachment: 'fixed'
@@ -26,7 +26,7 @@ export const PageContainer = ({ children, className = '' }) => (
 export const DashboardNavbar = ({ children }) => (
   <header className="sticky top-4 z-40">
     <PageContainer>
-      <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-[rgba(255,255,255,0.62)] backdrop-blur-[10px] shadow-dashboard-soft flex items-center">
+      <div className="h-[72px] w-full px-5 py-4 border border-[#E2EFE2] rounded-[22px] bg-white backdrop-blur-[10px] shadow-dashboard-soft flex items-center">
         {children}
       </div>
     </PageContainer>
